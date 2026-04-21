@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Carbon;
 use Laravel\Socialite\Socialite;
 
 
@@ -25,6 +25,7 @@ class GoogleController extends Controller
             "email" => $googlebUser->email
         ], [
             'name' => $googlebUser->name,
+            'email_verified_at' => Carbon::now(),
         ]);
 
         $token = $user->createToken("token", [$role ?? "User"])->plainTextToken;

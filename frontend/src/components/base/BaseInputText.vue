@@ -12,7 +12,7 @@ const props = defineProps({
     },
     customClassInput: {
         type: String,
-        default: "form-control"
+        default: "auth-input"
     },
     customPlaceholderInput: {
         type: String,
@@ -23,7 +23,7 @@ const props = defineProps({
         default: false
     },
     error: {
-        type: String,
+        type: [String, Array],
         default: ""
     }
 })
@@ -32,10 +32,12 @@ const value = defineModel();
 </script>
 
 <template>
-    <BaseInputLabel :customId="customId" :labelContent="labelContent" />
-    <input :required="isRequired" :placeholder="customPlaceholderInput" v-model="value" type="text" :id="customId"
-        :class="[customClassInput, error ? 'is-invalid' : '']">
-    <BaseInputError :error="error" />
+    <div class="auth-form-group">
+        <BaseInputLabel :customId="customId" :labelContent="labelContent" />
+        <input :required="isRequired" :placeholder="customPlaceholderInput" v-model="value" type="text" :id="customId"
+            :class="[customClassInput, error ? 'is-invalid' : '']">
+        <BaseInputError :error="error" />
+    </div>
 </template>
 
 <style scoped></style>

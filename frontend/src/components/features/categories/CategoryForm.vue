@@ -53,8 +53,8 @@ const categories = defineModel("categories")
             </template>
 
             <template #button>
-                <BaseButton customType="submit" customText="Submit" :disabled="loadingSubmit" />
-                <BaseSpinner v-if="loadingSubmit" />
+                <BaseButton v-if="!loadingSubmit" customType="submit" customText="Submit" :disabled="loadingSubmit" />
+                <BaseSpinner v-else />
             </template>
         </BaseForm>
     </BaseModal>

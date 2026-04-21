@@ -1,8 +1,8 @@
 <script setup>
-import CategoriesList from '@/components/features/categories/CategoriesList.vue';
+import CategoryList from '@/components/features/categories/CategoryList.vue';
 
 </script>
 <template>
-    <CategoriesList/>
+    <CategoryList />
 </template>
 <style scoped></style>

@@ -10,3 +10,12 @@ export const swalConfirmDelete = (title, text) =>
     showCancelButton: true,
     showCloseButton: true,
   })
+
+export const swalCallback = () =>
+  Swal.fire({
+    title: 'Đang xử lý',
+    text: 'Vui lòng chờ',
+    icon: 'info',
+    timer: 2000,
+    showConfirmButton: false,
+  })

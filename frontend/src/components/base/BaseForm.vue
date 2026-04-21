@@ -7,4 +7,5 @@ const emit = defineEmits(["handleSubmit"])
         <slot name="button"></slot>
     </form>
 </template>
-<style scoped></style>
+<style scoped>
+</style>

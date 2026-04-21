@@ -5,6 +5,7 @@ import { API_URL_IMAGE } from '@/config/env'
 import { computed } from 'vue'
 
 const props = defineProps({
+    params: Object,
     data: Array,
     loadingData: Boolean
 })
@@ -19,7 +20,7 @@ const categorizedData = computed(() => {
             rootIndex++
             return {
                 ...item,
-                stt: rootIndex
+                stt: (props.params.page - 1) * props.params.limit + rootIndex
             }
         }
 

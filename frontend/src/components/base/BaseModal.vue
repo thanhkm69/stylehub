@@ -12,7 +12,7 @@ const emit = defineEmits(["close"])
 <template>
     <div v-if="isShow" class="modal-overlay">
         <div class="modal-content">
-            <BaseButton @click="emit('close')" customClass="btn-danger">X</BaseButton>
+            <BaseButton @click="emit('close')" customClass="btn btn-danger">X</BaseButton>
             <slot></slot>
         </div>
     </div>

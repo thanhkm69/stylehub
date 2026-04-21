@@ -3,8 +3,10 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import { API_URL } from '@/config/env'
 import { useNotify } from '@/composables/useNotify'
+import { useTokenStore } from '@/stores/token'
 
-export const useCategoriesStore = defineStore('categories', () => {
+export const useCategoryStore = defineStore('category', () => {
+  const tokenStore = useTokenStore()
   const categories = ref([])
   const pagination = ref({
     total: 0,
@@ -31,7 +33,10 @@ export const useCategoriesStore = defineStore('categories', () => {
   // ================= GET LIST =================
   const index = async (params) => {
     try {
-      const res = await axios.get(`${API_URL}/categories`, { params })
+      const res = await axios.get(`${API_URL}/categories`, {
+        params,
+        headers: { Authorization: `Bearer ${tokenStore.token}` },
+      })
 
       const data = res.data.data
 
@@ -51,7 +56,9 @@ export const useCategoriesStore = defineStore('categories', () => {
   // ================= CREATE =================
   const store = async (data) => {
     try {
-      const res = await axios.post(`${API_URL}/categories`, data)
+      const res = await axios.post(`${API_URL}/categories`, data, {
+        headers: { Authorization: `Bearer ${tokenStore.token}` },
+      })
 
       if (res.status === 201 && res.data.success) {
         toast.success('Tạo danh mục thành công')
@@ -70,7 +77,9 @@ export const useCategoriesStore = defineStore('categories', () => {
   // ================= SHOW =================
   const show = async (id) => {
     try {
-      const res = await axios.get(`${API_URL}/categories/${id}`)
+      const res = await axios.get(`${API_URL}/categories/${id}`, {
+        headers: { Authorization: `Bearer ${tokenStore.token}` },
+      })
       if (res.status === 200 && res.data.success) {
         return res.data
       } else {
@@ -87,7 +96,9 @@ export const useCategoriesStore = defineStore('categories', () => {
   // ================= UPDATE =================
   const update = async (id, data) => {
     try {
-      const res = await axios.post(`${API_URL}/categories/${id}`, data)
+      const res = await axios.post(`${API_URL}/categories/${id}`, data, {
+        headers: { Authorization: `Bearer ${tokenStore.token}` },
+      })
 
       if (res.status === 200 && res.data.success) {
         toast.success('Cập nhật danh mục thành công')
@@ -106,7 +117,9 @@ export const useCategoriesStore = defineStore('categories', () => {
   // ================= DELETE =================
   const destroy = async (id) => {
     try {
-      const res = await axios.delete(`${API_URL}/categories/${id}`)
+      const res = await axios.delete(`${API_URL}/categories/${id}`, {
+        headers: { Authorization: `Bearer ${tokenStore.token}` },
+      })
 
       if (res.status === 200 && res.data.success) {
         toast.success('Xóa danh mục thành công')

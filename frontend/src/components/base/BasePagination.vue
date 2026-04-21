@@ -1,4 +1,5 @@
 <script setup>
+import BaseButton from './BaseButton.vue';
 const props = defineProps({
     total: {
         type: Number,
@@ -24,19 +25,18 @@ const changePage = (page) => {
 
 <template>
 
-    <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">
-        Trước
-    </button>
+    <BaseButton :disabled="currentPage === 1" @click="changePage(currentPage - 1)" customText="Trước" />
 
-    <button v-for="page in totalPages" :disabled="page === currentPage" :key="page" @click="changePage(page)"
-        :class="{ active: page === currentPage }">
-        {{ page }}
-    </button>
+    <BaseButton v-for="page in totalPages" :disabled="page === currentPage" :key="page" @click="changePage(page)"
+        :class="{ active: page === currentPage }" :customText="page" />
 
-    <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">
-        Sau
-    </button>
+    <BaseButton :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)" customText="Sau" />
 
 </template>
 
-<style scoped></style>
+<style scoped>
+.active {
+    background-color: #000;
+    color: #fff;
+}
+</style>

@@ -11,6 +11,10 @@ const props = defineProps({
     customType: {
         type: String,
         default: 'button'
+    },
+    disabled: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -19,5 +23,7 @@ const emit = defineEmits(["click"])
 </script>
 
 <template>
-    <button :type="customType" @click="emit('click')" :class="['btn', customClass]">{{ customText }}</button>
+    <button :disabled="disabled" :type="customType" @click="emit('click')" class="btn" :class="customClass">
+        <span>{{ customText }}</span>
+    </button>
 </template>

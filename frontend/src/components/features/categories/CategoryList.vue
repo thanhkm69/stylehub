@@ -1,15 +1,16 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { useCategoriesStore } from '@/stores/categories'
+import { useCategoryStore } from '@/stores/category'
 import { swalConfirmDelete } from '@/composables/useSwal'
 
-import CategoriesForm from './CategoriesForm.vue'
+import CategoryTable from './CategoryTable.vue'
+import CategoryForm from './CategoryForm.vue'
 import BaseAdmin from '@/components/base/BaseAdmin.vue'
 
 import { API_URL_IMAGE } from '@/config/env'
 
 // ================= STORE =================
-const store = useCategoriesStore()
+const store = useCategoryStore()
 
 // ================= COMPUTED =================
 const categories = computed(() => store.categories)
@@ -237,13 +238,17 @@ onMounted(loadData)
 <template>
 
     <!-- List -->
-    <BaseAdmin :loadingData="loadingData" :data="categories" :total="totalCategories" :totalPages="totalPages"
-        :currentPage="params.page" v-model:params="params" :sortMap="sortMap" :filterMap="filterMap"
-        :limitMap="limitMap" @search="search" @open="isShow = true" @update="update" @destroy="destroy" @show="show"
-        @changePage="changePage" />
+    <BaseAdmin :total="totalCategories" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
+        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="isShow = true"
+        @changePage="changePage">
+        <template #table>
+            <CategoryTable :params="params" :loadingData="loadingData" :data="categories" @update="update"
+                @destroy="destroy" @show="show" />
+        </template>
+    </BaseAdmin>
 
     <!-- Form -->
-    <CategoriesForm v-model:loadingSubmit="loadingSubmit" v-model:dataForm="dataForm" v-model:isShow="isShow"
+    <CategoryForm v-model:loadingSubmit="loadingSubmit" v-model:dataForm="dataForm" v-model:isShow="isShow"
         :categories="categories" :errors="errors" :categoryIds="categoryIds" :statusMap="statusMap" @submit="submit"
         @close="closeForm" @handleImageChange="handleImageChange" />
 </template>

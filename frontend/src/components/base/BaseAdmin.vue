@@ -1,5 +1,4 @@
 <script setup>
-import CategoriesTable from '../features/categories/CategoriesTable.vue';
 import BaseButton from './BaseButton.vue';
 import BaseInputText from './BaseInputText.vue';
 import BaseInputSelect from './BaseInputSelect.vue';
@@ -37,7 +36,7 @@ const changePage = (page) => {
 
 <template>
 
-    <BaseButton @click="emit('open')" customClass="btn-primary" customText="Thêm" />
+    <BaseButton @click="emit('open')" customClass="btn btn-primary" customText="Thêm" />
 
     <BaseInputText v-model="params.search" customPlaceholderInput="Tìm kiếm" />
     <BaseButton @click="emit('search')" customText="Tìm kiếm" />
@@ -51,7 +50,7 @@ const changePage = (page) => {
     <BaseInputSelect labelContent="Sắp xếp" v-model="params.sort" :isDisabled="true" customId="sort" :values="sortMap"
         placeholder="Sắp xếp" />
 
-    <CategoriesTable :loadingData="loadingData" :data="data" @update="update" @destroy="destroy" @show="show" />
+    <slot name="table"></slot>  
 
     <BasePagination :total="total" :currentPage="currentPage" :totalPages="totalPages"
         @changePage="changePage" />

@@ -30,9 +30,24 @@ const router = createRouter({
     {
       path: '/',
       component: DefaultLayout,
-      children: [{ path: '', name: 'Home', component: () => import('@/views/Home.vue') }],
+      children: [
+        { path: 'register', name: 'Register', component: () => import('@/views/Register.vue') },
+        { path: 'login', name: 'Login', component: () => import('@/views/Login.vue') },
+        { path: 'forgot', name: 'Forgot', component: () => import('@/views/Forgot.vue') },
+        { path: 'callback', name: 'Callback', component: () => import('@/views/Callback.vue') },
+        { path: '', name: 'Home', component: () => import('@/views/Home.vue') },
+        { path: 'shop', name: 'Shop', component: () => import('@/views/Shop.vue') },
+      ],
     },
   ],
+})
+
+router.beforeEach(async (to, from) => {
+  if (localStorage.getItem('token') ?? null) {
+    if (to.name === 'Login' || to.name === 'Register') {
+      return { name: 'Home' }
+    }
+  }
 })
 
 export default router
