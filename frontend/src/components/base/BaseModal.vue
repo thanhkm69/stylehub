@@ -2,7 +2,11 @@
 import BaseButton from './BaseButton.vue'
 
 const props = defineProps({
-    isShow: Boolean
+    isShow: Boolean,
+    customWidth: {
+        type: String,
+        default: '400px'
+    }
 })
 
 const emit = defineEmits(["close"])
@@ -11,8 +15,8 @@ const emit = defineEmits(["close"])
 
 <template>
     <div v-if="isShow" class="modal-overlay">
-        <div class="modal-content">
-            <BaseButton @click="emit('close')" customClass="btn btn-danger">X</BaseButton>
+        <div class="modal-content" :style="{ width: customWidth }">
+            <BaseButton @click="emit('close')" customClass="btn btn-danger float-end mb-3" customText="X" />
             <slot></slot>
         </div>
     </div>
@@ -26,12 +30,18 @@ const emit = defineEmits(["close"])
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 50px;
 }
 
 .modal-content {
     background: white;
     padding: 20px;
-    width: 400px;
-    margin: 100px auto;
+    border-radius: 8px;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 </style>

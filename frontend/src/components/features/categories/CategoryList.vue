@@ -11,6 +11,8 @@ import { API_URL_IMAGE } from '@/config/env'
 
 // ================= STORE =================
 const store = useCategoryStore()
+import { useNotify } from '@/composables/useNotify'
+const toast = useNotify()
 
 // ================= COMPUTED =================
 const categories = computed(() => store.categories)
@@ -175,20 +177,39 @@ const submit = async () => {
         formData.append(key, value ?? '')
     })
 
-    let res
+    let result
+    try {
+        if (dataForm.value.id) {
+            result = await store.update(dataForm.value.id, formData)
+        } else {
+            result = await store.store(formData)
+        }
 
-    if (dataForm.value.id) {
-        res = await store.update(dataForm.value.id, formData)
-    } else {
-        res = await store.store(formData)
+        if (!result?.success) {
+            toast.error(result?.message || "Lỗi khi lưu dữ liệu");
+            if (result?.errors) {
+                errors.value = {
+                    name: result.errors.name?.[0] ?? "",
+                    slug: result.errors.slug?.[0] ?? "",
+                    status: result.errors.status?.[0] ?? "",
+                    parent_id: result.errors.parent_id?.[0] ?? "",
+                    description: result.errors.description?.[0] ?? "",
+                    display: result.errors.display?.[0] ?? "",
+                    image: result.errors.image?.[0] ?? "",
+                }
+            }
+        } else {
+            toast.success(result?.message || "Thành công");
+            closeForm();
+            loadData();
+        }
+
+    } catch (error) {
+        toast.error("Đã xảy ra lỗi không xác định");
+        console.error(error);
+    } finally {
+        loadingSubmit.value = false
     }
-
-    if (res) {
-        closeForm()
-    }
-
-    loadingSubmit.value = false
-    loadData()
 }
 
 const update = async (item) => {

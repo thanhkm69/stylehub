@@ -39,10 +39,11 @@ export const useCategoryStore = defineStore('category', () => {
       })
 
       const data = res.data.data
+      const meta = res.data.meta
 
       categories.value = flatCategories(data.data ?? data)
-      pagination.value.total = data.total ?? categories.value.length
-      pagination.value.last_page = data.last_page ?? 1
+      pagination.value.total = meta?.total ?? data.total ?? categories.value.length
+      pagination.value.last_page = meta?.last_page ?? data.last_page ?? 1
 
       if (!res.status === 200 || !res.data.success) {
         toast.error('Lỗi khi tải danh mục')
@@ -59,18 +60,9 @@ export const useCategoryStore = defineStore('category', () => {
       const res = await axios.post(`${API_URL}/categories`, data, {
         headers: { Authorization: `Bearer ${tokenStore.token}` },
       })
-
-      if (res.status === 201 && res.data.success) {
-        toast.success('Tạo danh mục thành công')
-        return true
-      } else {
-        toast.error('Lỗi khi tạo danh mục')
-        return false
-      }
+      return res.data
     } catch (error) {
-      toast.error('Lỗi khi tạo danh mục')
-      console.error(error)
-      return false
+      return error.response?.data || {}
     }
   }
 
@@ -99,18 +91,9 @@ export const useCategoryStore = defineStore('category', () => {
       const res = await axios.post(`${API_URL}/categories/${id}`, data, {
         headers: { Authorization: `Bearer ${tokenStore.token}` },
       })
-
-      if (res.status === 200 && res.data.success) {
-        toast.success('Cập nhật danh mục thành công')
-        return true
-      } else {
-        toast.error('Lỗi khi cập nhật danh mục')
-        return false
-      }
+      return res.data
     } catch (error) {
-      toast.error('Lỗi khi cập nhật danh mục')
-      console.error(error)
-      return false
+      return error.response?.data || {}
     }
   }
 
@@ -120,18 +103,9 @@ export const useCategoryStore = defineStore('category', () => {
       const res = await axios.delete(`${API_URL}/categories/${id}`, {
         headers: { Authorization: `Bearer ${tokenStore.token}` },
       })
-
-      if (res.status === 200 && res.data.success) {
-        toast.success('Xóa danh mục thành công')
-        return true
-      } else {
-        toast.error('Lỗi khi xóa danh mục')
-        return false
-      }
+      return res.data
     } catch (error) {
-      toast.error('Lỗi khi xóa danh mục')
-      console.error(error)
-      return false
+      return error.response?.data || {}
     }
   }
 

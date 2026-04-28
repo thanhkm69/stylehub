@@ -1,7 +1,7 @@
 <script setup>
 const props = defineProps({
     customText: {
-        type: String,
+        type: [String, Number],
         default: 'Nút ấn'
     },
     customClass: {
