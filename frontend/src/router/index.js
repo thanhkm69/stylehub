@@ -24,6 +24,11 @@ const router = createRouter({
           name: 'Categories',
           component: () => import('@/views/admin/Categories.vue'),
         },
+        {
+          path: 'attributes',
+          name: 'Attributes',
+          component: () => import('@/views/admin/Attributes.vue'),
+        },
       ],
     },
 

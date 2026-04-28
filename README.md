@@ -57,7 +57,7 @@ php artisan serve
 
 ```bash
 cd backend
-php artisan queue:listen --tries=1
+php artisan queue:work
 ```
 
 ### Terminal 3 - Chạy frontend Vue
