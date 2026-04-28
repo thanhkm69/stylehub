@@ -1,7 +1,10 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+
+use App\Http\Controllers\AttributeController;
+use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\FacebookController;
@@ -32,6 +35,22 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('change-password', [AuthController::class, 'changePassword']);
 
   Route::middleware('abilities:Admin')->group(function () {
+
+    Route::controller(AttributeController::class)->group(function () {
+      Route::get('attributes', 'index');
+      Route::post('attributes', 'store');
+      Route::get('attributes/{attribute}', 'show');
+      Route::post('attributes/{attribute}', 'update');
+      Route::delete('attributes/{attribute}', 'destroy');
+    });
+
+    Route::controller(AttributeValueController::class)->group(function () {
+      Route::get('attribute-values', 'index');
+      Route::post('attribute-values', 'store');
+      Route::get('attribute-values/{attributeValue}', 'show');
+      Route::post('attribute-values/{attributeValue}', 'update');
+      Route::delete('attribute-values/{attributeValue}', 'destroy');
+    });
 
     Route::controller(CategoryController::class)->group(function () {
       Route::get('categories', 'index');

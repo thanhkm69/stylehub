@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Http\Resources\CategoryResource;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -45,24 +48,15 @@ class CategoryController extends Controller
             $categories = $query->get();
         }
 
-        return response()->json([
+        return CategoryResource::collection($categories)->additional([
             'success' => true,
             'message' => "Lấy danh sách danh mục thành công",
-            'data' => $categories
-        ], 200);
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        $data = $request->validate([
-            'parent_id' => 'nullable|exists:categories,id',
-            'name' => 'required|string|max:100',
-            'slug' => 'required|string|max:150|unique:categories,slug',
-            'image' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
-            'description' => 'nullable|string',
-            'display' => 'nullable|integer|min:0',
-            'status' => 'nullable|boolean'
-        ]);
+        $data = $request->validated();
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file("image")->store('uploads/categories', 'public');
@@ -74,7 +68,7 @@ class CategoryController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Thêm danh mục thành công",
-            'data' => $category
+            'data' => new CategoryResource($category)
         ], 201);
     }
 
@@ -106,23 +100,15 @@ class CategoryController extends Controller
             "success" => true,
             "message" => "Lấy chi tiết danh mục thành công",
             "ids" => $ids,
-            "data" => $category,
+            "data" => new CategoryResource($category),
         ], 200);
     }
 
 
-    public function update(Request $request, $id)
+    public function update(UpdateCategoryRequest $request, $id)
     {
         $category = $this->findCategory($id);
-        $data = $request->validate([
-            'parent_id' => 'nullable|exists:categories,id',
-            'name' => 'required|string|max:100',
-            'slug' => 'required|string|max:150|unique:categories,slug,' . $id,
-            'image' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
-            'description' => 'nullable|string',
-            'display' => 'nullable|integer|min:0',
-            'status' => 'nullable|boolean'
-        ]);
+        $data = $request->validated();
 
         $invalidIds = $this->getChildrensId($id);
 
@@ -144,7 +130,7 @@ class CategoryController extends Controller
         return response()->json([
             "success" => true,
             "message" => "Cập nhập danh mục thành công",
-            "data" => $category
+            "data" => new CategoryResource($category)
         ], 200);
     }
 
