@@ -94,12 +94,19 @@ const resetForm = () => {
         display: 0,
         status: 1
     }
+    categoryIds.value = []
+    errors.value = {}
 }
 
 const closeForm = () => {
     isShow.value = false
     isEdit.value = false
     resetForm()
+}
+
+const openCreateForm = () => {
+    resetForm()
+    isShow.value = true
 }
 
 const validate = () => {
@@ -260,7 +267,7 @@ onMounted(loadData)
 
     <!-- List -->
     <BaseAdmin :total="totalCategories" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
-        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="isShow = true"
+        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="openCreateForm"
         @changePage="changePage">
         <template #table>
             <CategoryTable :params="params" :loadingData="loadingData" :data="categories" @update="update"

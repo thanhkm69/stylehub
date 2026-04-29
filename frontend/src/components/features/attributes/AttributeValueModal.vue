@@ -134,13 +134,14 @@ watch(() => isShow.value, (newVal) => {
 
 <template>
     <BaseModal @close="emit('close')" :isShow="isShow" customWidth="1000px">
-        <div class="row">
+        <div class="attr-val-container">
             <!-- Trái: Danh sách giá trị -->
-            <div class="col-md-7">
-                <h5 class="mb-3">Thuộc tính: <span class="text-primary">{{ attribute?.name }}</span></h5>
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
+            <div class="attr-val-list">
+                <h3 class="modal-title">Thuộc tính: <span style="color: var(--primary);">{{ attribute?.name }}</span></h3>
+                
+                <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table">
+                        <thead>
                             <tr>
                                 <th>STT</th>
                                 <th>Giá trị</th>
@@ -151,25 +152,33 @@ watch(() => isShow.value, (newVal) => {
                         </thead>
                         <tbody>
                             <tr v-if="loadingData">
-                                <td colspan="5" class="text-center">Đang tải...</td>
+                                <td colspan="5" class="text-center" style="padding: 24px;">
+                                    <BaseLoading />
+                                </td>
                             </tr>
                             <tr v-else-if="values.length === 0">
-                                <td colspan="5" class="text-center">Chưa có giá trị nào</td>
+                                <td colspan="5" class="text-center" style="padding: 24px; color: var(--text-muted);">
+                                    Chưa có giá trị nào
+                                </td>
                             </tr>
                             <tr v-else v-for="(item, index) in values" :key="item.id">
                                 <td>{{ index + 1 }}</td>
-                                <td><strong>{{ item.value }}</strong></td>
-                                <td><small class="text-muted">{{ item.slug }}</small></td>
+                                <td><strong style="color: var(--text-main);">{{ item.value }}</strong></td>
                                 <td>
-                                    <span :class="item.status ? 'badge bg-success' : 'badge bg-secondary'">
+                                    <small style="color: var(--text-muted); font-family: monospace; background: var(--background); padding: 4px 8px; border-radius: 4px;">{{ item.slug }}</small>
+                                </td>
+                                <td>
+                                    <span :class="['badge-status', item.status ? 'badge-active' : 'badge-inactive']">
                                         {{ item.status ? 'Hiện' : 'Ẩn' }}
                                     </span>
                                 </td>
                                 <td>
-                                    <BaseButton @click="editValue(item)" customText="Sửa"
-                                        customClass="btn-warning btn-sm me-1" />
-                                    <BaseButton @click="destroyValue(item.id)" customText="Xóa"
-                                        customClass="btn-danger btn-sm" />
+                                    <div class="action-group">
+                                        <BaseButton @click="editValue(item)" customText="Sửa"
+                                            customClass="btn-action btn-edit" />
+                                        <BaseButton @click="destroyValue(item.id)" customText="Xóa"
+                                            customClass="btn-action btn-delete" />
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -178,34 +187,84 @@ watch(() => isShow.value, (newVal) => {
             </div>
 
             <!-- Phải: Form Thêm/Sửa -->
-            <div class="col-md-5">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <h5 class="card-title mb-4 border-bottom pb-2">{{ isEdit ? 'Sửa giá trị' : 'Thêm giá trị mới' }}
-                        </h5>
-                        <BaseForm @handleSubmit="submit">
-                            <template #input>
-                                <BaseInputText labelContent="Giá trị" customId="val_value" v-model="dataForm.value"
-                                    :error="errors.value" />
-                                <BaseInputText labelContent="Slug" customId="val_slug" v-model="dataForm.slug"
-                                    :error="errors.slug" />
-                                <BaseInputSelect labelContent="Trạng thái" v-model="dataForm.status"
-                                    :values="statusMap" />
-                            </template>
-                            <template #button>
-                                <div class="d-flex gap-2">
-                                    <BaseButton v-if="!loadingSubmit" customType="submit"
-                                        :customText="isEdit ? 'Cập nhật' : 'Thêm'" :disabled="loadingSubmit"
-                                        customClass="btn-primary flex-grow-1" />
-                                    <BaseSpinner v-else />
-                                    <BaseButton v-if="isEdit" @click="resetForm" customType="button" customText="Hủy"
-                                        customClass="btn-secondary" />
+            <div class="attr-val-form">
+                <div class="form-card">
+                    <h4 class="form-title">{{ isEdit ? 'Sửa giá trị' : 'Thêm giá trị mới' }}</h4>
+                    <BaseForm @handleSubmit="submit">
+                        <template #input>
+                            <BaseInputText labelContent="Giá trị" customId="val_value" v-model="dataForm.value" customPlaceholderInput="Nhập giá trị"
+                                :error="errors.value" />
+                            <BaseInputText labelContent="Slug" customId="val_slug" v-model="dataForm.slug" customPlaceholderInput="Nhập đường dẫn"
+                                :error="errors.slug" />
+                            <BaseInputSelect labelContent="Trạng thái" v-model="dataForm.status"
+                                :values="statusMap" />
+                        </template>
+                        <template #button>
+                            <div class="form-actions">
+                                <BaseButton v-if="!loadingSubmit" customType="submit"
+                                    :customText="isEdit ? 'Cập nhật' : 'Thêm'" :disabled="loadingSubmit"
+                                    customClass="btn btn-primary" style="flex: 1;" />
+                                <div v-else style="flex: 1; display: flex; justify-content: center; padding: 8px 0;">
+                                    <BaseSpinner />
                                 </div>
-                            </template>
-                        </BaseForm>
-                    </div>
+                                <BaseButton v-if="isEdit" @click="resetForm" customType="button" customText="Hủy"
+                                    customClass="btn" style="background: var(--background); color: var(--text-main); border: 1px solid var(--border);" />
+                            </div>
+                        </template>
+                    </BaseForm>
                 </div>
             </div>
         </div>
     </BaseModal>
 </template>
+
+<style scoped>
+.attr-val-container {
+    display: flex;
+    gap: 32px;
+}
+
+.attr-val-list {
+    flex: 6;
+}
+
+.attr-val-form {
+    flex: 4;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: var(--text-main);
+}
+
+.form-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    padding: 24px;
+}
+
+.form-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+    .attr-val-container {
+        flex-direction: column;
+    }
+}
+</style>

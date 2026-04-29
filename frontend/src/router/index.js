@@ -7,14 +7,6 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/user',
-      component: UserLayout,
-      children: [
-        { path: '', name: 'Profile', component: () => import('@/views/user/Profile.vue') },
-      ],
-    },
-
-    {
       path: '/admin',
       component: AdminLayout,
       children: [
@@ -36,6 +28,13 @@ const router = createRouter({
       path: '/',
       component: DefaultLayout,
       children: [
+        {
+          path: 'user',
+          component: UserLayout,
+          children: [
+            { path: '', name: 'Profile', component: () => import('@/views/user/Profile.vue') },
+          ],
+        },
         { path: 'register', name: 'Register', component: () => import('@/views/Register.vue') },
         { path: 'login', name: 'Login', component: () => import('@/views/Login.vue') },
         { path: 'forgot', name: 'Forgot', component: () => import('@/views/Forgot.vue') },

@@ -12,7 +12,7 @@ const props = defineProps({
     },
     customClassInput: {
         type: String,
-        default: "form-control"
+        default: "auth-input"
     },
     customMin: {
         default: null,
@@ -32,10 +32,12 @@ const value = defineModel();
 </script>
 
 <template>
-    <BaseInputLabel :customId="customId" :labelContent="labelContent" />
-    <input v-model.number="value" type="number" :min="customMin" :max="customMax" :id="customId"
-        :class="[customClassInput, error ? 'is-invalid' : '']">
-    <BaseInputError :error="error" />
+    <div class="auth-form-group">
+        <BaseInputLabel :customId="customId" :labelContent="labelContent" />
+        <input v-model.number="value" type="number" :min="customMin" :max="customMax" :id="customId"
+            :class="[customClassInput, error ? 'is-invalid' : '']">
+        <BaseInputError :error="error" />
+    </div>
 </template>
 
 <style scoped></style>
