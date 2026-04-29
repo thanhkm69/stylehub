@@ -38,16 +38,18 @@ const value = defineModel()
 </script>
 
 <template>
-    <BaseInputLabel :customId="customId" :labelContent="labelContent" />
+    <div class="auth-form-group">
+        <BaseInputLabel :customId="customId" :labelContent="labelContent" />
 
-    <select :id="customId" v-model="value">
-        <option :disabled="isDisabled" :value="null">{{ placeholder }}</option>
-        <option v-for="(item, index) in values" :disabled="categoryIds.includes(item.id)" :key="index" :value="item.id">
-            {{ item.name }}
-        </option>
-    </select>
+        <select :id="customId" v-model="value" class="auth-input" :class="[error ? 'is-invalid' : '']">
+            <option :disabled="isDisabled" :value="null">{{ placeholder }}</option>
+            <option v-for="(item, index) in values" :disabled="categoryIds.includes(item.id)" :key="index" :value="item.id">
+                {{ item.name }}
+            </option>
+        </select>
 
-    <BaseInputError :error="error" />
+        <BaseInputError :error="error" />
+    </div>
 </template>
 
 <style scoped></style>

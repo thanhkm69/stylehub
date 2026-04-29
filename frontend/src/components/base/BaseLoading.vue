@@ -1,131 +1,143 @@
 <script setup>
-// Bạn có thể thêm các logic quản lý trạng thái (ví dụ: const isLoading = ref(true)) ở đây nếu cần.
+defineProps({
+    fullscreen: {
+        type: Boolean,
+        default: false
+    },
+    text: {
+        type: String,
+        default: 'Đang tải dữ liệu...'
+    }
+})
 </script>
 
 <template>
-  <div class="fashion-loader-container">
-    <div class="loader-content">
-      <div class="monogram-logo">
-        <span class="letter-n">N</span>
-        <span class="letter-r">R</span>
-      </div>
-      
-      <div class="brand-name">STYLEHUB</div>
-      <div class="brand-tagline">FASHION BRAND</div>
-
-      <div class="progress-bar-container">
-        <div class="progress-bar"></div>
-      </div>
-      
-      <div class="loading-text">Đang xử lý...</div>
+    <div :class="['loading-wrapper', { 'is-fullscreen': fullscreen }]">
+        <div class="loader-content">
+            <div class="loader-animation">
+                <div class="logo-symbol">S<span>H</span></div>
+                <div class="pulse-ring"></div>
+            </div>
+            <div class="loader-info">
+                <span class="brand-text">STYLEHUB</span>
+                <div class="progress-line">
+                    <div class="line-fill"></div>
+                </div>
+                <p class="loading-text">{{ text }}</p>
+            </div>
+        </div>
     </div>
-  </div>
 </template>
 
 <style scoped>
-/* Bao phủ toàn màn hình */
-.fashion-loader-container {
-  background-color: #ffffff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+.loading-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    width: 100%;
+}
+
+.loading-wrapper.is-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    padding: 0;
 }
 
 .loader-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
-/* Kiểu dáng cho cụm chữ NR */
-.monogram-logo {
-  font-family: 'Playfair Display', 'Times New Roman', Times, serif; /* Font có chân giống logo */
-  font-size: 90px;
-  font-weight: 700;
-  color: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  /* Hiệu ứng nhịp đập nhẹ nhàng */
-  animation: pulse 2s infinite ease-in-out;
+.loader-animation {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Lồng ghép chữ N và R */
-.letter-n {
-  z-index: 2;
+.logo-symbol {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--text-main);
+    z-index: 2;
+    letter-spacing: -2px;
 }
 
-.letter-r {
-  margin-left: -20px; /* Kéo chữ R lại gần chữ N để tạo độ lồng ghép */
-  z-index: 1;
+.logo-symbol span {
+    color: var(--primary);
 }
 
-/* Tên thương hiệu */
-.brand-name {
-  font-family: 'Arial', sans-serif; /* Font không chân giống STYLEHUB */
-  font-size: 24px;
-  letter-spacing: 3px;
-  margin-top: 10px;
-  color: #000;
+.pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: pulse-ring 1.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
 }
 
-.brand-tagline {
-  font-family: 'Arial', sans-serif;
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: #333;
-  margin-bottom: 30px;
+@keyframes pulse-ring {
+    0% { transform: scale(0.6); opacity: 1; }
+    80%, 100% { transform: scale(1.2); opacity: 0; }
 }
 
-/* Thanh Loading (Progress bar) */
-.progress-bar-container {
-  width: 180px;
-  height: 2px;
-  background-color: #f0f0f0;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 12px;
+.loader-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
-.progress-bar {
-  position: absolute;
-  top: 0;
-  left: -50%;
-  height: 100%;
-  width: 50%;
-  background-color: #000;
-  /* Hiệu ứng trượt qua lại */
-  animation: slide-loading 1.5s infinite ease-in-out;
+.brand-text {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    color: var(--text-main);
+    opacity: 0.8;
 }
 
-/* Chữ "Đang xử lý..." */
+.progress-line {
+    width: 120px;
+    height: 2px;
+    background: #f1f5f9;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.line-fill {
+    height: 100%;
+    width: 40%;
+    background: var(--primary);
+    animation: line-move 1.5s infinite ease-in-out;
+}
+
+@keyframes line-move {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+}
+
 .loading-text {
-  font-family: 'Arial', sans-serif;
-  font-size: 13px;
-  color: #666;
-  letter-spacing: 1px;
-  animation: fade-text 1.5s infinite ease-in-out;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin: 0;
 }
 
-/* --- Các Animation --- */
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.8; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes slide-loading {
-  0% { left: -50%; width: 50%; }
-  50% { width: 100%; }
-  100% { left: 100%; width: 50%; }
-}
-
-@keyframes fade-text {
-  0% { opacity: 0.4; }
-  50% { opacity: 1; }
-  100% { opacity: 0.4; }
+/* Dark mode support if needed */
+@media (prefers-color-scheme: dark) {
+    .loading-wrapper.is-fullscreen {
+        background: rgba(15, 23, 42, 0.9);
+    }
 }
 </style>

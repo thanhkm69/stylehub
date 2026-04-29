@@ -24,19 +24,67 @@ const changePage = (page) => {
 </script>
 
 <template>
+    <div class="pagination-wrapper">
+        <BaseButton :disabled="currentPage === 1" @click="changePage(currentPage - 1)" customText="Trước" customClass="page-btn nav-btn" />
 
-    <BaseButton :disabled="currentPage === 1" @click="changePage(currentPage - 1)" customText="Trước" />
+        <div class="page-numbers">
+            <BaseButton v-for="page in totalPages" :key="page" :disabled="page === currentPage" @click="changePage(page)"
+                :customClass="['page-btn', page === currentPage ? 'active' : '']" :customText="String(page)" />
+        </div>
 
-    <BaseButton v-for="page in totalPages" :disabled="page === currentPage" :key="page" @click="changePage(page)"
-        :class="{ active: page === currentPage }" :customText="page" />
-
-    <BaseButton :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)" customText="Sau" />
-
+        <BaseButton :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)" customText="Sau" customClass="page-btn nav-btn" />
+    </div>
 </template>
 
 <style scoped>
-.active {
-    background-color: #000;
-    color: #fff;
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+:deep(.page-btn) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--surface);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+:deep(.page-btn:hover:not(:disabled)) {
+    background: var(--background);
+    border-color: var(--text-muted);
+}
+
+:deep(.page-btn:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+:deep(.page-btn.active) {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    opacity: 1;
+    cursor: default;
+}
+
+:deep(.nav-btn) {
+    padding: 0 16px;
 }
 </style>
