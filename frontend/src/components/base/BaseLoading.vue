@@ -46,7 +46,7 @@ defineProps({
     height: 100vh;
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(8px);
-    z-index: 9999;
+    z-index: 1060;
     padding: 0;
 }
 

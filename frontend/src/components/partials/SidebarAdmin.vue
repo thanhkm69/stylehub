@@ -4,8 +4,8 @@ const route = useRoute();
 
 const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: 'ph-house-line' },
+     { name: 'Thuộc tính', path: '/admin/attributes', icon: 'ph-list-bullets' },
     { name: 'Danh mục', path: '/admin/categories', icon: 'ph-squares-four' },
-    { name: 'Thuộc tính', path: '/admin/attributes', icon: 'ph-list-bullets' },
     { name: 'Sản phẩm', path: '/admin/products', icon: 'ph-package' },
     { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
     { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },

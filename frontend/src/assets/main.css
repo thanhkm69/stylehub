@@ -287,3 +287,9 @@ button {
     background-color: #f3f4f6;
     color: #4b5563;
 }
+
+/* ================= NOTIFICATION OVERRIDES ================= */
+.Vue-Toastification__container {
+    z-index: 11000 !important;
+}
+
