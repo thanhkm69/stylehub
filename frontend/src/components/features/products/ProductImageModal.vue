@@ -6,18 +6,22 @@ import BaseInputText from '@/components/base/BaseInputText.vue';
 import BaseInputSelect from '@/components/base/BaseInputSelect.vue';
 import BaseButton from '@/components/base/BaseButton.vue';
 import BaseSpinner from '@/components/base/BaseSpinner.vue';
-import { useAttributeValueStore } from '@/stores/attributeValue';
+import BaseInputFile from '@/components/base/BaseInputFile.vue';
+import BaseInputNumber from '@/components/base/BaseInputNumber.vue';
+import BaseLoading from '@/components/base/BaseLoading.vue';
+import { useProductImageStore } from '@/stores/productImage';
 import { swalConfirmDelete } from '@/composables/useSwal';
 import { useNotify } from '@/composables/useNotify';
+import { API_URL_IMAGE } from '@/config/env';
 
 const props = defineProps({
-    attribute: Object
+    product: Object
 })
 
-const emit = defineEmits(["close", "valuesChanged"])
+const emit = defineEmits(["close", "imagesChanged"])
 const isShow = defineModel("isShow")
 
-const store = useAttributeValueStore()
+const store = useProductImageStore()
 const toast = useNotify()
 
 const loadingData = ref(false)
@@ -27,9 +31,11 @@ const errors = ref({})
 
 const dataForm = ref({
     id: null,
-    attribute_id: null,
-    value: '',
-    slug: '',
+    product_id: null,
+    image: null,
+    preview: '',
+    alt: '',
+    display: 0,
     status: 1
 })
 
@@ -38,20 +44,22 @@ const statusMap = [
     { id: 0, name: 'Ẩn' }
 ]
 
-const values = computed(() => store.attributeValues)
+const values = computed(() => store.productImages)
 
 const loadData = async () => {
     loadingData.value = true
-    await store.index(props.attribute.id)
+    await store.index(props.product.id)
     loadingData.value = false
 }
 
 const resetForm = () => {
     dataForm.value = {
         id: null,
-        attribute_id: props.attribute?.id || null,
-        value: '',
-        slug: '',
+        product_id: props.product?.id || null,
+        image: null,
+        preview: '',
+        alt: '',
+        display: 0,
         status: 1
     }
     isEdit.value = false
@@ -61,43 +69,68 @@ const resetForm = () => {
 const validate = () => {
     errors.value = {}
 
-    if (!dataForm.value.value?.trim()) {
-        errors.value.value = 'Giá trị không được để trống'
+    if (!isEdit.value && !dataForm.value.image) {
+        errors.value.image = 'Hình ảnh không được để trống'
     }
 
-    if (!dataForm.value.slug?.trim()) {
-        errors.value.slug = 'Slug không được để trống'
+    if (!dataForm.value.alt?.trim()) {
+        errors.value.alt = 'Thẻ alt không được để trống'
+    }
+
+    if (dataForm.value.image instanceof File) {
+        const file = dataForm.value.image
+        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
+
+        if (!validTypes.includes(file.type)) {
+            errors.value.image = 'Chỉ chấp nhận png, jpg, jpeg, webp'
+        }
+
+        if (file.size > 2 * 1024 * 1024) {
+            errors.value.image = 'Ảnh tối đa 2MB'
+        }
     }
 
     return Object.keys(errors.value).length === 0
+}
+
+const handleImageChange = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    dataForm.value.image = file
+    dataForm.value.preview = URL.createObjectURL(file)
 }
 
 const submit = async () => {
     if (!validate()) return
 
     loadingSubmit.value = true
-    dataForm.value.attribute_id = props.attribute.id
+    dataForm.value.product_id = props.product.id
 
-    const payload = {
-        attribute_id: dataForm.value.attribute_id,
-        value: dataForm.value.value,
-        slug: dataForm.value.slug,
-        status: dataForm.value.status
+    const formData = new FormData()
+    formData.append('product_id', dataForm.value.product_id)
+    formData.append('alt', dataForm.value.alt)
+    formData.append('display', dataForm.value.display)
+    formData.append('status', dataForm.value.status)
+
+    if (dataForm.value.image instanceof File) {
+        formData.append('image', dataForm.value.image)
     }
 
     let result
     if (isEdit.value) {
-        result = await store.update(dataForm.value.id, payload)
+        result = await store.update(dataForm.value.id, formData)
     } else {
-        result = await store.store(payload)
+        result = await store.store(formData)
     }
 
-    if (!result?.status) {
+    if (!result?.success) {
         toast.error(result?.message || "Lỗi khi lưu dữ liệu");
         if (result?.errors) {
             errors.value = {
-                value: result.errors.value?.[0] ?? "",
-                slug: result.errors.slug?.[0] ?? "",
+                image: result.errors.image?.[0] ?? "",
+                alt: result.errors.alt?.[0] ?? "",
+                display: result.errors.display?.[0] ?? "",
                 status: result.errors.status?.[0] ?? "",
             }
         }
@@ -105,22 +138,22 @@ const submit = async () => {
         toast.success(result?.message || "Thành công");
         resetForm()
         await loadData()
-        emit('valuesChanged', 'add')
+        emit('imagesChanged', 'add')
     }
     loadingSubmit.value = false
 }
 
 const editValue = (item) => {
-    dataForm.value = { ...item }
+    dataForm.value = { ...item, image: null, preview: item.image ? `${API_URL_IMAGE}/${item.image}` : '' }
     isEdit.value = true
 }
 
 const destroyValue = async (id) => {
-    const result = await swalConfirmDelete('Xác nhận', 'Bạn có chắc xóa giá trị này không ?')
+    const result = await swalConfirmDelete('Xác nhận', 'Bạn có chắc xóa hình ảnh này không ?')
     if (!result.isConfirmed) return
     await store.destroy(id)
     await loadData()
-    emit('valuesChanged', 'delete')
+    emit('imagesChanged', 'delete')
 }
 
 watch(() => isShow.value, (newVal) => {
@@ -133,40 +166,42 @@ watch(() => isShow.value, (newVal) => {
 </script>
 
 <template>
-    <BaseModal @close="emit('close')" :isShow="isShow" customWidth="1000px">
-        <div class="attr-val-container">
-            <!-- Trái: Danh sách giá trị -->
-            <div class="attr-val-list">
-                <h3 class="modal-title">Thuộc tính: <span style="color: var(--primary);">{{ attribute?.name }}</span></h3>
+    <BaseModal @close="emit('close')" :isShow="isShow" customWidth="1100px">
+        <div class="prod-img-container">
+            <!-- Trái: Danh sách hình ảnh -->
+            <div class="prod-img-list">
+                <h3 class="modal-title">Sản phẩm: <span style="color: var(--primary);">{{ product?.name }}</span></h3>
                 
-                <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
+                <div class="admin-table-wrapper" style="max-height: 600px; overflow-y: auto;">
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>STT</th>
-                                <th>Giá trị</th>
-                                <th>Slug</th>
+                                <th>Hình ảnh</th>
+                                <th>Thẻ Alt</th>
+                                <th>Thứ tự</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="loadingData">
-                                <td colspan="5" class="text-center" style="padding: 48px;">
+                                <td colspan="6" class="text-center" style="padding: 48px;">
                                     <BaseSpinner size="lg" label="Đang tải dữ liệu..." />
                                 </td>
                             </tr>
                             <tr v-else-if="values.length === 0">
-                                <td colspan="5" class="text-center" style="padding: 24px; color: var(--text-muted);">
-                                    Chưa có giá trị nào
+                                <td colspan="6" class="text-center" style="padding: 24px; color: var(--text-muted);">
+                                    Chưa có hình ảnh nào
                                 </td>
                             </tr>
                             <tr v-else v-for="(item, index) in values" :key="item.id">
                                 <td>{{ index + 1 }}</td>
-                                <td><strong style="color: var(--text-main);">{{ item.value }}</strong></td>
                                 <td>
-                                    <small style="color: var(--text-muted); font-family: monospace; background: var(--background); padding: 4px 8px; border-radius: 4px;">{{ item.slug }}</small>
+                                    <img v-if="item.image" :src="`${API_URL_IMAGE}/${item.image}`" alt="preview" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
                                 </td>
+                                <td><strong style="color: var(--text-main);">{{ item.alt }}</strong></td>
+                                <td>{{ item.display }}</td>
                                 <td>
                                     <span :class="['badge-status', item.status ? 'badge-active' : 'badge-inactive']">
                                         {{ item.status ? 'Hiện' : 'Ẩn' }}
@@ -187,15 +222,31 @@ watch(() => isShow.value, (newVal) => {
             </div>
 
             <!-- Phải: Form Thêm/Sửa -->
-            <div class="attr-val-form">
+            <div class="prod-img-form">
                 <div class="form-card">
-                    <h4 class="form-title">{{ isEdit ? 'Sửa giá trị' : 'Thêm giá trị mới' }}</h4>
+                    <h4 class="form-title">{{ isEdit ? 'Sửa hình ảnh' : 'Thêm hình ảnh mới' }}</h4>
                     <BaseForm @handleSubmit="submit">
                         <template #input>
-                            <BaseInputText labelContent="Giá trị" customId="val_value" v-model="dataForm.value" customPlaceholderInput="Nhập giá trị"
-                                :error="errors.value" />
-                            <BaseInputText labelContent="Slug" customId="val_slug" v-model="dataForm.slug" customPlaceholderInput="Nhập đường dẫn"
-                                :error="errors.slug" />
+                            <div class="image-upload-wrapper" style="margin-bottom: 20px;">
+                                <div v-if="dataForm.preview" class="image-preview-large">
+                                    <img :src="dataForm.preview" alt="Preview" />
+                                    <div class="preview-overlay">Xem trước</div>
+                                </div>
+                                <div v-else class="image-placeholder">
+                                    <i class="ph ph-image-square"></i>
+                                    <p>Chưa có ảnh</p>
+                                </div>
+                                
+                                <div class="upload-input-container">
+                                    <BaseInputFile labelContent="" customId="image" :error="errors.image" customAccept="image/*"
+                                        @change="handleImageChange" />
+                                    <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
+                                </div>
+                            </div>
+
+                            <BaseInputText labelContent="Thẻ Alt" customId="val_alt" v-model="dataForm.alt" customPlaceholderInput="Ví dụ: Hình mặt trước"
+                                :error="errors.alt" />
+                            <BaseInputNumber labelContent="Thứ tự hiển thị" v-model="dataForm.display" :error="errors.display" />
                             <BaseInputSelect labelContent="Trạng thái" v-model="dataForm.status"
                                 :values="statusMap" />
                         </template>
@@ -219,21 +270,21 @@ watch(() => isShow.value, (newVal) => {
 </template>
 
 <style scoped>
-.attr-val-container {
+.prod-img-container {
     display: flex;
     gap: 32px;
 }
 
-.attr-val-list {
+.prod-img-list {
     flex: 6;
 }
 
-.attr-val-form {
+.prod-img-form {
     flex: 4;
 }
 
 .modal-title {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     margin-bottom: 24px;
     color: var(--text-main);
@@ -248,12 +299,70 @@ watch(() => isShow.value, (newVal) => {
 }
 
 .form-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 24px;
     padding-bottom: 16px;
     border-bottom: 1px solid var(--border);
     color: var(--text-main);
+}
+
+.image-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.image-preview-large {
+    width: 100%;
+    height: 180px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px dashed var(--border);
+    position: relative;
+    background: #f8fafc;
+}
+
+.image-preview-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 180px;
+    border-radius: 12px;
+    border: 2px dashed var(--border);
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    gap: 8px;
+}
+
+.image-placeholder i {
+    font-size: 40px;
+}
+
+.preview-overlay {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+}
+
+.upload-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
 }
 
 .form-actions {
@@ -288,7 +397,7 @@ watch(() => isShow.value, (newVal) => {
 }
 
 @media (max-width: 768px) {
-    .attr-val-container {
+    .prod-img-container {
         flex-direction: column;
     }
 }

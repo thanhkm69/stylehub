@@ -186,6 +186,16 @@ const openValues = (item) => {
     isShowValuesModal.value = true
 }
 
+const handleValuesChanged = (type) => {
+    if (selectedAttribute.value) {
+        if (type === 'add') {
+            selectedAttribute.value.values_count = (selectedAttribute.value.values_count || 0) + 1
+        } else if (type === 'delete') {
+            selectedAttribute.value.values_count = Math.max(0, (selectedAttribute.value.values_count || 0) - 1)
+        }
+    }
+}
+
 const search = () => {
     params.value.page = 1
     loadData()
@@ -223,6 +233,6 @@ onMounted(loadData)
         :errors="errors" :statusMap="statusMap" @submit="submit" @close="closeForm" />
 
     <!-- Attribute Values Modal -->
-    <AttributeValueModal v-model:isShow="isShowValuesModal" :attribute="selectedAttribute" @valuesChanged="loadData"
+    <AttributeValueModal v-model:isShow="isShowValuesModal" :attribute="selectedAttribute" @valuesChanged="handleValuesChanged"
         @close="isShowValuesModal = false" />
 </template>

@@ -19,10 +19,10 @@ const emit = defineEmits(["show", "update", "destroy", "openValues"])
                 <tr>
                     <th>STT</th>
                     <th>Tên thuộc tính</th>
-                    <th>Giá trị</th>
                     <th>Slug</th>
                     <th>Trạng thái</th>
                     <th>Hành động</th>
+                    <th>Giá trị</th>
                 </tr>
             </thead>
 
@@ -51,9 +51,7 @@ const emit = defineEmits(["show", "update", "destroy", "openValues"])
                         <strong style="color: var(--text-main);">{{ item.name }}</strong>
                     </td>
 
-                    <td>
-                        <BaseButton @click="emit('openValues', item)" :customText="String(item.values_count || 0)" customClass="btn-action btn-view" style="border-radius: 999px; padding: 4px 12px;" />
-                    </td>
+                   
 
                     <td>
                         <small style="color: var(--text-muted); font-family: monospace; background: var(--background); padding: 4px 8px; border-radius: 4px;">{{ item.slug }}</small>
@@ -72,8 +70,39 @@ const emit = defineEmits(["show", "update", "destroy", "openValues"])
                             <BaseButton @click="emit('destroy', item.id)" customText="Xóa" customClass="btn-action btn-delete" />
                         </div>
                     </td>
+
+                     <td>
+                        <BaseButton @click="emit('openValues', item)" customText="Giá trị" 
+                            customClass="btn-action btn-values" />
+                    </td>
                 </tr>
             </tbody>
         </table>
     </div>
 </template>
+
+<style scoped>
+.btn-values {
+    background-color: var(--primary) !important;
+    color: white !important;
+    border-radius: 999px !important;
+    padding: 4px 16px !important;
+    font-size: 13px !important;
+}
+
+.btn-action {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    filter: brightness(1.1);
+}
+
+.btn-action:active {
+    transform: translateY(0);
+}
+</style>

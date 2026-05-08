@@ -1,23 +1,25 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import BaseModal from '@/components/base/BaseModal.vue';
 import BaseForm from '@/components/base/BaseForm.vue';
-import BaseInputText from '@/components/base/BaseInputText.vue';
 import BaseInputSelect from '@/components/base/BaseInputSelect.vue';
 import BaseButton from '@/components/base/BaseButton.vue';
 import BaseSpinner from '@/components/base/BaseSpinner.vue';
+import BaseLoading from '@/components/base/BaseLoading.vue';
+import { useProductVariantValueStore } from '@/stores/productVariantValue';
 import { useAttributeValueStore } from '@/stores/attributeValue';
 import { swalConfirmDelete } from '@/composables/useSwal';
 import { useNotify } from '@/composables/useNotify';
 
 const props = defineProps({
-    attribute: Object
+    variant: Object
 })
 
-const emit = defineEmits(["close", "valuesChanged"])
+const emit = defineEmits(["close", "variantValuesChanged"])
 const isShow = defineModel("isShow")
 
-const store = useAttributeValueStore()
+const store = useProductVariantValueStore()
+const attributeValueStore = useAttributeValueStore()
 const toast = useNotify()
 
 const loadingData = ref(false)
@@ -27,32 +29,31 @@ const errors = ref({})
 
 const dataForm = ref({
     id: null,
-    attribute_id: null,
-    value: '',
-    slug: '',
-    status: 1
+    product_variant_id: null,
+    attribute_value_id: null,
 })
 
-const statusMap = [
-    { id: 1, name: 'Hiện' },
-    { id: 0, name: 'Ẩn' }
-]
+const values = computed(() => store.productVariantValues)
 
-const values = computed(() => store.attributeValues)
+// Lấy danh sách tất cả các giá trị thuộc tính để đưa vào select
+const attributeValueOptions = computed(() => {
+    return attributeValueStore.attributeValues.map(item => ({
+        id: item.id,
+        name: `${item.attribute?.name || 'Thuộc tính'} - ${item.value}`
+    }))
+})
 
 const loadData = async () => {
     loadingData.value = true
-    await store.index(props.attribute.id)
+    await store.index(props.variant.id)
     loadingData.value = false
 }
 
 const resetForm = () => {
     dataForm.value = {
         id: null,
-        attribute_id: props.attribute?.id || null,
-        value: '',
-        slug: '',
-        status: 1
+        product_variant_id: props.variant?.id || null,
+        attribute_value_id: null,
     }
     isEdit.value = false
     errors.value = {}
@@ -61,12 +62,8 @@ const resetForm = () => {
 const validate = () => {
     errors.value = {}
 
-    if (!dataForm.value.value?.trim()) {
-        errors.value.value = 'Giá trị không được để trống'
-    }
-
-    if (!dataForm.value.slug?.trim()) {
-        errors.value.slug = 'Slug không được để trống'
+    if (!dataForm.value.attribute_value_id) {
+        errors.value.attribute_value_id = 'Vui lòng chọn giá trị thuộc tính'
     }
 
     return Object.keys(errors.value).length === 0
@@ -76,36 +73,27 @@ const submit = async () => {
     if (!validate()) return
 
     loadingSubmit.value = true
-    dataForm.value.attribute_id = props.attribute.id
-
-    const payload = {
-        attribute_id: dataForm.value.attribute_id,
-        value: dataForm.value.value,
-        slug: dataForm.value.slug,
-        status: dataForm.value.status
-    }
+    dataForm.value.product_variant_id = props.variant.id
 
     let result
     if (isEdit.value) {
-        result = await store.update(dataForm.value.id, payload)
+        result = await store.update(dataForm.value.id, dataForm.value)
     } else {
-        result = await store.store(payload)
+        result = await store.store(dataForm.value)
     }
 
-    if (!result?.status) {
+    if (!result?.success) {
         toast.error(result?.message || "Lỗi khi lưu dữ liệu");
         if (result?.errors) {
             errors.value = {
-                value: result.errors.value?.[0] ?? "",
-                slug: result.errors.slug?.[0] ?? "",
-                status: result.errors.status?.[0] ?? "",
+                attribute_value_id: result.errors.attribute_value_id?.[0] ?? "",
             }
         }
     } else {
         toast.success(result?.message || "Thành công");
         resetForm()
         await loadData()
-        emit('valuesChanged', 'add')
+        emit('variantValuesChanged', 'add')
     }
     loadingSubmit.value = false
 }
@@ -120,12 +108,13 @@ const destroyValue = async (id) => {
     if (!result.isConfirmed) return
     await store.destroy(id)
     await loadData()
-    emit('valuesChanged', 'delete')
+    emit('variantValuesChanged', 'delete')
 }
 
-watch(() => isShow.value, (newVal) => {
+watch(() => isShow.value, async (newVal) => {
     if (newVal) {
         resetForm()
+        await attributeValueStore.index() // Load full attribute values
         loadData()
     }
 })
@@ -133,44 +122,38 @@ watch(() => isShow.value, (newVal) => {
 </script>
 
 <template>
-    <BaseModal @close="emit('close')" :isShow="isShow" customWidth="1000px">
-        <div class="attr-val-container">
-            <!-- Trái: Danh sách giá trị -->
-            <div class="attr-val-list">
-                <h3 class="modal-title">Thuộc tính: <span style="color: var(--primary);">{{ attribute?.name }}</span></h3>
+    <BaseModal @close="emit('close')" :isShow="isShow" customWidth="1100px">
+        <div class="prod-var-val-container">
+            <!-- Trái: Danh sách giá trị thuộc tính -->
+            <div class="prod-var-val-list">
+                <h3 class="modal-title">Thuộc tính của SKU: <span style="color: var(--primary);">{{ variant?.sku }}</span></h3>
                 
                 <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>STT</th>
+                                <th>Loại thuộc tính</th>
                                 <th>Giá trị</th>
-                                <th>Slug</th>
-                                <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="loadingData">
-                                <td colspan="5" class="text-center" style="padding: 48px;">
+                                <td colspan="4" class="text-center" style="padding: 48px;">
                                     <BaseSpinner size="lg" label="Đang tải dữ liệu..." />
                                 </td>
                             </tr>
                             <tr v-else-if="values.length === 0">
-                                <td colspan="5" class="text-center" style="padding: 24px; color: var(--text-muted);">
-                                    Chưa có giá trị nào
+                                <td colspan="4" class="text-center" style="padding: 24px; color: var(--text-muted);">
+                                    Chưa có thuộc tính nào
                                 </td>
                             </tr>
                             <tr v-else v-for="(item, index) in values" :key="item.id">
                                 <td>{{ index + 1 }}</td>
-                                <td><strong style="color: var(--text-main);">{{ item.value }}</strong></td>
+                                <td><strong>{{ item.attribute_value?.attribute?.name || 'N/A' }}</strong></td>
                                 <td>
-                                    <small style="color: var(--text-muted); font-family: monospace; background: var(--background); padding: 4px 8px; border-radius: 4px;">{{ item.slug }}</small>
-                                </td>
-                                <td>
-                                    <span :class="['badge-status', item.status ? 'badge-active' : 'badge-inactive']">
-                                        {{ item.status ? 'Hiện' : 'Ẩn' }}
-                                    </span>
+                                    <span class="badge-status badge-active">{{ item.attribute_value?.value || 'N/A' }}</span>
                                 </td>
                                 <td>
                                     <div class="action-group">
@@ -187,17 +170,17 @@ watch(() => isShow.value, (newVal) => {
             </div>
 
             <!-- Phải: Form Thêm/Sửa -->
-            <div class="attr-val-form">
+            <div class="prod-var-val-form">
                 <div class="form-card">
-                    <h4 class="form-title">{{ isEdit ? 'Sửa giá trị' : 'Thêm giá trị mới' }}</h4>
+                    <h4 class="form-title">{{ isEdit ? 'Sửa thuộc tính' : 'Thêm thuộc tính mới' }}</h4>
                     <BaseForm @handleSubmit="submit">
                         <template #input>
-                            <BaseInputText labelContent="Giá trị" customId="val_value" v-model="dataForm.value" customPlaceholderInput="Nhập giá trị"
-                                :error="errors.value" />
-                            <BaseInputText labelContent="Slug" customId="val_slug" v-model="dataForm.slug" customPlaceholderInput="Nhập đường dẫn"
-                                :error="errors.slug" />
-                            <BaseInputSelect labelContent="Trạng thái" v-model="dataForm.status"
-                                :values="statusMap" />
+                            <BaseInputSelect 
+                                labelContent="Chọn giá trị thuộc tính" 
+                                v-model="dataForm.attribute_value_id"
+                                :values="attributeValueOptions" 
+                                :error="errors.attribute_value_id" 
+                            />
                         </template>
                         <template #button>
                             <div class="form-actions">
@@ -219,23 +202,23 @@ watch(() => isShow.value, (newVal) => {
 </template>
 
 <style scoped>
-.attr-val-container {
+.prod-var-val-container {
     display: flex;
-    gap: 32px;
+    gap: 24px;
 }
 
-.attr-val-list {
+.prod-var-val-list {
     flex: 6;
 }
 
-.attr-val-form {
+.prod-var-val-form {
     flex: 4;
 }
 
 .modal-title {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 700;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     color: var(--text-main);
 }
 
@@ -248,7 +231,7 @@ watch(() => isShow.value, (newVal) => {
 }
 
 .form-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     margin-bottom: 24px;
     padding-bottom: 16px;
@@ -288,7 +271,7 @@ watch(() => isShow.value, (newVal) => {
 }
 
 @media (max-width: 768px) {
-    .attr-val-container {
+    .prod-var-val-container {
         flex-direction: column;
     }
 }
