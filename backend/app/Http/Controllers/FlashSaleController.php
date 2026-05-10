@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Coupon;
-use App\Http\Requests\StoreCouponRequest;
-use App\Http\Requests\UpdateCouponRequest;
-use App\Http\Resources\CouponResource;
+use App\Models\FlashSale;
+use App\Http\Requests\StoreFlashSaleRequest;
+use App\Http\Requests\UpdateFlashSaleRequest;
+use App\Http\Resources\FlashSaleResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Exception;
 
-class CouponController extends Controller
+class FlashSaleController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,38 +18,38 @@ class CouponController extends Controller
     public function index(Request $request)
     {
         try {
-            $coupons = Coupon::query();
+            $flashSales = FlashSale::query();
 
             if ($request->filled('search')) {
-                $coupons->where(function ($q) use ($request) {
-                    $q->where('code', 'like', '%' . $request->search . '%')
-                      ->orWhere('name', 'like', '%' . $request->search . '%');
-                });
+                $flashSales->where('name', 'like', '%' . $request->search . '%');
             }
 
             if ($request->filled('status')) {
-                $coupons->where('status', $request->status);
+                $flashSales->where('status', $request->status);
             }
 
-            if ($request->filled('discount_type')) {
-                $coupons->where('discount_type', $request->discount_type);
+            if ($request->filled('starts_at') && $request->filled('ends_at')) {
+                $flashSales->where('starts_at', '>=', $request->starts_at)
+                           ->where('ends_at', '<=', $request->ends_at);
             }
 
             $sortMap = [
+                'display_asc'     => ['display', 'asc'],
+                'display_desc'    => ['display', 'desc'],
                 'created_at_asc'  => ['created_at', 'asc'],
                 'created_at_desc' => ['created_at', 'desc'],
             ];
 
             $sortKey = $request->sort ?? 'created_at_desc';
             $sort = $sortMap[$sortKey] ?? $sortMap['created_at_desc'];
-            $coupons->orderBy($sort[0], $sort[1]);
+            $flashSales->orderBy($sort[0], $sort[1]);
 
             $limit = $request->input('limit', 15);
-            $coupons = $coupons->paginate((int) $limit);
+            $flashSales = $flashSales->paginate((int) $limit);
 
-            return CouponResource::collection($coupons)->additional([
+            return FlashSaleResource::collection($flashSales)->additional([
                 'success' => true,
-                'message' => 'Lấy danh sách mã giảm giá thành công',
+                'message' => 'Lấy danh sách flash sale thành công',
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -62,22 +63,22 @@ class CouponController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCouponRequest $request)
+    public function store(StoreFlashSaleRequest $request)
     {
         try {
-            $data = $request->validated();
+            $validated = $request->validated();
 
-            // Giảm cố định → max_discount_amount tự động bằng discount_value
-            if ($data['discount_type'] === 'fixed') {
-                $data['max_discount_amount'] = $data['discount_value'];
+            if ($request->hasFile('thumbnail')) {
+                $path = $request->file('thumbnail')->store('uploads/flash-sales', 'public');
+                $validated['thumbnail'] = $path;
             }
 
-            $coupon = Coupon::create($data);
+            $flashSale = FlashSale::create($validated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Thêm mã giảm giá thành công',
-                'data'    => new CouponResource($coupon),
+                'message' => 'Thêm flash sale thành công',
+                'data'    => new FlashSaleResource($flashSale),
             ], 201);
         } catch (Exception $e) {
             return response()->json([
@@ -91,13 +92,13 @@ class CouponController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Coupon $coupon)
+    public function show(FlashSale $flashSale)
     {
         try {
             return response()->json([
                 'success' => true,
-                'message' => 'Lấy thông tin mã giảm giá thành công',
-                'data'    => new CouponResource($coupon),
+                'message' => 'Lấy thông tin flash sale thành công',
+                'data'    => new FlashSaleResource($flashSale),
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -111,22 +112,25 @@ class CouponController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCouponRequest $request, Coupon $coupon)
+    public function update(UpdateFlashSaleRequest $request, FlashSale $flashSale)
     {
         try {
-            $data = $request->validated();
+            $validated = $request->validated();
 
-            // Giảm cố định → max_discount_amount tự động bằng discount_value
-            if ($data['discount_type'] === 'fixed') {
-                $data['max_discount_amount'] = $data['discount_value'];
+            if ($request->hasFile('thumbnail')) {
+                $path = $request->file('thumbnail')->store('uploads/flash-sales', 'public');
+                if ($path && $flashSale->thumbnail) {
+                    Storage::disk('public')->delete($flashSale->thumbnail);
+                }
+                $validated['thumbnail'] = $path;
             }
 
-            $coupon->update($data);
+            $flashSale->update($validated);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Cập nhật mã giảm giá thành công',
-                'data'    => new CouponResource($coupon),
+                'message' => 'Cập nhật flash sale thành công',
+                'data'    => new FlashSaleResource($flashSale),
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -140,14 +144,18 @@ class CouponController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Coupon $coupon)
+    public function destroy(FlashSale $flashSale)
     {
         try {
-            $coupon->delete();
+            if ($flashSale->thumbnail) {
+                Storage::disk('public')->delete($flashSale->thumbnail);
+            }
+
+            $flashSale->delete();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Xóa mã giảm giá thành công',
+                'message' => 'Xóa flash sale thành công',
                 'data'    => null,
             ]);
         } catch (Exception $e) {

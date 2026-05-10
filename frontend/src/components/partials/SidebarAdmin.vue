@@ -8,6 +8,7 @@ const menuItems = [
     { name: 'Danh mục', path: '/admin/categories', icon: 'ph-squares-four' },
     { name: 'Sản phẩm', path: '/admin/products', icon: 'ph-package' },
     { name: 'Mã giảm giá', path: '/admin/coupons', icon: 'ph-ticket' },
+    { name: 'Flash Sale', path: '/admin/flash-sales', icon: 'ph-lightning' },
     // { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
     // { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
 

@@ -7,6 +7,7 @@ import BaseInputTextarea from '@/components/base/BaseInputTextarea.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import BaseSpinner from '@/components/base/BaseSpinner.vue'
 import BaseInputNumber from '@/components/base/BaseInputNumber.vue'
+import { computed } from 'vue'
 
 const props = defineProps({
     errors: {
@@ -22,6 +23,9 @@ const emit = defineEmits(["close", "submit"])
 const isShow = defineModel("isShow")
 const dataForm = defineModel("dataForm")
 const loadingSubmit = defineModel("loadingSubmit")
+
+// Nếu loại giảm giá là cố định → giảm tối đa = giá trị giảm
+const isFixed = computed(() => dataForm.value?.discount_type === 'fixed')
 </script>
 
 <template>
@@ -47,9 +51,20 @@ const loadingSubmit = defineModel("loadingSubmit")
                                     :error="errors.discount_value" />
                             </div>
 
+                            <!-- Giảm tối đa: ẩn khi loại = fixed (tự động bằng discount_value) -->
                             <div class="two-col-grid">
-                                <BaseInputNumber labelContent="Giảm tối đa (VNĐ)" v-model="dataForm.max_discount_amount"
-                                    :error="errors.max_discount_amount" />
+                                <div class="form-group">
+                                    <label class="form-label">Giảm tối đa (VNĐ)</label>
+                                    <div v-if="isFixed" class="fixed-max-preview">
+                                        <span class="fixed-badge">
+                                            <i class="ph ph-lock-simple"></i>
+                                            Tự động = {{ dataForm.discount_value ? Number(dataForm.discount_value).toLocaleString('vi-VN') + 'đ' : '—' }}
+                                        </span>
+                                        <p class="fixed-hint">Giảm cố định, không cần giảm tối đa riêng</p>
+                                    </div>
+                                    <BaseInputNumber v-else labelContent="" v-model="dataForm.max_discount_amount"
+                                        :error="errors.max_discount_amount" />
+                                </div>
                                 <BaseInputNumber labelContent="Đơn tối thiểu (VNĐ)" v-model="dataForm.min_order_value"
                                     :error="errors.min_order_value" />
                             </div>
@@ -218,6 +233,36 @@ const loadingSubmit = defineModel("loadingSubmit")
     align-items: center;
     justify-content: center;
     padding: 0 40px;
+}
+
+.fixed-max-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 4px;
+}
+
+.fixed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.fixed-badge i {
+    font-size: 14px;
+}
+
+.fixed-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 0;
 }
 
 @media (max-width: 849px) {

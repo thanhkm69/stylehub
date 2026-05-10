@@ -39,8 +39,12 @@ class ProductController extends Controller
             $sort = $sortMap[$sortKey] ?? $sortMap['created_at_desc'];
             $products->orderBy($sort[0], $sort[1]);
 
-            $limit = $request->input('limit', 5);
-            $products = $products->paginate((int)$limit);
+            if ($request->has('limit')) {
+                $limit = $request->input('limit');
+                $products = $products->paginate((int)$limit);
+            } else {
+                $products = $products->get();
+            }
 
             return ProductResource::collection($products)->additional([
                 'success' => true,

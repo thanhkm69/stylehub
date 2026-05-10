@@ -36,6 +36,11 @@ const router = createRouter({
           name: 'Coupons',
           component: () => import('@/views/admin/Coupons.vue'),
         },
+        {
+          path: 'flash-sales',
+          name: 'FlashSales',
+          component: () => import('@/views/admin/FlashSales.vue'),
+        },
       ],
     },
 

@@ -28,7 +28,7 @@ class UpdateCouponRequest extends FormRequest
             'name' => 'required|string|max:100',
             'description' => 'nullable|string',
             'discount_type' => 'required|in:percentage,fixed',
-            'discount_value' => 'required|numeric|min:0',
+            'discount_value' => 'required|numeric|min:1',
             'max_discount_amount' => 'nullable|numeric|min:0',
             'min_order_value' => 'required|numeric|min:0',
             'usage_limit' => 'nullable|integer|min:1',
@@ -37,6 +37,30 @@ class UpdateCouponRequest extends FormRequest
             'expires_at' => 'nullable|date|after_or_equal:starts_at',
             'status' => 'boolean',
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $type  = $this->discount_type;
+            $value = (float) $this->discount_value;
+
+            if ($type === 'percentage') {
+                if ($value < 1 || $value > 100) {
+                    $validator->errors()->add(
+                        'discount_value',
+                        'Phần trăm giảm phải từ 1 đến 100.'
+                    );
+                }
+            } elseif ($type === 'fixed') {
+                if ($value < 1) {
+                    $validator->errors()->add(
+                        'discount_value',
+                        'Giá trị giảm cố định phải ít nhất 1đ.'
+                    );
+                }
+            }
+        });
     }
 
     /**
