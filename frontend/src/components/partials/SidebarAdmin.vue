@@ -4,11 +4,13 @@ const route = useRoute();
 
 const menuItems = [
     { name: 'Dashboard', path: '/admin', icon: 'ph-house-line' },
-     { name: 'Thuộc tính', path: '/admin/attributes', icon: 'ph-list-bullets' },
+    { name: 'Thuộc tính', path: '/admin/attributes', icon: 'ph-list-bullets' },
     { name: 'Danh mục', path: '/admin/categories', icon: 'ph-squares-four' },
     { name: 'Sản phẩm', path: '/admin/products', icon: 'ph-package' },
-    { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
-    { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
+    { name: 'Mã giảm giá', path: '/admin/coupons', icon: 'ph-ticket' },
+    // { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
+    // { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
+
 ];
 
 const isActive = (path) => {
@@ -46,10 +48,10 @@ const isActive = (path) => {
                 <p class="section-title">Hệ thống</p>
                 <ul class="nav-list">
                     <li>
-                        <RouterLink to="/admin/settings" class="nav-link">
+                        <!-- <RouterLink to="/admin/settings" class="nav-link">
                             <i class="ph-bold ph-gear"></i>
                             <span>Cài đặt</span>
-                        </RouterLink>
+                        </RouterLink> -->
                     </li>
                     <li>
                         <a href="#" class="nav-link logout-link">
