@@ -41,6 +41,11 @@ const router = createRouter({
           name: 'FlashSales',
           component: () => import('@/views/admin/FlashSales.vue'),
         },
+        {
+          path: 'combos',
+          name: 'Combos',
+          component: () => import('@/views/admin/Combos.vue'),
+        },
       ],
     },
 

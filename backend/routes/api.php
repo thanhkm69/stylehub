@@ -15,6 +15,8 @@ use App\Http\Controllers\ProductVariantValueController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\FlashSaleController;
 use App\Http\Controllers\FlashSaleItemController;
+use App\Http\Controllers\ComboController;
+use App\Http\Controllers\ComboItemController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -121,6 +123,22 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('flash-sale-items/{flashSaleItem}', 'show');
       Route::put('flash-sale-items/{flashSaleItem}', 'update');
       Route::delete('flash-sale-items/{flashSaleItem}', 'destroy');
+    });
+
+    Route::controller(ComboController::class)->group(function () {
+      Route::get('combos', 'index');
+      Route::post('combos', 'store');
+      Route::get('combos/{combo}', 'show');
+      Route::post('combos/{combo}', 'update');
+      Route::delete('combos/{combo}', 'destroy');
+    });
+
+    Route::controller(ComboItemController::class)->group(function () {
+      Route::get('combo-items', 'index');
+      Route::post('combo-items', 'store');
+      Route::get('combo-items/{comboItem}', 'show');
+      Route::put('combo-items/{comboItem}', 'update');
+      Route::delete('combo-items/{comboItem}', 'destroy');
     });
   });
 });
