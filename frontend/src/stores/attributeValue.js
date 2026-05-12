@@ -18,7 +18,7 @@ export const useAttributeValueStore = defineStore('attributeValue', () => {
         params: { attribute_id },
         headers: { Authorization: `Bearer ${tokenStore.token}` },
       })
-      if (res.status === 200 && res.data.status) {
+      if (res.status === 200 && res.data.success) {
         attributeValues.value = res.data.data
       } else {
         toast.error('Lỗi khi tải giá trị thuộc tính')

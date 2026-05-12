@@ -173,7 +173,12 @@ const destroy = async (id) => {
     const result = await swalConfirmDelete('Xác nhận', 'Bạn có chắc xóa thuộc tính này không ?')
     if (!result.isConfirmed) return
     const res = await store.destroy(id)
-    loadData()
+    if (!res?.success) {
+        toast.error(res?.message || "Lỗi khi xóa dữ liệu");
+    } else {
+        toast.success(res?.message || "Xóa thành công");
+        loadData();
+    }
 }
 
 const show = (item) => {

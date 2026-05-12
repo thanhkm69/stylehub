@@ -15,19 +15,27 @@ class AttributeValueController extends Controller
      */
     public function index(Request $request)
     {
-        $query = AttributeValue::with('attribute');
+        try {
+            $query = AttributeValue::with('attribute');
 
-        if ($request->has('attribute_id')) {
-            $query->where('attribute_id', $request->attribute_id);
+            if ($request->has('attribute_id')) {
+                $query->where('attribute_id', $request->attribute_id);
+            }
+
+            $data = $query->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lấy danh sách giá trị thuộc tính thành công',
+                'data' => AttributeValueResource::collection($data)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lấy danh sách giá trị thuộc tính thất bại',
+                'errors' => $e->getMessage()
+            ], 500);
         }
-
-        $data = $query->get();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Lấy danh sách giá trị thuộc tính thành công',
-            'data' => AttributeValueResource::collection($data)
-        ]);
     }
 
     /**
@@ -35,13 +43,21 @@ class AttributeValueController extends Controller
      */
     public function store(StoreAttributeValueRequest $request)
     {
-        $data = $request->validated();
-        $attributeValue = AttributeValue::create($data);
-        return response()->json([
-            'status' => true,
-            'message' => 'Tạo giá trị thuộc tính thành công',
-            'data' => new AttributeValueResource($attributeValue->load('attribute'))
-        ]);
+        try {
+            $data = $request->validated();
+            $attributeValue = AttributeValue::create($data);
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo giá trị thuộc tính thành công',
+                'data' => new AttributeValueResource($attributeValue->load('attribute'))
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tạo giá trị thuộc tính thất bại',
+                'errors' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -49,11 +65,19 @@ class AttributeValueController extends Controller
      */
     public function show(AttributeValue $attributeValue)
     {
-        return response()->json([
-            'status' => true,
-            'message' => 'Lấy giá trị thuộc tính thành công',
-            'data' => new AttributeValueResource($attributeValue->load('attribute'))
-        ]);
+        try {
+            return response()->json([
+                'success' => true,
+                'message' => 'Lấy giá trị thuộc tính thành công',
+                'data' => new AttributeValueResource($attributeValue->load('attribute'))
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lấy giá trị thuộc tính thất bại',
+                'errors' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -61,13 +85,21 @@ class AttributeValueController extends Controller
      */
     public function update(UpdateAttributeValueRequest $request, AttributeValue $attributeValue)
     {
-        $data = $request->validated();
-        $attributeValue->update($data);
-        return response()->json([
-            'status' => true,
-            'message' => 'Cập nhật giá trị thuộc tính thành công',
-            'data' => new AttributeValueResource($attributeValue->load('attribute'))
-        ]);
+        try {
+            $data = $request->validated();
+            $attributeValue->update($data);
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật giá trị thuộc tính thành công',
+                'data' => new AttributeValueResource($attributeValue->load('attribute'))
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cập nhật giá trị thuộc tính thất bại',
+                'errors' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -75,11 +107,19 @@ class AttributeValueController extends Controller
      */
     public function destroy(AttributeValue $attributeValue)
     {
-        $attributeValue->delete();
-        return response()->json([
-            'status' => true,
-            'message' => 'Xóa giá trị thuộc tính thành công',
-            'data' => new AttributeValueResource($attributeValue->load('attribute'))
-        ]);
+        try {
+            $attributeValue->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Xóa giá trị thuộc tính thành công',
+                'data' => new AttributeValueResource($attributeValue->load('attribute'))
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Xóa giá trị thuộc tính thất bại',
+                'errors' => $e->getMessage()
+            ], 500);
+        }
     }
 }

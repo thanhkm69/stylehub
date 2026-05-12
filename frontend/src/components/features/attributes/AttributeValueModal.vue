@@ -92,7 +92,7 @@ const submit = async () => {
         result = await store.store(payload)
     }
 
-    if (!result?.status) {
+    if (!result?.success) {
         toast.error(result?.message || "Lỗi khi lưu dữ liệu");
         if (result?.errors) {
             errors.value = {
@@ -118,9 +118,14 @@ const editValue = (item) => {
 const destroyValue = async (id) => {
     const result = await swalConfirmDelete('Xác nhận', 'Bạn có chắc xóa giá trị này không ?')
     if (!result.isConfirmed) return
-    await store.destroy(id)
-    await loadData()
-    emit('valuesChanged', 'delete')
+    const res = await store.destroy(id)
+    if (!res?.success) {
+        toast.error(res?.message || "Lỗi khi xóa dữ liệu");
+    } else {
+        toast.success(res?.message || "Xóa thành công");
+        await loadData()
+        emit('valuesChanged', 'delete')
+    }
 }
 
 watch(() => isShow.value, (newVal) => {
@@ -137,8 +142,9 @@ watch(() => isShow.value, (newVal) => {
         <div class="attr-val-container">
             <!-- Trái: Danh sách giá trị -->
             <div class="attr-val-list">
-                <h3 class="modal-title">Thuộc tính: <span style="color: var(--primary);">{{ attribute?.name }}</span></h3>
-                
+                <h3 class="modal-title">Thuộc tính: <span style="color: var(--primary);">{{ attribute?.name }}</span>
+                </h3>
+
                 <div class="admin-table-wrapper" style="max-height: 500px; overflow-y: auto;">
                     <table class="table">
                         <thead>
@@ -165,7 +171,9 @@ watch(() => isShow.value, (newVal) => {
                                 <td>{{ index + 1 }}</td>
                                 <td><strong style="color: var(--text-main);">{{ item.value }}</strong></td>
                                 <td>
-                                    <small style="color: var(--text-muted); font-family: monospace; background: var(--background); padding: 4px 8px; border-radius: 4px;">{{ item.slug }}</small>
+                                    <small
+                                        style="color: var(--text-muted); font-family: monospace; background: var(--background); padding: 4px 8px; border-radius: 4px;">{{
+                                        item.slug }}</small>
                                 </td>
                                 <td>
                                     <span :class="['badge-status', item.status ? 'badge-active' : 'badge-inactive']">
@@ -192,12 +200,11 @@ watch(() => isShow.value, (newVal) => {
                     <h4 class="form-title">{{ isEdit ? 'Sửa giá trị' : 'Thêm giá trị mới' }}</h4>
                     <BaseForm @handleSubmit="submit">
                         <template #input>
-                            <BaseInputText labelContent="Giá trị" customId="val_value" v-model="dataForm.value" customPlaceholderInput="Nhập giá trị"
-                                :error="errors.value" />
-                            <BaseInputText labelContent="Slug" customId="val_slug" v-model="dataForm.slug" customPlaceholderInput="Nhập đường dẫn"
-                                :error="errors.slug" />
-                            <BaseInputSelect labelContent="Trạng thái" v-model="dataForm.status"
-                                :values="statusMap" />
+                            <BaseInputText labelContent="Giá trị" customId="val_value" v-model="dataForm.value"
+                                customPlaceholderInput="Nhập giá trị" :error="errors.value" />
+                            <BaseInputText labelContent="Slug" customId="val_slug" v-model="dataForm.slug"
+                                customPlaceholderInput="Nhập đường dẫn" :error="errors.slug" />
+                            <BaseInputSelect labelContent="Trạng thái" v-model="dataForm.status" :values="statusMap" />
                         </template>
                         <template #button>
                             <div class="form-actions">
@@ -208,7 +215,8 @@ watch(() => isShow.value, (newVal) => {
                                     <BaseSpinner />
                                 </div>
                                 <BaseButton v-if="isEdit" @click="resetForm" customType="button" customText="Hủy"
-                                    customClass="btn" style="background: var(--background); color: var(--text-main); border: 1px solid var(--border);" />
+                                    customClass="btn"
+                                    style="background: var(--background); color: var(--text-main); border: 1px solid var(--border);" />
                             </div>
                         </template>
                     </BaseForm>
@@ -283,8 +291,15 @@ watch(() => isShow.value, (newVal) => {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 768px) {
