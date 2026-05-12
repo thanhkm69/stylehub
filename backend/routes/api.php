@@ -13,6 +13,7 @@ use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\ProductVariantValueController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CouponController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -103,6 +104,14 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('product-variant-values/{productVariantValue}', 'show');
       Route::put('product-variant-values/{productVariantValue}', 'update');
       Route::delete('product-variant-values/{productVariantValue}', 'destroy');
+    });
+
+    Route::controller(CouponController::class)->group(function () {
+      Route::get('coupons', 'index');
+      Route::post('coupons', 'store');
+      Route::get('coupons/{coupon}', 'show');
+      Route::put('coupons/{coupon}', 'update');
+      Route::delete('coupons/{coupon}', 'destroy');
     });
   });
 });
