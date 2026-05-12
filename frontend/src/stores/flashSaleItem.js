@@ -2,71 +2,65 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { API_URL } from '@/config/env'
-import { useNotify } from '@/composables/useNotify'
 import { useTokenStore } from '@/stores/token'
 
-export const useAttributeValueStore = defineStore('attributeValue', () => {
+export const useFlashSaleItemStore = defineStore('flashSaleItem', () => {
   const tokenStore = useTokenStore()
-  const attributeValues = ref([])
-
-  const toast = useNotify()
+  const flashSaleItems = ref([])
 
   // ================= GET LIST =================
-  const index = async (attribute_id) => {
+  const index = async (flash_sale_id) => {
     try {
-      const res = await axios.get(`${API_URL}/attribute-values`, {
-        params: { attribute_id },
+      const res = await axios.get(`${API_URL}/flash-sale-items`, {
+        params: { flash_sale_id },
         headers: { Authorization: `Bearer ${tokenStore.token}` },
       })
       if (res.status === 200 && res.data.success) {
-        attributeValues.value = res.data.data
-      } else {
-        toast.error('Lỗi khi tải giá trị thuộc tính')
+        flashSaleItems.value = res.data.data
       }
     } catch (error) {
-      toast.error('Lỗi khi tải giá trị thuộc tính')
-      console.error(error)
+      console.error('FlashSaleItemStore index error:', error)
     }
   }
 
   // ================= CREATE =================
   const store = async (data) => {
     try {
-      const res = await axios.post(`${API_URL}/attribute-values`, data, {
+      const res = await axios.post(`${API_URL}/flash-sale-items`, data, {
         headers: { Authorization: `Bearer ${tokenStore.token}` },
       })
       return res.data
     } catch (error) {
-      return error.response.data
+      return error.response?.data || {}
     }
   }
 
   // ================= UPDATE =================
   const update = async (id, data) => {
     try {
-      const res = await axios.post(`${API_URL}/attribute-values/${id}`, data, {
+      const res = await axios.put(`${API_URL}/flash-sale-items/${id}`, data, {
         headers: { Authorization: `Bearer ${tokenStore.token}` },
       })
       return res.data
     } catch (error) {
-      return error.response.data
+      return error.response?.data || {}
     }
   }
 
   // ================= DELETE =================
   const destroy = async (id) => {
     try {
-      const res = await axios.delete(`${API_URL}/attribute-values/${id}`, {
+      const res = await axios.delete(`${API_URL}/flash-sale-items/${id}`, {
         headers: { Authorization: `Bearer ${tokenStore.token}` },
       })
       return res.data
     } catch (error) {
-      return error.response.data
+      return error.response?.data || {}
     }
   }
 
   return {
-    attributeValues,
+    flashSaleItems,
     index,
     store,
     update,

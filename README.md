@@ -22,6 +22,7 @@ cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
+
 ```
 
 Mở file `backend/.env` và cấu hình tối thiểu:
@@ -33,6 +34,7 @@ Sau đó chạy migrate:
 
 ```bash
 php artisan migrate
+php artisan storage:link
 ```
 
 ### Bước 2: Cài frontend

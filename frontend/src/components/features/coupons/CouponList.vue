@@ -122,8 +122,19 @@ const validate = () => {
     if (!dataForm.value.code?.trim())        errors.value.code = 'Mã giảm giá không được để trống'
     if (!dataForm.value.name?.trim())        errors.value.name = 'Tên không được để trống'
     if (!dataForm.value.discount_type)       errors.value.discount_type = 'Loại giảm giá không được để trống'
-    if (dataForm.value.discount_value === null || dataForm.value.discount_value === '')
-        errors.value.discount_value = 'Giá trị giảm không được để trống'
+
+    const val = parseFloat(dataForm.value.discount_value)
+    if (isNaN(val) || val < 1) {
+        errors.value.discount_value = 'Giá trị giảm phải ít nhất 1'
+    } else if (dataForm.value.discount_type === 'percentage') {
+        if (val > 100) {
+            errors.value.discount_value = 'Phần trăm giảm phải từ 1 đến 100'
+        }
+    } else if (dataForm.value.discount_type === 'fixed') {
+        if (val < 1) {
+            errors.value.discount_value = 'Giá trị giảm cố định phải ít nhất 1đ'
+        }
+    }
 
     return Object.keys(errors.value).length === 0
 }
@@ -135,6 +146,11 @@ const submit = async () => {
     loadingSubmit.value = true
 
     const payload = { ...dataForm.value }
+
+    // Khi giảm cố định → max_discount_amount = discount_value (tự động)
+    if (payload.discount_type === 'fixed') {
+        payload.max_discount_amount = payload.discount_value
+    }
 
     let result
     if (dataForm.value.id) {
