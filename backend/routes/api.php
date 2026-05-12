@@ -12,6 +12,7 @@ use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ProductVariantController;
 use App\Http\Controllers\ProductVariantValueController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\CouponController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,6 +41,14 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('change-password', [AuthController::class, 'changePassword']);
 
   Route::middleware('abilities:Admin')->group(function () {
+
+    Route::controller(UserController::class)->group(function () {
+      Route::get('users', 'index');
+      Route::post('users', 'store');
+      Route::get('users/{user}', 'show');
+      Route::post('users/{user}', 'update');
+      Route::delete('users/{user}', 'destroy');
+    });
 
     Route::controller(AttributeController::class)->group(function () {
       Route::get('attributes', 'index');
