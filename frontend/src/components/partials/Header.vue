@@ -4,9 +4,11 @@ import BaseSpinner from '@/components/base/BaseSpinner.vue';
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useTokenStore } from '@/stores/token';
+import { useWishlistStore } from '@/stores/wishlist';
 import { useNotify } from '@/composables/useNotify';
 
 const tokenStore = useTokenStore()
+const wishlistStore = useWishlistStore()
 const toast = useNotify()
 
 const isAuth = computed(() => tokenStore.token)
@@ -38,6 +40,9 @@ const closeMobileMenu = () => {
 
 onMounted(async () => {
     await tokenStore.getUser()
+    if (tokenStore.token) {
+        await wishlistStore.ids()
+    }
 })
 </script>
 
