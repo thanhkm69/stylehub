@@ -9,6 +9,7 @@ import BaseSpinner from '@/components/base/BaseSpinner.vue';
 import { useAttributeValueStore } from '@/stores/attributeValue';
 import { swalConfirmDelete } from '@/composables/useSwal';
 import { useNotify } from '@/composables/useNotify';
+import { useSlug } from '@/composables/useSlug';
 
 const props = defineProps({
     attribute: Object
@@ -37,6 +38,19 @@ const statusMap = [
     { id: 1, name: 'Hiện' },
     { id: 0, name: 'Ẩn' }
 ]
+
+const { generateSlug } = useSlug()
+
+watch(
+    () => dataForm.value.value,
+    (newVal) => {
+        if (newVal) {
+            dataForm.value.slug = generateSlug(newVal)
+        } else if (!newVal) {
+            dataForm.value.slug = ''
+        }
+    }
+)
 
 const values = computed(() => store.attributeValues)
 

@@ -73,7 +73,7 @@ const categorizedData = computed(() => {
                     </td>
                     <td>
                         <div class="category-image-wrapper">
-                            <img v-if="item.image" :src="`${API_URL_IMAGE}/${item.image}`" :alt="item.name">
+                            <img v-if="item.image" :src="item.image" :alt="item.name">
                             <div v-else class="no-image"><i class="ph ph-image"></i></div>
                         </div>
                     </td>

@@ -24,6 +24,7 @@ class ProductResource extends JsonResource
             'thumbnail' => $this->thumbnail,
             'status' => $this->status,
             'views' => $this->views,
+            'description' => $this->description,
             'images_count' => $this->whenCounted('images'),
             'variants_count' => $this->whenCounted('variants'),
             'created_at' => $this->created_at,

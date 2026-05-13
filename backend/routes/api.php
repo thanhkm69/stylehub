@@ -5,6 +5,7 @@ use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductPublicController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\FlashSaleItemController;
 use App\Http\Controllers\ComboController;
 use App\Http\Controllers\ComboItemController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -42,11 +44,29 @@ Route::post('reset', [AuthController::class, 'resetPassword']);
 // Public routes for public data
 Route::get('coupons/active', [CouponController::class, 'getActive']);
 
+Route::get('home', [ProductPublicController::class, 'home']);
+Route::get('shop', [ProductPublicController::class, 'index']);
+Route::get('shop/{product:slug}', [ProductPublicController::class, 'show']);
+
+
 Route::middleware('auth:sanctum')->group(function () {
   Route::post('logout', [AuthController::class, 'logout']);
   Route::get('get-user', [AuthController::class, 'getUser']);
 
   Route::post('change-password', [AuthController::class, 'changePassword']);
+
+  Route::get('wishlist', [\App\Http\Controllers\WishlistController::class, 'index']);
+  Route::get('wishlist/ids', [\App\Http\Controllers\WishlistController::class, 'ids']);
+  Route::post('wishlist', [\App\Http\Controllers\WishlistController::class, 'store']);
+  Route::delete('wishlist/{wishlist}', [\App\Http\Controllers\WishlistController::class, 'destroy']);
+  Route::post('wishlist/toggle', [\App\Http\Controllers\WishlistController::class, 'toggle']);
+
+  // Cart Routes
+  Route::get('cart', [CartController::class, 'index']);
+  Route::post('cart', [CartController::class, 'store']);
+  Route::post('cart/{cart}', [CartController::class, 'update']);
+  Route::delete('cart/clear', [CartController::class, 'clear']);
+  Route::delete('cart/{cart}', [CartController::class, 'destroy']);
 
   Route::middleware('abilities:Admin')->group(function () {
 
@@ -77,9 +97,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(CategoryController::class)->group(function () {
       Route::get('categories', 'index');
       Route::post('categories', 'store');
-      Route::get('categories/{id}', 'show');
-      Route::post('categories/{id}', 'update');
-      Route::delete('categories/{id}', 'destroy');
+      Route::get('categories/{category}', 'show');
+      Route::post('categories/{category}', 'update');
+      Route::delete('categories/{category}', 'destroy');
     });
 
     Route::controller(ProductController::class)->group(function () {
