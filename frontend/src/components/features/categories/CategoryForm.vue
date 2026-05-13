@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
+import { useSlug } from '@/composables/useSlug';
 import BaseModal from '@/components/base/BaseModal.vue';
 import BaseForm from '@/components/base/BaseForm.vue';
 import BaseInputText from '@/components/base/BaseInputText.vue';
@@ -36,6 +37,19 @@ const formattedCategories = computed(() => {
         name: '  '.repeat(cat.level) + (cat.level > 0 ? '↳ ' : '') + cat.name
     }))
 })
+
+const { generateSlug } = useSlug()
+
+watch(
+    () => dataForm.value.name,
+    (newName) => {
+        if (newName) {
+            dataForm.value.slug = generateSlug(newName)
+        } else if (!newName) {
+            dataForm.value.slug = ''
+        }
+    }
+)
 
 </script>
 

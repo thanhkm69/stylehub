@@ -202,8 +202,13 @@ const editValue = (item) => {
 const destroyValue = async (id) => {
     const result = await swalConfirmDelete('Xác nhận', 'Bạn có chắc xóa biến thể này không ?');
     if (!result.isConfirmed) return;
-    await store.destroy(id);
-    await loadData();
+    const res = await store.destroy(id);
+    if (!res?.success) {
+        toast.error(res?.message || "Lỗi khi xóa dữ liệu");
+    } else {
+        toast.success(res?.message || "Thành công");
+        await loadData();
+    }
 };
 
 const openValues = (item) => {
@@ -259,8 +264,9 @@ onMounted(() => {
 <template>
     <div class="admin-page-header">
         <div style="display: flex; align-items: center; gap: 16px;">
-            <BaseButton @click="goBack" customClass="btn btn-outline" customText="Quay lại"
-                style="padding: 8px 16px;" />
+            <button @click="goBack" class="btn-back" title="Quay lại">
+                <i class="ph ph-arrow-left"></i>
+            </button>
             <div>
                 <h2 class="admin-page-title">Biến thể: <span style="color: var(--primary);">{{ product?.name }}</span>
                 </h2>
@@ -384,6 +390,34 @@ onMounted(() => {
 <style scoped>
 .admin-page-header {
     margin-bottom: 24px;
+}
+
+.btn-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: white;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.btn-back:hover {
+    background: var(--primary, #3b82f6);
+    color: white;
+    border-color: var(--primary, #3b82f6);
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.btn-back i {
+    font-size: 20px;
 }
 
 .admin-page-title {

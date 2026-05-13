@@ -1,4 +1,6 @@
 <script setup>
+import { watch } from 'vue';
+import { useSlug } from '@/composables/useSlug';
 import BaseModal from '@/components/base/BaseModal.vue';
 import BaseForm from '@/components/base/BaseForm.vue';
 import BaseInputText from '@/components/base/BaseInputText.vue';
@@ -23,6 +25,19 @@ const emit = defineEmits(["close", "submit", "handleImageChange"])
 const isShow = defineModel("isShow")
 const dataForm = defineModel("dataForm")
 const loadingSubmit = defineModel("loadingSubmit")
+
+const { generateSlug } = useSlug()
+
+watch(
+    () => dataForm.value.name,
+    (newName) => {
+        if (newName) {
+            dataForm.value.slug = generateSlug(newName)
+        } else if (!newName) {
+            dataForm.value.slug = ''
+        }
+    }
+)
 
 </script>
 
