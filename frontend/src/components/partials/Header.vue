@@ -5,10 +5,12 @@ import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useTokenStore } from '@/stores/token';
 import { useWishlistStore } from '@/stores/wishlist';
+import { useCartStore } from '@/stores/cart';
 import { useNotify } from '@/composables/useNotify';
 
 const tokenStore = useTokenStore()
 const wishlistStore = useWishlistStore()
+const cartStore = useCartStore()
 const toast = useNotify()
 
 const isAuth = computed(() => tokenStore.token)
@@ -41,6 +43,10 @@ const closeMobileMenu = () => {
 onMounted(async () => {
     await tokenStore.getUser()
     if (tokenStore.token) {
+        await Promise.all([
+            wishlistStore.ids(),
+            cartStore.index()
+        ])
         await wishlistStore.ids()
     }
 })
@@ -67,10 +73,12 @@ onMounted(async () => {
             <div class="nav-actions">
                 <div class="action-icons">
                     <i class="ph ph-magnifying-glass" title="Tìm kiếm"></i>
-                    <div class="cart-icon-wrapper">
+                    <router-link to="/cart" class="cart-icon-wrapper">
                         <i class="ph ph-shopping-cart" title="Giỏ hàng"></i>
-                        <span class="cart-badge">3</span>
-                    </div>
+                        <span class="cart-badge" v-if="cartStore.summary.total_items > 0">
+                            {{ cartStore.summary.total_items }}
+                        </span>
+                    </router-link>
                 </div>
 
                 <div class="divider hide-on-tablet"></div>

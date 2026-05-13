@@ -83,6 +83,7 @@ const router = createRouter({
         { path: '', name: 'Home', component: () => import('@/views/Home.vue') },
         { path: 'shop', name: 'Shop', component: () => import('@/views/Shop.vue') },
         { path: 'products/:slug', name: 'ProductDetail', component: () => import('@/views/Detail.vue') },
+        { path: 'cart', name: 'Cart', component: () => import('@/views/CartView.vue'), meta: { requiresAuth: true } },
         { path: 'contact', name: 'Contact', component: () => import('@/views/Contact.vue') },
         { path: 'about', name: 'About', component: () => import('@/views/About.vue') },
       ],
