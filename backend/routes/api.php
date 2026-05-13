@@ -73,9 +73,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(CategoryController::class)->group(function () {
       Route::get('categories', 'index');
       Route::post('categories', 'store');
-      Route::get('categories/{id}', 'show');
-      Route::post('categories/{id}', 'update');
-      Route::delete('categories/{id}', 'destroy');
+      Route::get('categories/{category}', 'show');
+      Route::post('categories/{category}', 'update');
+      Route::delete('categories/{category}', 'destroy');
     });
 
     Route::controller(ProductController::class)->group(function () {
