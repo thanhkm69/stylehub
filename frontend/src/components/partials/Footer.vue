@@ -32,7 +32,7 @@
                         <a href="#">Chính sách đổi trả</a>
                         <a href="#">Câu hỏi thường gặp</a>
                         <a href="#">Kiểm tra đơn hàng</a>
-                        <a href="#">Liên hệ</a>
+                        <router-link to="/contact">Liên hệ</router-link>
                     </div>
                 </div>
 

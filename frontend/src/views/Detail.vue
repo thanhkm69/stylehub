@@ -2,13 +2,18 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductPublicStore } from '@/stores/productPublic'
+import { useCartStore } from '@/stores/cart'
+import { useNotify } from '@/composables/useNotify'
 import { API_URL_IMAGE } from '@/config/env'
 import ProductCard from '@/components/features/products/ProductCard.vue'
 import WishlistButton from '@/components/features/products/WishlistButton.vue'
 import BaseLoading from '@/components/base/BaseLoading.vue'
+import BaseButton from '@/components/base/BaseButton.vue'
 
 const route = useRoute()
 const store = useProductPublicStore()
+const cartStore = useCartStore()
+const toast = useNotify()
 
 // ── Image Gallery ──
 const selectedImageIndex = ref(0)
@@ -99,11 +104,21 @@ const selectAttribute = (attrId, valueSlug) => {
   selectedAttributes.value[attrId] = valueSlug
 }
 
-const increaseQty = () => { quantity.value++ }
+const increaseQty = () => { 
+  if (displayStock.value !== null && quantity.value >= displayStock.value) {
+    toast.warning(`Chỉ còn ${displayStock.value} sản phẩm trong kho`)
+    return
+  }
+  quantity.value++ 
+}
 const decreaseQty = () => { if (quantity.value > 1) quantity.value-- }
 const handleQtyBlur = () => {
   if (typeof quantity.value !== 'number' || isNaN(quantity.value) || quantity.value < 1) {
     quantity.value = 1
+  }
+  if (displayStock.value !== null && quantity.value > displayStock.value) {
+    toast.warning(`Chỉ còn ${displayStock.value} sản phẩm trong kho`)
+    quantity.value = displayStock.value
   }
 }
 
@@ -113,6 +128,28 @@ const formatPrice = (price) => new Intl.NumberFormat('vi-VN').format(price) + '�
 const formatDate = (dateStr) => {
   if (!dateStr) return ''
   return new Date(dateStr).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+// ── Cart ──
+const handleAddToCart = async () => {
+  // 1. If has variants, must select all attributes
+  if (groupedAttributes.value.length > 0 && !matchedVariant.value) {
+    toast.warning('Vui lòng chọn đầy đủ các tùy chọn sản phẩm')
+    return
+  }
+
+  const payload = {
+    product_id: store.product.id,
+    product_variant_id: matchedVariant.value ? matchedVariant.value.id : null,
+    quantity: quantity.value
+  }
+
+  const res = await cartStore.store(payload)
+  if (res.success) {
+    toast.success('Đã thêm vào giỏ hàng thành công')
+  } else {
+    toast.error(res.message)
+  }
 }
 
 // ── Fetch ──
@@ -253,9 +290,15 @@ watch(() => route.params.slug, (newSlug) => {
                 <i class="ph ph-plus"></i>
               </button>
             </div>
-            <button class="btn btn-primary btn-add-cart">
-              <i class="ph ph-shopping-cart-simple"></i> Thêm vào giỏ hàng
-            </button>
+            <BaseButton 
+              variant="primary"
+              class="btn-add-cart" 
+              @click="handleAddToCart"
+              :loading="cartStore.loading"
+              :disabled="displayStock !== null && displayStock <= 0"
+            >
+              <i class="ph ph-shopping-cart-simple"></i> {{ displayStock !== null && displayStock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng' }}
+            </BaseButton>
           </div>
 
           <!-- Description -->
