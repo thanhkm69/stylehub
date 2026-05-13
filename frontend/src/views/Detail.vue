@@ -15,6 +15,9 @@ const store = useProductPublicStore()
 const cartStore = useCartStore()
 const toast = useNotify()
 
+const route = useRoute()
+const store = useProductPublicStore()
+
 // ── Image Gallery ──
 const selectedImageIndex = ref(0)
 
@@ -111,6 +114,7 @@ const increaseQty = () => {
   }
   quantity.value++ 
 }
+const increaseQty = () => { quantity.value++ }
 const decreaseQty = () => { if (quantity.value > 1) quantity.value-- }
 const handleQtyBlur = () => {
   if (typeof quantity.value !== 'number' || isNaN(quantity.value) || quantity.value < 1) {
@@ -299,6 +303,9 @@ watch(() => route.params.slug, (newSlug) => {
             >
               <i class="ph ph-shopping-cart-simple"></i> {{ displayStock !== null && displayStock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng' }}
             </BaseButton>
+            <button class="btn btn-primary btn-add-cart">
+              <i class="ph ph-shopping-cart-simple"></i> Thêm vào giỏ hàng
+            </button>
           </div>
 
           <!-- Description -->
