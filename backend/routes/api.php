@@ -41,6 +41,8 @@ Route::post('forgot', [AuthController::class, 'sendPasswordResetOtp']);
 Route::post('verify-otp', [AuthController::class, 'verifyPasswordResetOtp']);
 Route::post('reset', [AuthController::class, 'resetPassword']);
 
+// Public routes for public data
+Route::get('coupons/active', [CouponController::class, 'getActive']);
 
 Route::get('home', [ProductPublicController::class, 'home']);
 Route::get('shop', [ProductPublicController::class, 'index']);
