@@ -35,9 +35,16 @@ const router = createRouter({
           path: 'users',
           name: 'Users',
           component: () => import('@/views/admin/Users.vue'),
+        },
+        {
           path: 'coupons',
           name: 'Coupons',
           component: () => import('@/views/admin/Coupons.vue'),
+        },
+        {
+          path: 'contacts',
+          name: 'Contacts',
+          component: () => import('@/views/admin/Contacts.vue'),
         },
         {
           path: 'flash-sales',
@@ -69,6 +76,7 @@ const router = createRouter({
         { path: 'callback', name: 'Callback', component: () => import('@/views/Callback.vue') },
         { path: '', name: 'Home', component: () => import('@/views/Home.vue') },
         { path: 'shop', name: 'Shop', component: () => import('@/views/Shop.vue') },
+        { path: 'contact', name: 'Contact', component: () => import('@/views/Contact.vue') },
       ],
     },
   ],
