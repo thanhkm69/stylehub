@@ -1,4 +1,7 @@
-<!-- ... existing code ... -->
+<script setup>
+import HomeCoupons from '@/components/home/HomeCoupons.vue'
+</script>
+
 <template>
     <main>
         <!-- Hero Section -->
@@ -14,6 +17,9 @@
                 <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop" alt="Thời trang StyleHub" class="hero-image">
             </div>
         </section>
+
+        <!-- Featured Coupons -->
+        <HomeCoupons />
 
         <!-- Featured Products -->
         <section class="products-section container">
