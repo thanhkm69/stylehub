@@ -19,9 +19,11 @@ use App\Http\Controllers\FlashSaleController;
 use App\Http\Controllers\FlashSaleItemController;
 use App\Http\Controllers\ComboController;
 use App\Http\Controllers\ComboItemController;
+use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
+Route::post('contacts', [ContactController::class, 'store']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
@@ -160,6 +162,13 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('combo-items/{comboItem}', 'show');
       Route::put('combo-items/{comboItem}', 'update');
       Route::delete('combo-items/{comboItem}', 'destroy');
+    });
+
+    Route::controller(ContactController::class)->group(function () {
+      Route::get('contacts', 'index');
+      Route::get('contacts/{contact}', 'show');
+      Route::put('contacts/{contact}', 'update');
+      Route::delete('contacts/{contact}', 'destroy');
     });
   });
 });

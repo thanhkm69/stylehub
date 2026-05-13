@@ -25,3 +25,12 @@ app.use(createPinia())
 app.use(router)
 
 app.mount('#app')
+
+if (typeof window !== 'undefined' && window.AOS) {
+  window.AOS.init({
+    once: true,
+    duration: 900,
+    offset: 90,
+    easing: 'ease-out-cubic',
+  })
+}

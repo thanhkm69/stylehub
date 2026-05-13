@@ -59,7 +59,7 @@ onMounted(async () => {
                 <router-link to="/" exact-active-class="active">Trang chủ</router-link>
                 <router-link to="/shop" active-class="active">Sản phẩm</router-link>
                 <a href="#">Bộ sưu tập</a>
-                <a href="#">Về chúng tôi</a>
+                <router-link to="/about" active-class="active">Về chúng tôi</router-link>
                 <a href="#">Blog</a>
             </nav>
 
@@ -165,9 +165,9 @@ onMounted(async () => {
                         <a href="#" class="mobile-nav-item">
                             <i class="ph-bold ph-sketch-logo"></i> <span>Bộ sưu tập</span>
                         </a>
-                        <a href="#" class="mobile-nav-item">
+                        <RouterLink to="/about" class="mobile-nav-item" @click="closeMobileMenu">
                             <i class="ph-bold ph-info"></i> <span>Về chúng tôi</span>
-                        </a>
+                        </RouterLink>
                         <a href="#" class="mobile-nav-item">
                             <i class="ph-bold ph-newspaper"></i> <span>Blog</span>
                         </a>
