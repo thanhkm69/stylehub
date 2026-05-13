@@ -27,4 +27,14 @@ class Category extends Model
     {
         return $this->childrens()->with('childrensRecursive');
     }
+
+    /**
+     * Active child categories for public API.
+     */
+    public function children()
+    {
+        return $this->hasMany(Category::class, 'parent_id')
+            ->where('status', 1)
+            ->orderBy('display', 'asc');
+    }
 }

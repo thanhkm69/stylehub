@@ -5,6 +5,7 @@ use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductPublicController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
@@ -38,11 +39,22 @@ Route::post('verify-otp', [AuthController::class, 'verifyPasswordResetOtp']);
 Route::post('reset', [AuthController::class, 'resetPassword']);
 
 
+Route::get('home', [ProductPublicController::class, 'home']);
+Route::get('shop', [ProductPublicController::class, 'index']);
+Route::get('shop/{product:slug}', [ProductPublicController::class, 'show']);
+
+
 Route::middleware('auth:sanctum')->group(function () {
   Route::post('logout', [AuthController::class, 'logout']);
   Route::get('get-user', [AuthController::class, 'getUser']);
 
   Route::post('change-password', [AuthController::class, 'changePassword']);
+
+  Route::get('wishlist', [\App\Http\Controllers\WishlistController::class, 'index']);
+  Route::get('wishlist/ids', [\App\Http\Controllers\WishlistController::class, 'ids']);
+  Route::post('wishlist', [\App\Http\Controllers\WishlistController::class, 'store']);
+  Route::delete('wishlist/{wishlist}', [\App\Http\Controllers\WishlistController::class, 'destroy']);
+  Route::post('wishlist/toggle', [\App\Http\Controllers\WishlistController::class, 'toggle']);
 
   Route::middleware('abilities:Admin')->group(function () {
 
