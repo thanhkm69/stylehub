@@ -5,6 +5,7 @@ use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\AttributeValueController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductPublicController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GithubController;
 use App\Http\Controllers\GoogleController;
@@ -18,9 +19,12 @@ use App\Http\Controllers\FlashSaleController;
 use App\Http\Controllers\FlashSaleItemController;
 use App\Http\Controllers\ComboController;
 use App\Http\Controllers\ComboItemController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
+Route::post('contacts', [ContactController::class, 'store']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
@@ -37,12 +41,32 @@ Route::post('forgot', [AuthController::class, 'sendPasswordResetOtp']);
 Route::post('verify-otp', [AuthController::class, 'verifyPasswordResetOtp']);
 Route::post('reset', [AuthController::class, 'resetPassword']);
 
+// Public routes for public data
+Route::get('coupons/active', [CouponController::class, 'getActive']);
+
+Route::get('home', [ProductPublicController::class, 'home']);
+Route::get('shop', [ProductPublicController::class, 'index']);
+Route::get('shop/{product:slug}', [ProductPublicController::class, 'show']);
+
 
 Route::middleware('auth:sanctum')->group(function () {
   Route::post('logout', [AuthController::class, 'logout']);
   Route::get('get-user', [AuthController::class, 'getUser']);
 
   Route::post('change-password', [AuthController::class, 'changePassword']);
+
+  Route::get('wishlist', [\App\Http\Controllers\WishlistController::class, 'index']);
+  Route::get('wishlist/ids', [\App\Http\Controllers\WishlistController::class, 'ids']);
+  Route::post('wishlist', [\App\Http\Controllers\WishlistController::class, 'store']);
+  Route::delete('wishlist/{wishlist}', [\App\Http\Controllers\WishlistController::class, 'destroy']);
+  Route::post('wishlist/toggle', [\App\Http\Controllers\WishlistController::class, 'toggle']);
+
+  // Cart Routes
+  Route::get('cart', [CartController::class, 'index']);
+  Route::post('cart', [CartController::class, 'store']);
+  Route::post('cart/{cart}', [CartController::class, 'update']);
+  Route::delete('cart/clear', [CartController::class, 'clear']);
+  Route::delete('cart/{cart}', [CartController::class, 'destroy']);
 
   Route::middleware('abilities:Admin')->group(function () {
 
@@ -148,6 +172,13 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('combo-items/{comboItem}', 'show');
       Route::put('combo-items/{comboItem}', 'update');
       Route::delete('combo-items/{comboItem}', 'destroy');
+    });
+
+    Route::controller(ContactController::class)->group(function () {
+      Route::get('contacts', 'index');
+      Route::get('contacts/{contact}', 'show');
+      Route::put('contacts/{contact}', 'update');
+      Route::delete('contacts/{contact}', 'destroy');
     });
   });
 });

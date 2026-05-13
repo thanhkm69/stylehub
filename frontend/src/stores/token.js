@@ -21,6 +21,8 @@ export const useTokenStore = defineStore('token', () => {
       )
       token.value = null
       user.value = null
+      localStorage.removeItem('cart_items')
+      localStorage.removeItem('cart_summary')
       return res.data
     } catch (error) {
       return error.response.data

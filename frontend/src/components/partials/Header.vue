@@ -4,9 +4,13 @@ import BaseSpinner from '@/components/base/BaseSpinner.vue';
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useTokenStore } from '@/stores/token';
+import { useWishlistStore } from '@/stores/wishlist';
+import { useCartStore } from '@/stores/cart';
 import { useNotify } from '@/composables/useNotify';
 
 const tokenStore = useTokenStore()
+const wishlistStore = useWishlistStore()
+const cartStore = useCartStore()
 const toast = useNotify()
 
 const isAuth = computed(() => tokenStore.token)
@@ -38,6 +42,13 @@ const closeMobileMenu = () => {
 
 onMounted(async () => {
     await tokenStore.getUser()
+    if (tokenStore.token) {
+        await Promise.all([
+            wishlistStore.ids(),
+            cartStore.index()
+        ])
+        await wishlistStore.ids()
+    }
 })
 </script>
 
@@ -54,7 +65,7 @@ onMounted(async () => {
                 <router-link to="/" exact-active-class="active">Trang chủ</router-link>
                 <router-link to="/shop" active-class="active">Sản phẩm</router-link>
                 <a href="#">Bộ sưu tập</a>
-                <a href="#">Về chúng tôi</a>
+                <router-link to="/about" active-class="active">Về chúng tôi</router-link>
                 <a href="#">Blog</a>
             </nav>
 
@@ -62,10 +73,12 @@ onMounted(async () => {
             <div class="nav-actions">
                 <div class="action-icons">
                     <i class="ph ph-magnifying-glass" title="Tìm kiếm"></i>
-                    <div class="cart-icon-wrapper">
+                    <router-link to="/cart" class="cart-icon-wrapper">
                         <i class="ph ph-shopping-cart" title="Giỏ hàng"></i>
-                        <span class="cart-badge">3</span>
-                    </div>
+                        <span class="cart-badge" v-if="cartStore.summary.total_items > 0">
+                            {{ cartStore.summary.total_items }}
+                        </span>
+                    </router-link>
                 </div>
 
                 <div class="divider hide-on-tablet"></div>
@@ -160,9 +173,9 @@ onMounted(async () => {
                         <a href="#" class="mobile-nav-item">
                             <i class="ph-bold ph-sketch-logo"></i> <span>Bộ sưu tập</span>
                         </a>
-                        <a href="#" class="mobile-nav-item">
+                        <RouterLink to="/about" class="mobile-nav-item" @click="closeMobileMenu">
                             <i class="ph-bold ph-info"></i> <span>Về chúng tôi</span>
-                        </a>
+                        </RouterLink>
                         <a href="#" class="mobile-nav-item">
                             <i class="ph-bold ph-newspaper"></i> <span>Blog</span>
                         </a>
