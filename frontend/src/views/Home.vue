@@ -232,7 +232,7 @@ import HomeCoupons from '@/components/home/HomeCoupons.vue'
     font-weight: 600;
     margin-bottom: 8px;
     display: -webkit-box;
-    -webkit-line-clamp: 1;
+    /* -webkit-line-clamp: 1; */
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
