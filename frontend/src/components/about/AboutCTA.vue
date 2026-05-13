@@ -7,7 +7,7 @@
           <h2 class="mt-3">Lấy cảm hứng từ phong cách hiện đại, cùng tạo nên trải nghiệm khác biệt.</h2>
         </div>
         <div class="d-flex flex-column flex-sm-row gap-3">
-          <router-link to="/contact" class="btn btn-light btn-lg text-uppercase">Liên hệ ngay</router-link>
+          <router-link to="/contact" class="btn btn-light btn-lg text-uppercase">Liên hệ ngay với chúng tôi</router-link>
           <router-link to="/shop" class="btn btn-outline-light btn-lg text-uppercase">Khám phá bộ sưu tập</router-link>
         </div>
       </div>
