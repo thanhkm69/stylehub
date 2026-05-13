@@ -68,6 +68,7 @@ const router = createRouter({
           component: UserLayout,
           children: [
             { path: '', name: 'Profile', component: () => import('@/views/user/Profile.vue') },
+            { path: 'password', name: 'ChangePassword', component: () => import('@/views/user/ChangePassword.vue') },
           ],
         },
         { path: 'register', name: 'Register', component: () => import('@/views/Register.vue') },

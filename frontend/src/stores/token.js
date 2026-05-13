@@ -9,6 +9,12 @@ export const useTokenStore = defineStore('token', () => {
   const user = ref(null)
 
   const logout = async () => {
+    if (!token.value) {
+      token.value = null
+      user.value = null
+      return { success: false, message: 'Không có token để đăng xuất' }
+    }
+
     try {
       const res = await axios.post(
         `${API_URL}/logout`,
@@ -23,11 +29,18 @@ export const useTokenStore = defineStore('token', () => {
       user.value = null
       return res.data
     } catch (error) {
-      return error.response.data
+      token.value = null
+      user.value = null
+      return error.response?.data || { success: false, message: 'Lỗi khi đăng xuất' }
     }
   }
 
   const getUser = async () => {
+    if (!token.value) {
+      user.value = null
+      return
+    }
+
     try {
       const res = await axios.get(`${API_URL}/get-user`, {
         headers: {
