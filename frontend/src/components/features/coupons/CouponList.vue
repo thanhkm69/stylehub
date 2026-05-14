@@ -7,6 +7,10 @@ import { useNotify } from '@/composables/useNotify'
 import CouponTable from './CouponTable.vue'
 import CouponForm from './CouponForm.vue'
 import BaseAdmin from '@/components/base/BaseAdmin.vue'
+const props = defineProps({
+    title: String,
+    description: String
+})
 
 // ================= STORE =================
 const store = useCouponStore()
@@ -29,8 +33,8 @@ const errors = ref({})
 const params = ref({
     search: '',
     sort: 'created_at_desc',
-    status: null,
-    discount_type: null,
+    status: '',
+    discount_type: '',
     limit: 15,
     page: 1
 })
@@ -119,9 +123,9 @@ const openCreateForm = () => {
 const validate = () => {
     errors.value = {}
 
-    if (!dataForm.value.code?.trim())        errors.value.code = 'Mã giảm giá không được để trống'
-    if (!dataForm.value.name?.trim())        errors.value.name = 'Tên không được để trống'
-    if (!dataForm.value.discount_type)       errors.value.discount_type = 'Loại giảm giá không được để trống'
+    if (!dataForm.value.code?.trim()) errors.value.code = 'Mã giảm giá không được để trống'
+    if (!dataForm.value.name?.trim()) errors.value.name = 'Tên không được để trống'
+    if (!dataForm.value.discount_type) errors.value.discount_type = 'Loại giảm giá không được để trống'
 
     const val = parseFloat(dataForm.value.discount_value)
     if (isNaN(val) || val < 1) {
@@ -163,17 +167,17 @@ const submit = async () => {
         toast.error(result?.message || 'Lỗi khi lưu dữ liệu')
         if (result?.errors) {
             errors.value = {
-                code:                result.errors.code?.[0] ?? '',
-                name:                result.errors.name?.[0] ?? '',
-                discount_type:       result.errors.discount_type?.[0] ?? '',
-                discount_value:      result.errors.discount_value?.[0] ?? '',
+                code: result.errors.code?.[0] ?? '',
+                name: result.errors.name?.[0] ?? '',
+                discount_type: result.errors.discount_type?.[0] ?? '',
+                discount_value: result.errors.discount_value?.[0] ?? '',
                 max_discount_amount: result.errors.max_discount_amount?.[0] ?? '',
-                min_order_value:     result.errors.min_order_value?.[0] ?? '',
-                usage_limit:         result.errors.usage_limit?.[0] ?? '',
-                usage_limit_per_user:result.errors.usage_limit_per_user?.[0] ?? '',
-                starts_at:           result.errors.starts_at?.[0] ?? '',
-                expires_at:          result.errors.expires_at?.[0] ?? '',
-                status:              result.errors.status?.[0] ?? '',
+                min_order_value: result.errors.min_order_value?.[0] ?? '',
+                usage_limit: result.errors.usage_limit?.[0] ?? '',
+                usage_limit_per_user: result.errors.usage_limit_per_user?.[0] ?? '',
+                starts_at: result.errors.starts_at?.[0] ?? '',
+                expires_at: result.errors.expires_at?.[0] ?? '',
+                status: result.errors.status?.[0] ?? '',
             }
         }
     } else {
@@ -236,17 +240,16 @@ onMounted(() => {
 
 <template>
     <!-- List -->
-    <BaseAdmin :total="totalCoupons" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
-        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="openCreateForm"
-        @changePage="changePage">
+    <BaseAdmin :title="props.title" :description="props.description" :total="totalCoupons" :totalPages="totalPages"
+        :currentPage="params.page" v-model:params="params" :sortMap="sortMap" :filterMap="filterMap"
+        :limitMap="limitMap" @search="search" @open="openCreateForm" @changePage="changePage">
         <template #table>
-            <CouponTable :params="params" :loadingData="loadingData" :data="coupons"
-                @update="update" @destroy="destroy" />
+            <CouponTable :params="params" :loadingData="loadingData" :data="coupons" @update="update"
+                @destroy="destroy" />
         </template>
     </BaseAdmin>
 
     <!-- Form -->
     <CouponForm v-model:loadingSubmit="loadingSubmit" v-model:dataForm="dataForm" v-model:isShow="isShow"
-        :errors="errors" :statusMap="statusMap" :discountTypes="discountTypes"
-        @submit="submit" @close="closeForm" />
+        :errors="errors" :statusMap="statusMap" :discountTypes="discountTypes" @submit="submit" @close="closeForm" />
 </template>

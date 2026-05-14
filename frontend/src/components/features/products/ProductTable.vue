@@ -31,14 +31,14 @@ const emit = defineEmits(["show", "update", "destroy", "openImages", "openVarian
             <tbody>
                 <!-- Loading -->
                 <tr v-if="loadingData">
-                    <td colspan="7" class="text-center" style="padding: 32px 0;">
+                    <td colspan="8" class="text-center" style="padding: 32px 0;">
                         <BaseLoading />
                     </td>
                 </tr>
 
                 <!-- Không có dữ liệu -->
                 <tr v-else-if="!data || data.length === 0">
-                    <td colspan="7" class="text-center" style="padding: 32px 0; color: var(--text-muted);">
+                    <td colspan="8" class="text-center" style="padding: 32px 0; color: var(--text-muted);">
                         Không có dữ liệu
                     </td>
                 </tr>

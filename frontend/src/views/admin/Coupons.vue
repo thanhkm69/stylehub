@@ -4,7 +4,7 @@ import CouponList from '@/components/features/coupons/CouponList.vue'
 
 <template>
   <div class="admin-coupons-page">
-    <CouponList />
+    <CouponList title="Quản lý Mã Giảm Giá" description="Tạo và quản lý các mã giảm giá." />
   </div>
 </template>
 

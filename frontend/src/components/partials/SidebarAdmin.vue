@@ -11,8 +11,8 @@ const menuItems = [
     { name: 'Mã giảm giá', path: '/admin/coupons', icon: 'ph-ticket' },
     { name: 'Flash Sale', path: '/admin/flash-sales', icon: 'ph-lightning' },
     { name: 'Combo', path: '/admin/combos', icon: 'ph-stack' },
-    // { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
-    // { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
+    { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
+    { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
 
 ];
 

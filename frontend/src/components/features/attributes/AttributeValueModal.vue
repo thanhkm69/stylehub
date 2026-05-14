@@ -5,7 +5,7 @@ import BaseForm from '@/components/base/BaseForm.vue';
 import BaseInputText from '@/components/base/BaseInputText.vue';
 import BaseInputSelect from '@/components/base/BaseInputSelect.vue';
 import BaseButton from '@/components/base/BaseButton.vue';
-import BaseSpinner from '@/components/base/BaseSpinner.vue';
+import BaseLoading from '@/components/base/BaseLoading.vue';
 import { useAttributeValueStore } from '@/stores/attributeValue';
 import { swalConfirmDelete } from '@/composables/useSwal';
 import { useNotify } from '@/composables/useNotify';
@@ -158,8 +158,8 @@ watch(() => isShow.value, (newVal) => {
                         </thead>
                         <tbody>
                             <tr v-if="loadingData">
-                                <td colspan="5" class="text-center" style="padding: 48px;">
-                                    <BaseSpinner size="lg" label="Đang tải dữ liệu..." />
+                                <td colspan="5" class="text-center" style="padding: 16px;">
+                                    <BaseLoading />
                                 </td>
                             </tr>
                             <tr v-else-if="values.length === 0">

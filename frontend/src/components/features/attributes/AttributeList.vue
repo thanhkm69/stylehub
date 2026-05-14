@@ -8,7 +8,10 @@ import AttributeForm from './AttributeForm.vue'
 import AttributeValueModal from './AttributeValueModal.vue'
 import BaseAdmin from '@/components/base/BaseAdmin.vue'
 import { useNotify } from '@/composables/useNotify'
-
+const props = defineProps({
+    title: String,
+    description: String
+})
 // ================= STORE =================
 const store = useAttributeStore()
 
@@ -32,8 +35,8 @@ const errors = ref({})
 const params = ref({
     search: '',
     sort: 'created_at_desc',
-    status: null,
-    limit: 5,
+    status: '',
+    limit: 15,
     page: 1
 })
 
@@ -58,10 +61,10 @@ const filterMap = [
 ]
 
 const limitMap = [
-    { id: 5, name: '5' },
-    { id: 10, name: '10' },
-    { id: 20, name: '20' },
+    { id: 15, name: '15' },
+    { id: 30, name: '30' },
     { id: 50, name: '50' },
+    { id: 100, name: '100' },
 ]
 
 const statusMap = [
@@ -201,6 +204,11 @@ const handleValuesChanged = (type) => {
     }
 }
 
+const openCreateForm = () => {
+    resetForm()
+    isShow.value = true
+}
+
 const search = () => {
     params.value.page = 1
     loadData()
@@ -223,10 +231,9 @@ onMounted(loadData)
 
 <template>
 
-    <!-- List -->
-    <BaseAdmin :total="totalAttributes" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
-        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="isShow = true"
-        @changePage="changePage">
+    <BaseAdmin :title="props.title" :description="props.description" :total="totalAttributes" :totalPages="totalPages"
+        :currentPage="params.page" v-model:params="params" :sortMap="sortMap" :filterMap="filterMap"
+        :limitMap="limitMap" @search="search" @open="openCreateForm" @changePage="changePage">
         <template #table>
             <AttributeTable :params="params" :loadingData="loadingData" :data="attributes" @update="update"
                 @destroy="destroy" @show="show" @openValues="openValues" />
@@ -238,6 +245,6 @@ onMounted(loadData)
         :errors="errors" :statusMap="statusMap" @submit="submit" @close="closeForm" />
 
     <!-- Attribute Values Modal -->
-    <AttributeValueModal v-model:isShow="isShowValuesModal" :attribute="selectedAttribute" @valuesChanged="handleValuesChanged"
-        @close="isShowValuesModal = false" />
+    <AttributeValueModal v-model:isShow="isShowValuesModal" :attribute="selectedAttribute"
+        @valuesChanged="handleValuesChanged" @close="isShowValuesModal = false" />
 </template>

@@ -56,6 +56,11 @@ const router = createRouter({
           name: 'Combos',
           component: () => import('@/views/admin/Combos.vue'),
         },
+        {
+          path: 'orders',
+          name: 'Orders',
+          component: () => import('@/views/admin/Orders.vue'),
+        },
       ],
     },
 
@@ -74,6 +79,18 @@ const router = createRouter({
               component: () => import('@/views/user/WishlistView.vue'),
               meta: { requiresAuth: true }
             },
+            {
+              path: 'addresses',
+              name: 'UserAddresses',
+              component: () => import('@/views/user/Addresses.vue'),
+              meta: { requiresAuth: true }
+            },
+            {
+              path: 'orders',
+              name: 'UserOrders',
+              component: () => import('@/views/user/Orders.vue'),
+              meta: { requiresAuth: true }
+            },
           ],
         },
         { path: 'register', name: 'Register', component: () => import('@/views/Register.vue') },
@@ -84,6 +101,8 @@ const router = createRouter({
         { path: 'shop', name: 'Shop', component: () => import('@/views/Shop.vue') },
         { path: 'products/:slug', name: 'ProductDetail', component: () => import('@/views/Detail.vue') },
         { path: 'cart', name: 'Cart', component: () => import('@/views/CartView.vue'), meta: { requiresAuth: true } },
+        { path: 'checkout', name: 'Checkout', component: () => import('@/views/Checkout.vue'), meta: { requiresAuth: true } },
+        { path: 'order-success/:code', name: 'OrderSuccess', component: () => import('@/views/OrderSuccess.vue'), meta: { requiresAuth: true } },
         { path: 'contact', name: 'Contact', component: () => import('@/views/Contact.vue') },
         { path: 'about', name: 'About', component: () => import('@/views/About.vue') },
       ],

@@ -140,8 +140,8 @@ watch(() => isShow.value, async (newVal) => {
                         </thead>
                         <tbody>
                             <tr v-if="loadingData">
-                                <td colspan="4" class="text-center" style="padding: 48px;">
-                                    <BaseSpinner size="lg" label="Đang tải dữ liệu..." />
+                                <td colspan="4" class="text-center" style="padding: 32px 0;">
+                                    <BaseLoading />
                                 </td>
                             </tr>
                             <tr v-else-if="values.length === 0">
@@ -187,8 +187,8 @@ watch(() => isShow.value, async (newVal) => {
                                 <BaseButton v-if="!loadingSubmit" customType="submit"
                                     :customText="isEdit ? 'Cập nhật' : 'Thêm'" :disabled="loadingSubmit"
                                     customClass="btn btn-primary" style="flex: 1;" />
-                                <div v-else style="flex: 1; display: flex; justify-content: center; padding: 8px 0;">
-                                    <BaseSpinner />
+                                <div v-else style="flex: 1; display: flex; justify-content: center; padding: 4px 0;">
+                                    <BaseLoading />
                                 </div>
                                 <BaseButton v-if="isEdit" @click="resetForm" customType="button" customText="Hủy"
                                     customClass="btn" style="background: var(--background); color: var(--text-main); border: 1px solid var(--border);" />
