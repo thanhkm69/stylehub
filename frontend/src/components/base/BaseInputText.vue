@@ -18,6 +18,10 @@ const props = defineProps({
         type: String,
         default: ""
     },
+    customType: {
+        type: String,
+        default: 'text'
+    },
     isRequired: {
         type: Boolean,
         default: false
@@ -34,7 +38,7 @@ const value = defineModel();
 <template>
     <div class="auth-form-group">
         <BaseInputLabel :customId="customId" :labelContent="labelContent" />
-        <input :required="isRequired" :placeholder="customPlaceholderInput" v-model="value" type="text" :id="customId"
+        <input :required="isRequired" :placeholder="customPlaceholderInput" v-model="value" :type="customType" :id="customId"
             :class="[customClassInput, error ? 'is-invalid' : '']">
         <BaseInputError :error="error" />
     </div>
