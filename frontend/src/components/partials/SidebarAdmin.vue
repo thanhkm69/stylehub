@@ -13,6 +13,8 @@ const menuItems = [
     { name: 'Combo', path: '/admin/combos', icon: 'ph-stack' },
     { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
     { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
+    { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
+    // { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
 
 ];
 

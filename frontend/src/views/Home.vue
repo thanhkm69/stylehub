@@ -4,6 +4,7 @@ import { useProductPublicStore } from '@/stores/productPublic'
 import { API_URL_IMAGE } from '@/config/env'
 import ProductCard from '@/components/features/products/ProductCard.vue'
 import BaseLoading from '@/components/base/BaseLoading.vue'
+import HomeCoupons from '@/components/home/HomeCoupons.vue'
 
 const store = useProductPublicStore()
 
@@ -27,6 +28,9 @@ onMounted(() => {
         <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop" alt="Thời trang StyleHub" class="hero-image">
       </div>
     </section>
+
+    <!-- Featured Coupons -->
+    <HomeCoupons />
 
     <!-- Categories Section -->
     <section v-if="store.homeData.categories?.length" class="categories-section container">
@@ -219,6 +223,15 @@ onMounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;
+}
+.product-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    /* -webkit-line-clamp: 1; */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .empty-state {

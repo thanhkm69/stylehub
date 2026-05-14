@@ -138,6 +138,32 @@ class CouponController extends Controller
     }
 
     /**
+     * Get active coupons for public display
+     */
+    public function getActive()
+    {
+        try {
+            // Lấy tất cả coupon có status = true, sắp xếp theo ngày tạo mới nhất
+            $coupons = Coupon::where('status', true)
+                ->orderBy('created_at', 'desc')
+                ->limit(6)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Lấy danh sách mã giảm giá thành công',
+                'data'    => CouponResource::collection($coupons),
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi: ' . $e->getMessage(),
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Coupon $coupon)

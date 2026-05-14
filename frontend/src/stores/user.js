@@ -100,6 +100,24 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const changePassword = async (formData) => {
+    try {
+      const payload = {
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+        newPassword_confirmation: formData.newPassword_confirmation,
+      }
+
+      const res = await axios.post(`${API_URL}/change-password`, payload, {
+        headers: getHeaders(),
+      })
+
+      return res.data
+    } catch (error) {
+      return error.response?.data || {}
+    }
+  }
+
   return {
     users,
     pagination,
@@ -108,5 +126,6 @@ export const useUserStore = defineStore('user', () => {
     show,
     update,
     destroy,
+    changePassword,
   }
 })

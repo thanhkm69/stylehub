@@ -106,9 +106,14 @@ const editValue = (item) => {
 const destroyValue = async (id) => {
     const result = await swalConfirmDelete('Xác nhận', 'Bạn có chắc xóa giá trị này không ?')
     if (!result.isConfirmed) return
-    await store.destroy(id)
-    await loadData()
-    emit('variantValuesChanged', 'delete')
+    const res = await store.destroy(id)
+    if (!res?.success) {
+        toast.error(res?.message || "Lỗi khi xóa dữ liệu");
+    } else {
+        toast.success(res?.message || "Thành công");
+        await loadData()
+        emit('variantValuesChanged', 'delete')
+    }
 }
 
 watch(() => isShow.value, async (newVal) => {

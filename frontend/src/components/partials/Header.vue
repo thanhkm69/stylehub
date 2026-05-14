@@ -47,6 +47,7 @@ onMounted(async () => {
             wishlistStore.ids(),
             cartStore.index()
         ])
+        await wishlistStore.ids()
     }
 })
 </script>

@@ -198,7 +198,7 @@ watch(() => isShow.value, (newVal) => {
                             <tr v-else v-for="(item, index) in values" :key="item.id">
                                 <td>{{ index + 1 }}</td>
                                 <td>
-                                    <img v-if="item.image" :src="`${API_URL_IMAGE}/${item.image}`" alt="preview" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
+                                    <img v-if="item.image" :src="item.image" alt="preview" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
                                 </td>
                                 <td><strong style="color: var(--text-main);">{{ item.alt }}</strong></td>
                                 <td>{{ item.display }}</td>

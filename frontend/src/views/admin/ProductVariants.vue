@@ -202,8 +202,13 @@ const editValue = (item) => {
 const destroyValue = async (id) => {
     const result = await swalConfirmDelete('Xác nhận', 'Bạn có chắc xóa biến thể này không ?');
     if (!result.isConfirmed) return;
-    await store.destroy(id);
-    await loadData();
+    const res = await store.destroy(id);
+    if (!res?.success) {
+        toast.error(res?.message || "Lỗi khi xóa dữ liệu");
+    } else {
+        toast.success(res?.message || "Thành công");
+        await loadData();
+    }
 };
 
 const openValues = (item) => {
@@ -352,6 +357,104 @@ onMounted(() => {
                                 @change="handleImageChange" />
                             <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
                         </div>
+    <div class="admin-page-header">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button @click="goBack" class="btn-back" title="Quay lại">
+                <i class="ph ph-arrow-left"></i>
+            </button>
+            <div>
+                <h2 class="admin-page-title">Biến thể: <span style="color: var(--primary);">{{ product?.name }}</span>
+                </h2>
+                <p class="admin-page-desc">Quản lý các biến thể của sản phẩm.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- BaseAdmin Wrap -->
+    <BaseAdmin :total="totalVariants" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
+        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="openCreateForm"
+        @changePage="changePage">
+        <template #table>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ảnh</th>
+                        <th>SKU</th>
+                        <th>Giá</th>
+                        <th>Tồn kho</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                        <th>Giá trị</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-if="loadingData">
+                        <td colspan="6" class="text-center" style="padding: 24px;">
+                            <BaseLoading />
+                        </td>
+                    </tr>
+                    <tr v-else-if="values.length === 0">
+                        <td colspan="6" class="text-center" style="padding: 24px; color: var(--text-muted);">
+                            Chưa có biến thể nào
+                        </td>
+                    </tr>
+                    <tr v-else v-for="item in values" :key="item.id">
+                        <td>
+                            <img v-if="item.image" :src="`${API_URL_IMAGE}/${item.image}`" alt="preview"
+                                style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
+                        </td>
+                        <td><strong style="color: var(--text-main);">{{ item.sku }}</strong></td>
+                        <td>{{ new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)
+                        }}</td>
+                        <td>
+                            <span :style="{ color: item.stock > 0 ? 'var(--text-main)' : 'var(--danger)' }">
+                                {{ item.stock > 0 ? item.stock : 'Hết hàng' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span :class="['badge-status', item.status ? 'badge-active' : 'badge-inactive']">
+                                {{ item.status ? 'Hiện' : 'Ẩn' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-group">
+                                <BaseButton @click="editValue(item)" customText="Sửa"
+                                    customClass="btn-action btn-edit" />
+                                <BaseButton @click="destroyValue(item.id)" customText="Xóa"
+                                    customClass="btn-action btn-delete" />
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-group">
+                                <BaseButton @click="openValues(item)" customText="Giá trị"
+                                    customClass="btn-action btn-attribute" />
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </template>
+    </BaseAdmin>
+
+    <!-- Modal Form Thêm/Sửa -->
+    <BaseModal @close="closeForm" :isShow="isShowFormModal" :title="isEdit ? 'Sửa biến thể' : 'Thêm biến thể mới'"
+        customWidth="600px">
+        <BaseForm @handleSubmit="submit">
+            <template #input>
+                <div class="image-upload-wrapper" style="margin-bottom: 16px;">
+                    <div v-if="dataForm.preview" class="image-preview-large">
+                        <img :src="dataForm.preview" alt="Preview" />
+                        <div class="preview-overlay">Xem trước</div>
+                    </div>
+                    <div v-else class="image-placeholder">
+                        <i class="ph ph-image-square"></i>
+                        <p>Chưa có ảnh</p>
+                    </div>
+
+                    <div class="upload-input-container">
+                        <BaseInputFile labelContent="" customId="image" :error="errors.image" customAccept="image/*"
+                            @change="handleImageChange" />
+                        <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
                     </div>
 
                     <BaseInputText labelContent="Mã SKU" customId="val_sku" v-model="dataForm.sku"
@@ -384,6 +487,34 @@ onMounted(() => {
 <style scoped>
 .admin-page-header {
     margin-bottom: 24px;
+}
+
+.btn-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color, #e2e8f0);
+    background: white;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.btn-back:hover {
+    background: var(--primary, #3b82f6);
+    color: white;
+    border-color: var(--primary, #3b82f6);
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.btn-back i {
+    font-size: 20px;
 }
 
 .admin-page-title {

@@ -44,6 +44,8 @@ Route::post('forgot', [AuthController::class, 'sendPasswordResetOtp']);
 Route::post('verify-otp', [AuthController::class, 'verifyPasswordResetOtp']);
 Route::post('reset', [AuthController::class, 'resetPassword']);
 
+// Public routes for public data
+Route::get('coupons/active', [CouponController::class, 'getActive']);
 
 Route::get('home', [ProductPublicController::class, 'home']);
 Route::get('shop', [ProductPublicController::class, 'index']);
@@ -126,9 +128,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(CategoryController::class)->group(function () {
       Route::get('categories', 'index');
       Route::post('categories', 'store');
-      Route::get('categories/{id}', 'show');
-      Route::post('categories/{id}', 'update');
-      Route::delete('categories/{id}', 'destroy');
+      Route::get('categories/{category}', 'show');
+      Route::post('categories/{category}', 'update');
+      Route::delete('categories/{category}', 'destroy');
     });
 
     Route::controller(ProductController::class)->group(function () {

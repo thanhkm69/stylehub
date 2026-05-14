@@ -17,7 +17,6 @@ const form = ref({
 
 const handleUpdate = () => {
     loading.value = true;
-    // Update logic here
     setTimeout(() => {
         loading.value = false;
     }, 1000);
@@ -134,6 +133,92 @@ const handleUpdate = () => {
     margin-top: 16px;
     display: flex;
     justify-content: flex-start;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+<style scoped>
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.content-header {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 24px;
+}
+
+.content-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+}
+
+.content-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.profile-form,
+.password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-hint {
+    font-size: 12px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.form-footer {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.password-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 28px;
+}
+
+.password-card-header {
+    margin-bottom: 24px;
+}
+
+.password-card-title {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.password-card-desc {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
 }
 
 @media (max-width: 768px) {

@@ -22,12 +22,8 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Category id passed as parameter in the URL. Since $this->route('category') might be just ID if route is bound implicitly, or the model if explicitly bound.
-        // Let's check CategoryController.php: it receives $id. So we use $this->route('id') or $this->route('category')?
-        // In CategoryController.php: public function update(Request $request, $id) -> so it receives 'id' in route.
-        // The parameter is $this->route('id') or similar depending on the route definition.
-        // Wait, route:list showed api/categories/{id}
-        $categoryId = $this->route('id') ?? $this->route('category');
+        $category = $this->route('category');
+        $categoryId = $category ? $category->id : null;
 
         return [
             'parent_id' => 'nullable|exists:categories,id',
