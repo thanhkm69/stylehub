@@ -21,6 +21,7 @@ use App\Http\Controllers\ComboController;
 use App\Http\Controllers\ComboItemController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\GHNController;
 use App\Http\Controllers\AddressController;
@@ -71,6 +72,8 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::get('get-user', [AuthController::class, 'getUser']);
 
   Route::post('change-password', [AuthController::class, 'changePassword']);
+  Route::get('profile', [ProfileController::class, 'me']);
+  Route::put('profile', [ProfileController::class, 'updateSelf']);
 
   Route::get('wishlist', [\App\Http\Controllers\WishlistController::class, 'index']);
   Route::get('wishlist/ids', [\App\Http\Controllers\WishlistController::class, 'ids']);
@@ -211,6 +214,19 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::delete('combo-items/{comboItem}', 'destroy');
     });
 
+    Route::controller(ProfileController::class)->group(function () {
+      Route::get('profiles', 'index');
+      Route::post('profiles', 'store');
+      Route::get('profiles/{profile}', 'show');
+      Route::put('profiles/{profile}', 'update');
+      Route::delete('profiles/{profile}', 'destroy');
+    });
+
+    Route::controller(ContactController::class)->group(function () {
+      Route::get('contacts', 'index');
+      Route::get('contacts/{contact}', 'show');
+      Route::put('contacts/{contact}', 'update');
+      Route::delete('contacts/{contact}', 'destroy');
       Route::controller(ContactController::class)->group(function () {
         Route::get('contacts', 'index');
         Route::get('contacts/{contact}', 'show');

@@ -1,82 +1,195 @@
 <script setup>
-import { useTokenStore } from '@/stores/token';
-import { computed, ref } from 'vue';
-import BaseButton from '@/components/base/BaseButton.vue';
-import BaseInputText from '@/components/base/BaseInputText.vue';
+import { computed, ref, onMounted, watch } from 'vue'
+import { useTokenStore } from '@/stores/token'
+import { useProfileStore } from '@/stores/profile'
+import { useNotify } from '@/composables/useNotify'
+import BaseButton from '@/components/base/BaseButton.vue'
+import BaseInputText from '@/components/base/BaseInputText.vue'
+import BaseInputSelect from '@/components/base/BaseInputSelect.vue'
+import BaseInputTextarea from '@/components/base/BaseInputTextarea.vue'
 
-const tokenStore = useTokenStore();
-const user = computed(() => tokenStore.user?.data);
+const tokenStore = useTokenStore()
+const profileStore = useProfileStore()
+const notify = useNotify()
+const user = computed(() => tokenStore.user?.data)
 
-const loading = ref(false);
+const loading = ref(false)
+const submitting = ref(false)
+const errors = ref({})
+
 const form = ref({
-    name: user.value?.name || '',
-    email: user.value?.email || '',
-    phone: user.value?.phone || '',
-    address: user.value?.address || ''
-});
+  full_name: '',
+  email: '',
+  phone: '',
+  gender: null,
+  date_of_birth: '',
+  hobbies: '',
+  occupation: '',
+})
 
-const handleUpdate = () => {
-    loading.value = true;
-    setTimeout(() => {
-        loading.value = false;
-    }, 1000);
-};
+const genderOptions = [
+  { id: 'male', name: 'Nam' },
+  { id: 'female', name: 'Nữ' },
+  { id: 'other', name: 'Khác' },
+]
+
+const initForm = () => {
+  form.value = {
+    full_name: user.value?.name || '',
+    email: user.value?.email || '',
+    phone: '',
+    gender: null,
+    date_of_birth: '',
+    hobbies: '',
+    occupation: '',
+  }
+}
+
+const loadProfile = async () => {
+  loading.value = true
+  initForm()
+
+  const result = await profileStore.me()
+  if (result?.success && result?.data) {
+    form.value = {
+      full_name: result.data.full_name || form.value.full_name,
+      email: result.data.email || form.value.email,
+      phone: result.data.phone || '',
+      gender: result.data.gender,
+      date_of_birth: result.data.date_of_birth || '',
+      hobbies: result.data.hobbies || '',
+      occupation: result.data.occupation || '',
+    }
+  } else if (!result?.success) {
+    notify.error(result?.message || 'Không thể tải hồ sơ cá nhân')
+  }
+
+  loading.value = false
+}
+
+const handleUpdate = async () => {
+  submitting.value = true
+  errors.value = {}
+
+  const result = await profileStore.updateCurrent({
+    full_name: form.value.full_name,
+    email: form.value.email,
+    phone: form.value.phone,
+    gender: form.value.gender,
+    date_of_birth: form.value.date_of_birth,
+    hobbies: form.value.hobbies,
+    occupation: form.value.occupation,
+  })
+
+  if (!result?.success) {
+    notify.error(result?.message || 'Cập nhật hồ sơ thất bại')
+    if (result?.errors) {
+      errors.value = result.errors
+    }
+  } else {
+    notify.success(result?.message || 'Cập nhật hồ sơ thành công')
+  }
+
+  submitting.value = false
+}
+
+watch(user, (value) => {
+  if (value) {
+    initForm()
+  }
+})
+
+onMounted(loadProfile)
 </script>
 
 <template>
-    <div class="profile-content">
-        <div class="content-header">
-            <h2 class="content-title">Hồ sơ cá nhân</h2>
-            <p class="content-subtitle">Quản lý thông tin cá nhân của bạn để bảo mật tài khoản</p>
+  <div class="profile-content">
+    <div class="content-header">
+      <h2 class="content-title">Hồ sơ cá nhân</h2>
+      <p class="content-subtitle">Quản lý thông tin cá nhân của bạn để bảo mật tài khoản</p>
+    </div>
+
+    <form @submit.prevent="handleUpdate" class="profile-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <BaseInputText
+            labelContent="Họ và tên"
+            v-model="form.full_name"
+            customPlaceholderInput="Nhập họ và tên"
+            :error="errors.full_name"
+          />
         </div>
 
-        <form @submit.prevent="handleUpdate" class="profile-form">
-            <div class="form-grid">
-                <div class="form-group">
-                    <BaseInputText 
-                        labelContent="Họ và tên" 
-                        v-model="form.name" 
-                        customPlaceholderInput="Nhập họ và tên"
-                    />
-                </div>
-                
-                <div class="form-group">
-                    <BaseInputText 
-                        labelContent="Địa chỉ Email" 
-                        v-model="form.email" 
-                        :disabled="true"
-                        customPlaceholderInput="email@example.com"
-                    />
-                    <small class="form-hint">Email không thể thay đổi vì lý do bảo mật.</small>
-                </div>
+        <div class="form-group">
+          <BaseInputText
+            labelContent="Địa chỉ Email"
+            v-model="form.email"
+            :disabled="true"
+            customPlaceholderInput="email@example.com"
+            :error="errors.email"
+          />
+          <small class="form-hint">Email không thể thay đổi vì lý do bảo mật.</small>
+        </div>
 
-                <div class="form-group">
-                    <BaseInputText 
-                        labelContent="Số điện thoại" 
-                        v-model="form.phone" 
-                        customPlaceholderInput="0123 456 789"
-                    />
-                </div>
+        <div class="form-group">
+          <BaseInputText
+            labelContent="Số điện thoại"
+            v-model="form.phone"
+            customPlaceholderInput="0123 456 789"
+            :error="errors.phone"
+          />
+        </div>
 
-                <div class="form-group">
-                    <BaseInputText 
-                        labelContent="Địa chỉ mặc định" 
-                        v-model="form.address" 
-                        customPlaceholderInput="Số nhà, tên đường, quận/huyện..."
-                    />
-                </div>
-            </div>
+        <div class="form-group">
+          <BaseInputSelect
+            labelContent="Giới tính"
+            customId="gender"
+            v-model="form.gender"
+            :values="genderOptions"
+            placeholder="Chọn giới tính"
+            :error="errors.gender"
+          />
+        </div>
 
-            <div class="form-footer">
-                <BaseButton 
-                    customType="submit" 
-                    customText="Lưu thay đổi" 
-                    customClass="btn btn-primary px-5" 
-                    :disabled="loading"
-                />
-            </div>
-        </form>
-    </div>
+        <div class="form-group">
+          <BaseInputText
+            labelContent="Ngày sinh"
+            v-model="form.date_of_birth"
+            customType="date"
+            :error="errors.date_of_birth"
+          />
+        </div>
+
+        <div class="form-group">
+          <BaseInputTextarea
+            labelContent="Sở thích"
+            customId="hobbies"
+            v-model="form.hobbies"
+            customPlaceholderInput="Nhập sở thích của bạn"
+            :error="errors.hobbies"
+          />
+        </div>
+
+        <div class="form-group">
+          <BaseInputText
+            labelContent="Nghề nghiệp"
+            v-model="form.occupation"
+            customPlaceholderInput="Nhập nghề nghiệp"
+            :error="errors.occupation"
+          />
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <BaseButton
+          customType="submit"
+          customText="Lưu thay đổi"
+          customClass="btn btn-primary px-5"
+          :disabled="submitting"
+        />
+      </div>
+    </form>
+  </div>
 </template>
 
 <style scoped>
