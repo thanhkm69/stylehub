@@ -22,6 +22,9 @@ use App\Http\Controllers\ComboItemController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BlogCategoryController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\BlogPublicController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -48,6 +51,10 @@ Route::get('coupons/active', [CouponController::class, 'getActive']);
 Route::get('home', [ProductPublicController::class, 'home']);
 Route::get('shop', [ProductPublicController::class, 'index']);
 Route::get('shop/{product:slug}', [ProductPublicController::class, 'show']);
+
+Route::get('blog-categories/active', [BlogPublicController::class, 'categories']);
+Route::get('blogs', [BlogPublicController::class, 'index']);
+Route::get('blogs/{slug}', [BlogPublicController::class, 'show']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -190,6 +197,22 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('contacts/{contact}', 'show');
       Route::put('contacts/{contact}', 'update');
       Route::delete('contacts/{contact}', 'destroy');
+    });
+
+    Route::controller(BlogCategoryController::class)->group(function () {
+      Route::get('blog-categories', 'index');
+      Route::post('blog-categories', 'store');
+      Route::get('blog-categories/{blogCategory}', 'show');
+      Route::put('blog-categories/{blogCategory}', 'update');
+      Route::delete('blog-categories/{blogCategory}', 'destroy');
+    });
+
+    Route::controller(PostController::class)->group(function () {
+      Route::get('posts', 'index');
+      Route::post('posts', 'store');
+      Route::get('posts/{post}', 'show');
+      Route::post('posts/{post}', 'update');
+      Route::delete('posts/{post}', 'destroy');
     });
   });
 });

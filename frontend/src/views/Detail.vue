@@ -15,8 +15,6 @@ const store = useProductPublicStore()
 const cartStore = useCartStore()
 const toast = useNotify()
 
-const route = useRoute()
-const store = useProductPublicStore()
 
 // ── Image Gallery ──
 const selectedImageIndex = ref(0)
@@ -114,7 +112,6 @@ const increaseQty = () => {
   }
   quantity.value++ 
 }
-const increaseQty = () => { quantity.value++ }
 const decreaseQty = () => { if (quantity.value > 1) quantity.value-- }
 const handleQtyBlur = () => {
   if (typeof quantity.value !== 'number' || isNaN(quantity.value) || quantity.value < 1) {
