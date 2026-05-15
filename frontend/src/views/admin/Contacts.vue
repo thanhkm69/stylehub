@@ -20,7 +20,7 @@ const errors = ref({})
 
 const params = reactive({
   search: '',
-  status: null,
+  status: '',
   created_at_from: '',
   created_at_to: '',
   limit: 15,
@@ -114,12 +114,13 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="admin-page-header">
-    <h2 class="admin-page-title">Quản lý Liên hệ</h2>
-    <p class="admin-page-desc">Danh sách liên hệ của khách hàng và cập nhật trạng thái phản hồi.</p>
-  </div>
-
+<div>
+   <div class="admin-page-header">
+      <h1 class="admin-page-title">Quản lý Liên hệ</h1>
+      <p class="admin-page-desc">Xem và xử lý các liên hệ từ khách hàng.</p>
+    </div>
   <div class="admin-card admin-card--contact">
+
     <div class="admin-toolbar">
       <div class="toolbar-left">
         <BaseInputText v-model="params.search" customPlaceholderInput="Tìm theo họ tên, email, chủ đề" />
@@ -185,6 +186,7 @@ onMounted(loadData)
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <style scoped>

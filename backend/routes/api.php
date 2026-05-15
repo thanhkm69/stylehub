@@ -21,6 +21,9 @@ use App\Http\Controllers\ComboController;
 use App\Http\Controllers\ComboItemController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\GHNController;
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\BlogCategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\BlogPublicController;
@@ -51,6 +54,13 @@ Route::get('home', [ProductPublicController::class, 'home']);
 Route::get('shop', [ProductPublicController::class, 'index']);
 Route::get('shop/{product:slug}', [ProductPublicController::class, 'show']);
 
+// Public - GHN
+Route::prefix('ghn')->group(function () {
+    Route::get('provinces', [GHNController::class, 'provinces']);
+    Route::get('districts', [GHNController::class, 'districts']);
+    Route::get('wards', [GHNController::class, 'wards']);
+    Route::post('shipping-fee', [GHNController::class, 'shippingFee']);
+});
 Route::get('blog-categories/active', [BlogPublicController::class, 'categories']);
 Route::get('blogs', [BlogPublicController::class, 'index']);
 Route::get('blogs/{slug}', [BlogPublicController::class, 'show']);
@@ -74,6 +84,26 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('cart/{cart}', [CartController::class, 'update']);
   Route::delete('cart/clear', [CartController::class, 'clear']);
   Route::delete('cart/{cart}', [CartController::class, 'destroy']);
+
+  // Address Routes
+  Route::controller(AddressController::class)->group(function () {
+    Route::get('addresses', 'index');
+    Route::post('addresses', 'store');
+    Route::get('addresses/{address}', 'show');
+    Route::post('addresses/{address}', 'update');
+    Route::delete('addresses/{address}', 'destroy');
+    Route::post('addresses/{address}/set-default', 'setDefault');
+  });
+
+  // Checkout Routes
+  Route::get('checkout', [App\Http\Controllers\CheckoutController::class, 'index']);
+  Route::post('checkout/preview', [App\Http\Controllers\CheckoutController::class, 'preview']);
+  Route::post('checkout/process', [App\Http\Controllers\CheckoutController::class, 'process']);
+
+  // User Order Routes
+  Route::get('orders', [OrderController::class, 'index']);
+  Route::get('orders/code/{code}', [OrderController::class, 'showByCode']);
+  Route::get('orders/{order}', [OrderController::class, 'show']);
 
   Route::middleware('abilities:Admin')->group(function () {
 
@@ -181,11 +211,23 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::delete('combo-items/{comboItem}', 'destroy');
     });
 
-    Route::controller(ContactController::class)->group(function () {
-      Route::get('contacts', 'index');
-      Route::get('contacts/{contact}', 'show');
-      Route::put('contacts/{contact}', 'update');
-      Route::delete('contacts/{contact}', 'destroy');
+      Route::controller(ContactController::class)->group(function () {
+        Route::get('contacts', 'index');
+        Route::get('contacts/{contact}', 'show');
+        Route::put('contacts/{contact}', 'update');
+        Route::delete('contacts/{contact}', 'destroy');
+      });
+
+      // Order Management
+      Route::prefix('admin')->group(function () {
+        Route::controller(OrderController::class)->group(function () {
+          Route::get('orders', 'index');
+          Route::post('orders', 'store');
+          Route::get('orders/{order}', 'show');
+          Route::post('orders/{order}', 'update');
+          Route::delete('orders/{order}', 'destroy');
+        });
+      });
     });
 
     Route::controller(BlogCategoryController::class)->group(function () {
@@ -204,4 +246,3 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::delete('posts/{post}', 'destroy');
     });
   });
-});

@@ -204,9 +204,11 @@ const handleClearCart = async () => {
 
           <p class="vat-note">(Đã bao gồm thuế VAT nếu có)</p>
 
-          <BaseButton variant="primary" size="lg" block class="btn-checkout">
-            Thanh toán
-          </BaseButton>
+          <router-link to="/checkout">
+            <BaseButton variant="primary" size="lg" block class="btn-checkout">
+              Thanh toán
+            </BaseButton>
+          </router-link>
 
           <div class="payment-methods">
             <p>Chúng tôi chấp nhận:</p>

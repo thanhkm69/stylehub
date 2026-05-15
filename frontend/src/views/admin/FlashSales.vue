@@ -4,6 +4,9 @@ import FlashSaleList from '@/components/features/flashSales/FlashSaleList.vue'
 
 <template>
     <div>
-        <FlashSaleList />
+        <FlashSaleList
+            title="Quản lý Flash Sale"
+            description="Tạo và quản lý các chương trình giảm giá chớp nhoáng."
+        />
     </div>
 </template>

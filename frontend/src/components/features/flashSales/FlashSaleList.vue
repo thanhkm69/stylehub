@@ -9,6 +9,10 @@ import FlashSaleForm from './FlashSaleForm.vue'
 import FlashSaleItemModal from './FlashSaleItemModal.vue'
 import BaseAdmin from '@/components/base/BaseAdmin.vue'
 import { API_URL_IMAGE } from '@/config/env'
+const props = defineProps({
+    title: String,
+    description: String
+})
 
 // ================= STORE =================
 const store = useFlashSaleStore()
@@ -33,7 +37,7 @@ const selectedFlashSale = ref(null)
 const params = ref({
     search: '',
     sort: 'created_at_desc',
-    status: null,
+    status: '',
     limit: 15,
     page: 1
 })
@@ -53,29 +57,29 @@ const dataForm = ref({
 // ================= MAP =================
 const sortMap = [
     { id: 'created_at_desc', name: 'Mới nhất' },
-    { id: 'created_at_asc',  name: 'Cũ nhất' },
-    { id: 'display_asc',     name: 'Thứ tự tăng' },
-    { id: 'display_desc',    name: 'Thứ tự giảm' },
+    { id: 'created_at_asc', name: 'Cũ nhất' },
+    { id: 'display_asc', name: 'Thứ tự tăng' },
+    { id: 'display_desc', name: 'Thứ tự giảm' },
 ]
 
 const filterMap = [
-    { id: 'draft',     name: 'Nháp' },
-    { id: 'active',    name: 'Đang chạy' },
-    { id: 'ended',     name: 'Đã kết thúc' },
+    { id: 'draft', name: 'Nháp' },
+    { id: 'active', name: 'Đang chạy' },
+    { id: 'ended', name: 'Đã kết thúc' },
     { id: 'cancelled', name: 'Đã hủy' },
 ]
 
 const limitMap = [
-    { id: 15,  name: '15' },
-    { id: 30,  name: '30' },
-    { id: 50,  name: '50' },
+    { id: 15, name: '15' },
+    { id: 30, name: '30' },
+    { id: 50, name: '50' },
     { id: 100, name: '100' },
 ]
 
 const statusMap = [
-    { id: 'draft',     name: 'Nháp' },
-    { id: 'active',    name: 'Đang chạy' },
-    { id: 'ended',     name: 'Đã kết thúc' },
+    { id: 'draft', name: 'Nháp' },
+    { id: 'active', name: 'Đang chạy' },
+    { id: 'ended', name: 'Đã kết thúc' },
     { id: 'cancelled', name: 'Đã hủy' },
 ]
 
@@ -115,9 +119,9 @@ const openCreateForm = () => {
 const validate = () => {
     errors.value = {}
 
-    if (!dataForm.value.name?.trim())     errors.value.name = 'Tên Flash Sale không được để trống'
-    if (!dataForm.value.starts_at)        errors.value.starts_at = 'Ngày bắt đầu không được để trống'
-    if (!dataForm.value.ends_at)          errors.value.ends_at = 'Ngày kết thúc không được để trống'
+    if (!dataForm.value.name?.trim()) errors.value.name = 'Tên Flash Sale không được để trống'
+    if (!dataForm.value.starts_at) errors.value.starts_at = 'Ngày bắt đầu không được để trống'
+    if (!dataForm.value.ends_at) errors.value.ends_at = 'Ngày kết thúc không được để trống'
 
     if (dataForm.value.starts_at && dataForm.value.ends_at) {
         if (new Date(dataForm.value.ends_at) <= new Date(dataForm.value.starts_at)) {
@@ -131,7 +135,7 @@ const validate = () => {
         const file = dataForm.value.thumbnail
         const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
         if (!validTypes.includes(file.type)) errors.value.thumbnail = 'Chỉ chấp nhận png, jpg, jpeg, webp'
-        if (file.size > 2 * 1024 * 1024)    errors.value.thumbnail = 'Ảnh tối đa 2MB'
+        if (file.size > 2 * 1024 * 1024) errors.value.thumbnail = 'Ảnh tối đa 2MB'
     }
 
     return Object.keys(errors.value).length === 0
@@ -172,12 +176,12 @@ const submit = async () => {
         toast.error(result?.message || 'Lỗi khi lưu dữ liệu')
         if (result?.errors) {
             errors.value = {
-                name:        result.errors.name?.[0] ?? '',
-                thumbnail:   result.errors.thumbnail?.[0] ?? '',
-                starts_at:   result.errors.starts_at?.[0] ?? '',
-                ends_at:     result.errors.ends_at?.[0] ?? '',
-                status:      result.errors.status?.[0] ?? '',
-                display:     result.errors.display?.[0] ?? '',
+                name: result.errors.name?.[0] ?? '',
+                thumbnail: result.errors.thumbnail?.[0] ?? '',
+                starts_at: result.errors.starts_at?.[0] ?? '',
+                ends_at: result.errors.ends_at?.[0] ?? '',
+                status: result.errors.status?.[0] ?? '',
+                display: result.errors.display?.[0] ?? '',
             }
         }
     } else {
@@ -198,7 +202,7 @@ const update = async (item) => {
         thumbnail: null,
         preview: d.thumbnail ? `http://localhost:8000/storage/${d.thumbnail}` : '',
         starts_at: d.starts_at ? d.starts_at.replace(' ', 'T').substring(0, 16) : '',
-        ends_at:   d.ends_at   ? d.ends_at.replace(' ', 'T').substring(0, 16) : '',
+        ends_at: d.ends_at ? d.ends_at.replace(' ', 'T').substring(0, 16) : '',
     }
     isEdit.value = true
     isShow.value = true
@@ -246,19 +250,19 @@ onMounted(() => {
 
 <template>
     <!-- List -->
-    <BaseAdmin :total="totalItems" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
-        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="openCreateForm"
-        @changePage="changePage">
+    <BaseAdmin :title="props.title" :description="props.description" :total="totalItems" :totalPages="totalPages"
+        :currentPage="params.page" v-model:params="params" :sortMap="sortMap" :filterMap="filterMap"
+        :limitMap="limitMap" @search="search" @open="openCreateForm" @changePage="changePage">
         <template #table>
-            <FlashSaleTable :params="params" :loadingData="loadingData" :data="flashSales"
-                @update="update" @destroy="destroy" @openItems="openItems" />
+            <FlashSaleTable :params="params" :loadingData="loadingData" :data="flashSales" @update="update"
+                @destroy="destroy" @openItems="openItems" />
         </template>
     </BaseAdmin>
 
     <!-- Form -->
     <FlashSaleForm v-model:loadingSubmit="loadingSubmit" v-model:dataForm="dataForm" v-model:isShow="isShow"
-        :errors="errors" :statusMap="statusMap"
-        @submit="submit" @close="closeForm" @handleImageChange="handleImageChange" />
+        :errors="errors" :statusMap="statusMap" @submit="submit" @close="closeForm"
+        @handleImageChange="handleImageChange" />
 
     <!-- Items Modal -->
     <FlashSaleItemModal v-model:isShow="isShowItemsModal" :flashSale="selectedFlashSale"
