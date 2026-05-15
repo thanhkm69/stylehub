@@ -41,7 +41,6 @@ export const useCartStore = defineStore('cart', () => {
           headers: { Authorization: `Bearer ${tokenStore.token}` }
         })
         if (res.data.success) {
-          // Sau khi thêm thành công, load lại toàn bộ giỏ để đảm bảo đồng bộ
           await index()
         }
         return res.data
@@ -66,7 +65,6 @@ export const useCartStore = defineStore('cart', () => {
         headers: { Authorization: `Bearer ${tokenStore.token}` }
       })
       if (res.data.success) {
-        // Cập nhật lại summary và item cụ thể trong mảng items (reactive)
         summary.value = res.data.cart_summary
         const itemIndex = items.value.findIndex(i => i.id === cartId)
         if (itemIndex !== -1) {
@@ -119,6 +117,12 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  // ================= CLEAR LOCAL (Sau khi đặt hàng) =================
+  const clearLocal = () => {
+    items.value = []
+    summary.value = { total_items: 0, total_price: 0 }
+  }
+
   return {
     items,
     loading,
@@ -127,6 +131,7 @@ export const useCartStore = defineStore('cart', () => {
     store,
     update,
     destroy,
-    clear
+    clear,
+    clearLocal
   }
 })

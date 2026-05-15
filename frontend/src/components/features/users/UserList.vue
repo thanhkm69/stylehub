@@ -7,6 +7,10 @@ import { useNotify } from '@/composables/useNotify'
 import UserTable from './UserTable.vue'
 import UserForm from './UserForm.vue'
 import BaseAdmin from '@/components/base/BaseAdmin.vue'
+const props = defineProps({
+    title: String,
+    description: String
+})
 const store = useUserStore()
 const toast = useNotify()
 const users = computed(() => store.users)
@@ -21,7 +25,7 @@ const errors = ref({})
 const params = ref({
     search: '',
     sort: 'created_at_desc',
-    status: null,
+    status: '',
     limit: 15,
     page: 1
 })
@@ -181,14 +185,13 @@ onMounted(() => {
 </script>
 
 <template>
-    <BaseAdmin :total="totalUsers" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
-        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="openCreateForm"
-        @changePage="changePage">
+    <BaseAdmin :title="props.title" :description="props.description" :total="totalUsers" :totalPages="totalPages"
+        :currentPage="params.page" v-model:params="params" :sortMap="sortMap" :filterMap="filterMap"
+        :limitMap="limitMap" @search="search" @open="openCreateForm" @changePage="changePage">
         <template #table>
-            <UserTable :params="params" :loadingData="loadingData" :data="users" @update="update"
-                @destroy="destroy" />
+            <UserTable :params="params" :loadingData="loadingData" :data="users" @update="update" @destroy="destroy" />
         </template>
     </BaseAdmin>
-    <UserForm v-model:loadingSubmit="loadingSubmit" v-model:dataForm="dataForm" v-model:isShow="isShow"
-        :errors="errors" :statusMap="statusMap" :roleMap="roleMap" @submit="submit" @close="closeForm" />
+    <UserForm v-model:loadingSubmit="loadingSubmit" v-model:dataForm="dataForm" v-model:isShow="isShow" :errors="errors"
+        :statusMap="statusMap" :roleMap="roleMap" @submit="submit" @close="closeForm" />
 </template>

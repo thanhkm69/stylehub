@@ -292,4 +292,15 @@ button {
 .Vue-Toastification__container {
     z-index: 11000 !important;
 }
+html, body {
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+}
+html {
+    overflow-y: scroll; /* tránh layout shift */
+    scrollbar-width: none; /* Firefox */
+}
 
+html::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}
