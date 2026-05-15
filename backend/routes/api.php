@@ -262,3 +262,4 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::delete('posts/{post}', 'destroy');
     });
   });
+});
