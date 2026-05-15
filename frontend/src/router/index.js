@@ -59,7 +59,17 @@ const router = createRouter({
         {
           path: 'orders',
           name: 'Orders',
-          component: () => import('@/views/admin/Orders.vue'),
+          component: () => import('@/views/admin/Orders.vue')
+        },
+        {
+          path: 'blog-categories',
+          name: 'BlogCategories',
+          component: () => import('@/views/admin/BlogCategories.vue'),
+        },
+        {
+          path: 'posts',
+          name: 'Posts',
+          component: () => import('@/views/admin/Posts.vue'),
         },
       ],
     },
@@ -106,6 +116,8 @@ const router = createRouter({
         { path: 'order-success/:code', name: 'OrderSuccess', component: () => import('@/views/OrderSuccess.vue'), meta: { requiresAuth: true } },
         { path: 'contact', name: 'Contact', component: () => import('@/views/Contact.vue') },
         { path: 'about', name: 'About', component: () => import('@/views/About.vue') },
+        { path: 'blog', name: 'Blog', component: () => import('@/views/Blog.vue') },
+        { path: 'blog/:slug', name: 'BlogDetail', component: () => import('@/views/BlogDetail.vue') },
       ],
     },
   ],

@@ -24,6 +24,9 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\GHNController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\BlogCategoryController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\BlogPublicController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -58,6 +61,9 @@ Route::prefix('ghn')->group(function () {
     Route::get('wards', [GHNController::class, 'wards']);
     Route::post('shipping-fee', [GHNController::class, 'shippingFee']);
 });
+Route::get('blog-categories/active', [BlogPublicController::class, 'categories']);
+Route::get('blogs', [BlogPublicController::class, 'index']);
+Route::get('blogs/{slug}', [BlogPublicController::class, 'show']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -222,5 +228,21 @@ Route::middleware('auth:sanctum')->group(function () {
           Route::delete('orders/{order}', 'destroy');
         });
       });
+    });
+
+    Route::controller(BlogCategoryController::class)->group(function () {
+      Route::get('blog-categories', 'index');
+      Route::post('blog-categories', 'store');
+      Route::get('blog-categories/{blogCategory}', 'show');
+      Route::put('blog-categories/{blogCategory}', 'update');
+      Route::delete('blog-categories/{blogCategory}', 'destroy');
+    });
+
+    Route::controller(PostController::class)->group(function () {
+      Route::get('posts', 'index');
+      Route::post('posts', 'store');
+      Route::get('posts/{post}', 'show');
+      Route::post('posts/{post}', 'update');
+      Route::delete('posts/{post}', 'destroy');
     });
   });

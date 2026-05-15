@@ -66,7 +66,7 @@ onMounted(async () => {
                 <router-link to="/shop" active-class="active">Sản phẩm</router-link>
                 <a href="#">Bộ sưu tập</a>
                 <router-link to="/about" active-class="active">Về chúng tôi</router-link>
-                <a href="#">Blog</a>
+                <router-link to="/blog" active-class="active">Blog</router-link>
             </nav>
 
             <!-- Actions & Auth -->
@@ -173,12 +173,12 @@ onMounted(async () => {
                         <a href="#" class="mobile-nav-item">
                             <i class="ph-bold ph-sketch-logo"></i> <span>Bộ sưu tập</span>
                         </a>
-                        <RouterLink to="/about" class="mobile-nav-item" @click="closeMobileMenu">
+                        <router-link to="/about" class="mobile-nav-item" @click="closeMobileMenu">
                             <i class="ph-bold ph-info"></i> <span>Về chúng tôi</span>
-                        </RouterLink>
-                        <a href="#" class="mobile-nav-item">
+                        </router-link>
+                        <router-link to="/blog" class="mobile-nav-item" @click="closeMobileMenu">
                             <i class="ph-bold ph-newspaper"></i> <span>Blog</span>
-                        </a>
+                        </router-link>
                     </div>
 
                     <div v-if="!isAuth" class="mobile-auth-section">

@@ -14,6 +14,8 @@ const menuItems = [
     { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
     { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
     { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
+    { name: 'Danh mục Blog', path: '/admin/blog-categories', icon: 'ph-article' },
+    { name: 'Bài viết', path: '/admin/posts', icon: 'ph-newspaper' },
     // { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
 
 ];
