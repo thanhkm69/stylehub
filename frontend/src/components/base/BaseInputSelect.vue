@@ -41,8 +41,8 @@ const value = defineModel()
     <div class="auth-form-group">
         <BaseInputLabel :customId="customId" :labelContent="labelContent" />
 
-        <select :id="customId" v-model="value" class="auth-input" :class="[error ? 'is-invalid' : '']">
-            <option :disabled="isDisabled" :value="null">{{ placeholder }}</option>
+        <select :id="customId" v-model="value" :disabled="isDisabled" class="auth-input" :class="[error ? 'is-invalid' : '']">
+            <option value="">{{ placeholder }}</option>
             <option v-for="(item, index) in values" :disabled="categoryIds.includes(item.id)" :key="index" :value="item.id">
                 {{ item.name }}
             </option>

@@ -11,6 +11,10 @@ import ProductImageModal from './ProductImageModal.vue'
 import BaseAdmin from '@/components/base/BaseAdmin.vue'
 import { useNotify } from '@/composables/useNotify'
 import { API_URL_IMAGE } from '@/config/env'
+const props = defineProps({
+    title: String,
+    description: String
+})
 
 // ================= STORE =================
 const store = useProductStore()
@@ -46,7 +50,7 @@ const selectedProduct = ref(null)
 const params = ref({
     search: '',
     sort: 'created_at_desc',
-    status: null,
+    status: '',
     limit: 15,
     page: 1
 })
@@ -279,10 +283,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <!-- List -->
-    <BaseAdmin :total="totalProducts" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
-        :sortMap="sortMap" :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="openCreateForm"
-        @changePage="changePage">
+    <BaseAdmin :title="props.title" :description="props.description" :total="totalProducts" :totalPages="totalPages"
+        :currentPage="params.page" v-model:params="params" :sortMap="sortMap" :filterMap="filterMap"
+        :limitMap="limitMap" @search="search" @open="openCreateForm" @changePage="changePage">
         <template #table>
             <ProductTable :params="params" :loadingData="loadingData" :data="products" @update="update"
                 @destroy="destroy" @show="show" @openImages="openImages" @openVariants="openVariants" />
@@ -295,6 +298,6 @@ onMounted(() => {
         @handleImageChange="handleImageChange" />
 
     <!-- Product Images Modal -->
-    <ProductImageModal v-model:isShow="isShowImagesModal" :product="selectedProduct" @imagesChanged="handleImagesChanged"
-        @close="isShowImagesModal = false" />
+    <ProductImageModal v-model:isShow="isShowImagesModal" :product="selectedProduct"
+        @imagesChanged="handleImagesChanged" @close="isShowImagesModal = false" />
 </template>

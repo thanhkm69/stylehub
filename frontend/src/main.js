@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { createHead } from '@unhead/vue/client'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
@@ -13,7 +14,7 @@ import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 
 const app = createApp(App)
-
+const head = createHead()
 app.use(Toast, {
   timeout: 3000,
   position: 'top-right',
@@ -23,6 +24,7 @@ app.use(Toast, {
 
 app.use(createPinia())
 app.use(router)
+app.use(head)
 
 app.mount('#app')
 

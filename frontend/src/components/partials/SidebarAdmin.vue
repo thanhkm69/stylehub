@@ -11,7 +11,11 @@ const menuItems = [
     { name: 'Mã giảm giá', path: '/admin/coupons', icon: 'ph-ticket' },
     { name: 'Flash Sale', path: '/admin/flash-sales', icon: 'ph-lightning' },
     { name: 'Combo', path: '/admin/combos', icon: 'ph-stack' },
+    { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
     { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
+    { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
+    { name: 'Danh mục Blog', path: '/admin/blog-categories', icon: 'ph-article' },
+    { name: 'Bài viết', path: '/admin/posts', icon: 'ph-newspaper' },
     // { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
 
 ];
