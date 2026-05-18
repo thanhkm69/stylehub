@@ -17,7 +17,21 @@ onMounted(() => {
   <main>
     <!-- Hero Section -->
     <section class="hero container">
-      <div class="hero-inner">
+      <div v-if="store.homeData.banners?.length" class="banner-carousel">
+        <div class="hero-inner" v-for="banner in store.homeData.banners" :key="banner.id">
+          <div class="hero-content">
+            <h1 class="line-clamp-2">{{ banner.title || 'Phong Cách Thời Trang Mới' }}</h1>
+            <p v-if="!banner.title">Bộ sưu tập thời trang mới nhất với các thiết kế độc quyền, chất liệu cao cấp dành riêng cho bạn.</p>
+            <a :href="banner.link || '/shop'" class="btn btn-primary" :target="banner.link?.startsWith('http') ? '_blank' : '_self'">
+              Khám phá ngay <i class="ph ph-arrow-right" style="margin-left: 8px;"></i>
+            </a>
+          </div>
+          <img :src="`${API_URL_IMAGE}/${banner.image}`" :alt="banner.title || 'Banner'" class="hero-image">
+        </div>
+      </div>
+      
+      <!-- Fallback -->
+      <div v-else class="hero-inner">
         <div class="hero-content">
           <h1>Định Hình<br>Phong Cách Của Bạn</h1>
           <p>Khám phá bộ sưu tập mùa hè mới nhất với các thiết kế độc quyền, chất liệu cao cấp và form dáng chuẩn mực dành riêng cho bạn.</p>
@@ -103,7 +117,22 @@ onMounted(() => {
   animation: fadeInUp 0.8s ease-out forwards;
 }
 
+.banner-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: 20px;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.banner-carousel::-webkit-scrollbar {
+  display: none;
+}
+
 .hero-inner {
+  scroll-snap-align: center;
+  flex: 0 0 100%;
   background-color: var(--accent);
   border-radius: var(--radius-lg);
   display: flex;
