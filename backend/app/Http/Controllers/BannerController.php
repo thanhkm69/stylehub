@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateBannerRequest;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class BannerController extends Controller
 {
@@ -57,6 +58,8 @@ class BannerController extends Controller
 
             $banner = Banner::create($data);
 
+            Cache::forget('home_data');
+
             return response()->json([
                 'success' => true,
                 'message' => "Thêm banner thành công",
@@ -102,6 +105,8 @@ class BannerController extends Controller
 
             $banner->update($data);
 
+            Cache::forget('home_data');
+
             return response()->json([
                 "success" => true,
                 "message" => "Cập nhật banner thành công",
@@ -124,6 +129,8 @@ class BannerController extends Controller
             }
             $banner->delete();
             
+            Cache::forget('home_data');
+
             return response()->json([
                 "success" => true,
                 "message" => "Xóa banner thành công",

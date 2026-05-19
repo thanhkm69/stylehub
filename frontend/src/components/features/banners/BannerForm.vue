@@ -5,6 +5,9 @@ import BaseInputText from '@/components/base/BaseInputText.vue'
 import BaseInputNumber from '@/components/base/BaseInputNumber.vue'
 import BaseInputSelect from '@/components/base/BaseInputSelect.vue'
 import BaseInputFile from '@/components/base/BaseInputFile.vue'
+import BaseForm from '@/components/base/BaseForm.vue'
+import BaseButton from '@/components/base/BaseButton.vue'
+import BaseSpinner from '@/components/base/BaseSpinner.vue'
 
 const props = defineProps({
     dataForm: Object,
@@ -41,14 +44,12 @@ const handleSubmit = () => {
 <template>
     <BaseModal v-model:isShow="isShowComputed" :title="dataFormComputed.id ? 'Cập nhật Banner' : 'Thêm Banner mới'"
         customWidth="800px" @close="emit('close')">
-        <div class="p-6">
-            <form @submit.prevent="handleSubmit" class="space-y-6">
+        <BaseForm @handleSubmit="handleSubmit">
+            <template #input>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <!-- Left Column -->
                     <div class="space-y-6">
-                        <BaseInputText labelContent="Tiêu đề" customPlaceholderInput="Nhập tiêu đề banner"
-                            v-model="dataFormComputed.title" :error="errors?.title" />
 
                         <BaseInputText labelContent="Đường dẫn (Link)" customPlaceholderInput="https://example.com"
                             v-model="dataFormComputed.link" :error="errors?.link" />
@@ -86,20 +87,18 @@ const handleSubmit = () => {
                         </div>
                     </div>
                 </div>
-            </form>
-        </div>
-        <div class="flex justify-end gap-3 p-4 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl">
-            <button type="button" @click="emit('close')"
-                class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:text-gray-900 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200">
-                Hủy bỏ
-            </button>
-            <button type="button" @click="handleSubmit" :disabled="props.loadingSubmit"
-                class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-xl hover:bg-blue-700 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i v-if="props.loadingSubmit" class="ph ph-spinner animate-spin text-lg"></i>
-                <i v-else class="ph ph-floppy-disk text-lg"></i>
-                {{ props.loadingSubmit ? 'Đang xử lý...' : 'Lưu Banner' }}
-            </button>
-        </div>
+            </template>
+
+            <template #button>
+                <div class="form-actions">
+                    <BaseButton @click="emit('close')" customType="button" customText="Hủy bỏ" customClass="btn-cancel" />
+                    <BaseButton v-if="!props.loadingSubmit" customType="submit" :customText="dataFormComputed.id ? 'Lưu thay đổi' : 'Tạo banner'" customClass="btn btn-primary px-5" :disabled="props.loadingSubmit" />
+                    <div v-else class="loading-submit">
+                        <BaseSpinner size="sm" />
+                    </div>
+                </div>
+            </template>
+        </BaseForm>
     </BaseModal>
 </template>
 
@@ -164,5 +163,33 @@ const handleSubmit = () => {
     font-size: 12px;
     color: var(--text-muted);
     margin-top: 8px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    padding-top: 24px;
+    margin-top: 8px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #64748b;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 12px;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+.loading-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
 }
 </style>

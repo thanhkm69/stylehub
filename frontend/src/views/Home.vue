@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useProductPublicStore } from '@/stores/productPublic'
 import { API_URL_IMAGE } from '@/config/env'
 import ProductCard from '@/components/features/products/ProductCard.vue'
@@ -7,39 +7,80 @@ import BaseLoading from '@/components/base/BaseLoading.vue'
 import HomeCoupons from '@/components/home/HomeCoupons.vue'
 
 const store = useProductPublicStore()
+const carouselRef = ref(null)
+let slideInterval = null
 
-onMounted(() => {
-  store.home()
+const scrollCarousel = (direction) => {
+  if (carouselRef.value) {
+    const scrollAmount = carouselRef.value.clientWidth + 20 // 20px is the gap
+    const currentScroll = carouselRef.value.scrollLeft
+    const maxScroll = carouselRef.value.scrollWidth - carouselRef.value.clientWidth
+
+    let targetScroll = 0
+    if (direction === 'next') {
+      if (currentScroll >= maxScroll - 10) {
+        targetScroll = 0
+      } else {
+        targetScroll = currentScroll + scrollAmount
+      }
+    } else {
+      if (currentScroll <= 10) {
+        targetScroll = maxScroll
+      } else {
+        targetScroll = currentScroll - scrollAmount
+      }
+    }
+
+    carouselRef.value.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    })
+  }
+}
+
+const startAutoSlide = () => {
+  slideInterval = setInterval(() => {
+    scrollCarousel('next')
+  }, 4000)
+}
+
+const stopAutoSlide = () => {
+  if (slideInterval) clearInterval(slideInterval)
+}
+
+onMounted(async () => {
+  await store.home()
+  if (store.homeData.banners?.length > 1) {
+    startAutoSlide()
+  }
+})
+
+onUnmounted(() => {
+  stopAutoSlide()
 })
 </script>
 
 <template>
   <main>
     <!-- Hero Section -->
-    <section class="hero container">
-      <div v-if="store.homeData.banners?.length" class="banner-carousel">
-        <div class="hero-inner" v-for="banner in store.homeData.banners" :key="banner.id">
-          <div class="hero-content">
-            <h1 class="line-clamp-2">{{ banner.title || 'Phong Cách Thời Trang Mới' }}</h1>
-            <p v-if="!banner.title">Bộ sưu tập thời trang mới nhất với các thiết kế độc quyền, chất liệu cao cấp dành riêng cho bạn.</p>
-            <a :href="banner.link || '/shop'" class="btn btn-primary" :target="banner.link?.startsWith('http') ? '_blank' : '_self'">
-              Khám phá ngay <i class="ph ph-arrow-right" style="margin-left: 8px;"></i>
-            </a>
-          </div>
-          <img :src="`${API_URL_IMAGE}/${banner.image}`" :alt="banner.title || 'Banner'" class="hero-image">
-        </div>
+    <section class="hero container relative group" @mouseenter="stopAutoSlide" @mouseleave="startAutoSlide">
+      <div v-if="store.homeData.banners?.length" class="banner-carousel" ref="carouselRef">
+        <a :href="banner.link || '#'" :target="banner.link?.startsWith('http') ? '_blank' : '_self'" class="hero-inner" v-for="banner in store.homeData.banners" :key="banner.id">
+          <img :src="`${API_URL_IMAGE}/${banner.image}`" :alt="banner.title || 'Banner'" class="hero-image-full">
+        </a>
       </div>
       
+      <!-- Next/Prev Buttons -->
+      <button v-if="store.homeData.banners?.length > 1" @click="scrollCarousel('prev')" class="carousel-btn prev-btn">
+        <i class="ph ph-caret-left"></i>
+      </button>
+      <button v-if="store.homeData.banners?.length > 1" @click="scrollCarousel('next')" class="carousel-btn next-btn">
+        <i class="ph ph-caret-right"></i>
+      </button>
+
       <!-- Fallback -->
-      <div v-else class="hero-inner">
-        <div class="hero-content">
-          <h1>Định Hình<br>Phong Cách Của Bạn</h1>
-          <p>Khám phá bộ sưu tập mùa hè mới nhất với các thiết kế độc quyền, chất liệu cao cấp và form dáng chuẩn mực dành riêng cho bạn.</p>
-          <router-link to="/shop" class="btn btn-primary">
-            Mua sắm ngay <i class="ph ph-arrow-right" style="margin-left: 8px;"></i>
-          </router-link>
-        </div>
-        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop" alt="Thời trang StyleHub" class="hero-image">
+      <div v-if="!store.homeData.banners?.length" class="hero-inner">
+        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop" alt="Thời trang StyleHub" class="hero-image-full">
       </div>
     </section>
 
@@ -130,47 +171,62 @@ onMounted(() => {
   display: none;
 }
 
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  border: none;
+  z-index: 10;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.carousel-btn:hover {
+  background-color: var(--primary);
+  color: white;
+  opacity: 1;
+}
+
+.hero.group:hover .carousel-btn {
+  opacity: 1;
+}
+
+.prev-btn {
+  left: 20px;
+}
+
+.next-btn {
+  right: 20px;
+}
+
 .hero-inner {
   scroll-snap-align: center;
   flex: 0 0 100%;
-  background-color: var(--accent);
   border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: block;
   overflow: hidden;
-  padding: 60px;
-  min-height: 500px;
+  height: 500px;
   position: relative;
+  text-decoration: none;
 }
 
-.hero-content {
-  max-width: 500px;
-  z-index: 2;
-}
-
-.hero-content h1 {
-  font-size: 56px;
-  font-weight: 700;
-  line-height: 1.1;
-  margin-bottom: 24px;
-  letter-spacing: -1.5px;
-}
-
-.hero-content p {
-  font-size: 18px;
-  color: var(--text-muted);
-  margin-bottom: 32px;
-}
-
-.hero-image {
-  position: absolute;
-  right: 0;
-  top: 0;
+.hero-image-full {
+  width: 100%;
   height: 100%;
-  width: 50%;
   object-fit: cover;
-  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  border-radius: var(--radius-lg);
+  display: block;
 }
 
 /* ── Categories ── */
@@ -278,15 +334,10 @@ onMounted(() => {
 /* ── Responsive ── */
 @media (max-width: 992px) {
   .hero-inner {
-    flex-direction: column;
-    padding: 40px;
+    height: 400px;
   }
-  .hero-image {
-    position: relative;
-    width: 100%;
-    height: 300px;
+  .hero-image-full {
     border-radius: var(--radius-md);
-    margin-top: 32px;
   }
   .category-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -294,8 +345,8 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .hero-content h1 {
-    font-size: 40px;
+  .hero-inner {
+    height: 300px;
   }
   .product-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

@@ -57,8 +57,8 @@ const sortMap = [
 ]
 
 const filterMap = [
-    { id: 1, name: 'Hiện' },
-    { id: 0, name: 'Ẩn' },
+    { id: 1, name: 'Chọn' },
+    { id: 0, name: 'Không chọn' },
 ]
 
 const limitMap = [
@@ -68,8 +68,8 @@ const limitMap = [
 ]
 
 const statusMap = [
-    { id: 1, name: 'Hiện' },
-    { id: 0, name: 'Ẩn' }
+    { id: 1, name: 'Chọn' },
+    { id: 0, name: 'Không chọn' }
 ]
 
 // ================= METHODS =================
@@ -144,9 +144,7 @@ const submit = async () => {
         formData.append(key, value ?? '')
     })
 
-    if (isEdit.value) {
-        formData.append('_method', 'PUT')
-    }
+
 
     let result
     try {
