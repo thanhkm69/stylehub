@@ -15,33 +15,47 @@ use Illuminate\Support\Facades\Cache;
 class ProductPublicController extends Controller
 {
     /**
+     * Helper to load homepage data from database.
+     */
+    private function getHomeData(): array
+    {
+        $newArrivals = Product::with(['category', 'activeImages'])
+            ->where('status', 1)
+            ->orderBy('created_at', 'desc')
+            ->limit(16)
+            ->get();
+
+        $categories = Category::with('children')
+            ->where('status', 1)
+            ->whereNull('parent_id')
+            ->orderBy('display', 'asc')
+            ->limit(8)
+            ->get();
+
+        return [
+            'new_arrivals' => ProductListResource::collection($newArrivals),
+            'categories'   => CategoryPublicResource::collection($categories),
+        ];
+    }
+
+    /**
      * GET /api/home
      *
      * Returns homepage data: new arrivals + parent categories with children.
-     * Cached in Redis for 10 minutes.
+     * Cached in Redis for 10 minutes. Graceful fallback to database if Redis is down.
      */
     public function home(): JsonResponse
     {
         try {
-            $data = Cache::remember('home_data', 600, function () {
-                $newArrivals = Product::with(['category', 'activeImages'])
-                    ->where('status', 1)
-                    ->orderBy('created_at', 'desc')
-                    ->limit(16)
-                    ->get();
-
-                $categories = Category::with('children')
-                    ->where('status', 1)
-                    ->whereNull('parent_id')
-                    ->orderBy('display', 'asc')
-                    ->limit(8)
-                    ->get();
-
-                return [
-                    'new_arrivals' => ProductListResource::collection($newArrivals),
-                    'categories'   => CategoryPublicResource::collection($categories),
-                ];
-            });
+            $data = null;
+            try {
+                $data = Cache::remember('home_data', 600, function () {
+                    return $this->getHomeData();
+                });
+            } catch (Exception $cacheException) {
+                // Graceful fallback if Redis/Cache server is down
+                $data = $this->getHomeData();
+            }
 
             return response()->json([
                 'success' => true,
@@ -121,60 +135,78 @@ class ProductPublicController extends Controller
     }
 
     /**
+     * Helper to load product detail from database.
+     */
+    private function getProductDetail(Product $product): ProductDetailResource
+    {
+        // Eager load full detail relationships
+        $product->load([
+            'category',
+            'activeImages',
+            'activeVariants.productVariantValues.attributeValue.attribute',
+        ]);
+
+        // Fetch AI recommendations if available
+        $aiRecommendations = $product->recommendedProducts()
+            ->with(['category', 'activeImages'])
+            ->where('status', 1)
+            ->get();
+
+        if ($aiRecommendations->isNotEmpty()) {
+            $similarProducts = $aiRecommendations->filter(function($p) {
+                return $p->pivot->type === 'similar';
+            })->values();
+            
+            $outfitProducts = $aiRecommendations->filter(function($p) {
+                return $p->pivot->type === 'outfit';
+            })->values();
+        } else {
+            $similarProducts = Product::with(['category', 'activeImages'])
+                ->where('category_id', $product->category_id)
+                ->where('id', '!=', $product->id)
+                ->where('status', 1)
+                ->limit(8)
+                ->get();
+            $outfitProducts = collect([]);
+        }
+
+        $product->setRelation('similarProducts', $similarProducts);
+        $product->setRelation('outfitProducts', $outfitProducts);
+
+        // Map activeImages → images, activeVariants → variants for the resource
+        $product->setRelation('images', $product->activeImages);
+        $product->setRelation('variants', $product->activeVariants);
+
+        return new ProductDetailResource($product);
+    }
+
+    /**
      * GET /api/products/{product:slug}
      *
      * Product detail with views increment and related products.
-     * Cached in Redis for 5 minutes (cache is busted on views increment).
+     * Cached in Redis for 5 minutes. Graceful fallback to database if Redis is down.
      */
     public function show(Product $product): JsonResponse
     {
         try {
             // Increment views (outside cache)
-            $product->increment('views');
+            try {
+                $product->increment('views');
+            } catch (Exception $viewsException) {
+                // Ignore view increment errors if any database locks or issues
+            }
 
             $cacheKey = 'product_' . $product->slug;
 
-            $data = Cache::remember($cacheKey, 300, function () use ($product) {
-                // Eager load full detail relationships
-                $product->load([
-                    'category',
-                    'activeImages',
-                    'activeVariants.productVariantValues.attributeValue.attribute',
-                ]);
-
-                // Fetch AI recommendations if available
-                $aiRecommendations = $product->recommendedProducts()
-                    ->with(['category', 'activeImages'])
-                    ->where('status', 1)
-                    ->get();
-
-                if ($aiRecommendations->isNotEmpty()) {
-                    $similarProducts = $aiRecommendations->filter(function($p) {
-                        return $p->pivot->type === 'similar';
-                    })->values();
-                    
-                    $outfitProducts = $aiRecommendations->filter(function($p) {
-                        return $p->pivot->type === 'outfit';
-                    })->values();
-                } else {
-                    $similarProducts = Product::with(['category', 'activeImages'])
-                        ->where('category_id', $product->category_id)
-                        ->where('id', '!=', $product->id)
-                        ->where('status', 1)
-                        ->limit(8)
-                        ->get();
-                    $outfitProducts = collect([]);
-                }
-
-                $product->setRelation('similarProducts', $similarProducts);
-                $product->setRelation('outfitProducts', $outfitProducts);
-
-                // Map activeImages → images, activeVariants → variants for the resource
-                $product->setRelation('images', $product->activeImages);
-                $product->setRelation('variants', $product->activeVariants);
-
-                return new ProductDetailResource($product);
-            });
+            $data = null;
+            try {
+                $data = Cache::remember($cacheKey, 300, function () use ($product) {
+                    return $this->getProductDetail($product);
+                });
+            } catch (Exception $cacheException) {
+                // Graceful fallback if Redis/Cache is down
+                $data = $this->getProductDetail($product);
+            }
 
             return response()->json([
                 'success' => true,

@@ -72,27 +72,46 @@ const getStatusLabel = (status) => {
                                 </div>
                                 <div class="confetti-ring"></div>
                             </div>
-                            <h4 class="fw-black mb-1">Đặt hàng thành công!</h4>
+                            <h4 class="fw-black mb-1">
+                                {{ order.payment_status === 'paid' ? 'Thanh toán thành công!' : 'Đặt hàng thành công!' }}
+                            </h4>
                             <p class="text-muted x-small">Cảm ơn bạn đã tin tưởng StyleHub.</p>
                         </div>
 
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="info-card h-100">
-                                    <div class="d-flex align-items-center justify-content-between bg-light rounded-3 p-2 px-3 border border-dashed border-dark-subtle">
+                                    <div class="d-flex align-items-center justify-content-between bg-light rounded-3 p-2 px-3 border border-dashed border-dark-subtle h-100">
                                         <div class="d-flex flex-column">
                                             <span class="text-muted xx-small uppercase fw-bold">Mã đơn hàng</span>
-                                            <span class="fw-black text-primary small">{{ order.order_code }}</span>
+                                            <span class="fw-black text-primary x-small">{{ order.order_code }}</span>
                                         </div>
                                         <span class="badge-status">{{ getStatusLabel(order.status) }}</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <div class="info-card h-100">
+                                    <div class="bg-light rounded-3 p-2 px-3 border border-dashed border-dark-subtle h-100 d-flex flex-column justify-content-center">
+                                        <span class="text-muted xx-small uppercase fw-bold mb-1">Thanh toán</span>
+                                        <span class="fw-bold xx-small d-block mb-1">
+                                            {{ 
+                                                order.payment_method === 'cod' ? 'Tiền mặt (COD)' : 
+                                                order.payment_method === 'momo' ? 'Ví MoMo' : 
+                                                order.payment_method === 'vnpay' ? 'Ví VNPay' : order.payment_method.toUpperCase()
+                                            }}
+                                        </span>
+                                        <span class="badge bg-opacity-75 xx-small w-fit text-uppercase" :class="order.payment_status === 'paid' ? 'bg-success' : 'bg-danger'">
+                                            {{ order.payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="info-card h-100">
                                     <div class="bg-light rounded-3 p-2 px-3 border border-dashed border-dark-subtle h-100 d-flex flex-column justify-content-center">
                                         <span class="text-muted xx-small uppercase fw-bold">Ngày đặt</span>
-                                        <span class="fw-bold small">{{ new Date(order.created_at).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' }) }}</span>
+                                        <span class="fw-bold xx-small">{{ new Date(order.created_at).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' }) }}</span>
                                     </div>
                                 </div>
                             </div>

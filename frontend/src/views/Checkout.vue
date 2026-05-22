@@ -1,11 +1,13 @@
 <script setup>
 import { onMounted, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 import { useCheckoutStore } from '@/stores/checkout'
 import { useTokenStore } from '@/stores/token'
 import { useCartStore } from '@/stores/cart'
+import { useMoMoStore } from '@/stores/momo'
 import { useNotify } from '@/composables/useNotify'
-import { API_URL_IMAGE } from '@/config/env'
+import { API_URL, API_URL_IMAGE } from '@/config/env'
 import BaseLoading from '@/components/base/BaseLoading.vue'
 
 const checkoutStore = useCheckoutStore()
@@ -51,8 +53,56 @@ const handlePlaceOrder = async () => {
     const res = await checkoutStore.placeOrder()
     if (res.success) {
         cartStore.clearLocal() // Xóa giỏ hàng local
-        toast.success(res.message)
-        router.push({ name: 'OrderSuccess', params: { code: res.data.order_code } })
+        
+        if (checkoutStore.paymentMethod === 'vnpay') {
+            toast.info('Đang chuyển hướng sang cổng thanh toán VNPay...')
+            try {
+                const payRes = await axios.post(`${API_URL}/vnpay/create-payment`, {
+                    order_id: res.data.order_id
+                }, {
+                    headers: { Authorization: `Bearer ${tokenStore.token}` }
+                })
+                
+                if (payRes.data.success && payRes.data.data.payment_url) {
+                    window.location.href = payRes.data.data.payment_url
+                } else {
+                    toast.error(payRes.data.message || 'Không thể tạo liên kết thanh toán VNPay. Vui lòng thử lại.')
+                    setTimeout(() => {
+                        router.push({ name: 'UserOrders' })
+                    }, 2000)
+                }
+            } catch (error) {
+                console.error('Lỗi thanh toán VNPay:', error)
+                toast.error(error.response?.data?.message || 'Lỗi khi tạo liên kết thanh toán VNPay.')
+                setTimeout(() => {
+                    router.push({ name: 'UserOrders' })
+                }, 2000)
+            }
+        } else if (checkoutStore.paymentMethod === 'momo') {
+            toast.info('Đang chuyển hướng sang cổng thanh toán MoMo...')
+            try {
+                const momoStore = useMoMoStore()
+                const payRes = await momoStore.createPayment(res.data.order_id)
+                
+                if (payRes.success && payRes.data.payment_url) {
+                    window.location.href = payRes.data.payment_url
+                } else {
+                    toast.error(payRes.message || 'Không thể tạo liên kết thanh toán MoMo. Vui lòng thử lại.')
+                    setTimeout(() => {
+                        router.push({ name: 'UserOrders' })
+                    }, 2000)
+                }
+            } catch (error) {
+                console.error('Lỗi thanh toán MoMo:', error)
+                toast.error('Lỗi khi tạo liên kết thanh toán MoMo.')
+                setTimeout(() => {
+                    router.push({ name: 'UserOrders' })
+                }, 2000)
+            }
+        } else {
+            toast.success(res.message)
+            router.push({ name: 'OrderSuccess', params: { code: res.data.order_code } })
+        }
     } else {
         toast.error(res.message)
     }
@@ -142,18 +192,38 @@ const getProductImage = (item) => {
                             <div class="checkout-card h-100">
                                 <h6 class="fw-black mb-4 x-small uppercase">THANH TOÁN</h6>
                                 <div class="payment-options">
-                                    <label class="payment-card active">
+                                    <label 
+                                        class="payment-card" 
+                                        :class="{ active: checkoutStore.paymentMethod === 'cod' }"
+                                        @click="checkoutStore.paymentMethod = 'cod'"
+                                    >
                                         <div class="d-flex align-items-center gap-3">
                                             <div class="payment-icon"><i class="ph ph-wallet"></i></div>
                                             <div class="fw-bold x-small">Tiền mặt (COD)</div>
                                         </div>
-                                        <i class="ph-fill ph-check-circle text-dark ms-auto"></i>
+                                        <i v-if="checkoutStore.paymentMethod === 'cod'" class="ph-fill ph-check-circle text-dark ms-auto"></i>
                                     </label>
-                                    <label class="payment-card disabled">
+                                    <label 
+                                        class="payment-card" 
+                                        :class="{ active: checkoutStore.paymentMethod === 'vnpay' }"
+                                        @click="checkoutStore.paymentMethod = 'vnpay'"
+                                    >
                                         <div class="d-flex align-items-center gap-3">
-                                            <div class="payment-icon disabled"><i class="ph ph-bank"></i></div>
-                                            <div class="fw-bold x-small text-muted">Online (Sắp có)</div>
+                                            <div class="payment-icon"><i class="ph ph-bank"></i></div>
+                                            <div class="fw-bold x-small">Thanh toán Online (VNPay)</div>
                                         </div>
+                                        <i v-if="checkoutStore.paymentMethod === 'vnpay'" class="ph-fill ph-check-circle text-dark ms-auto"></i>
+                                    </label>
+                                    <label 
+                                        class="payment-card" 
+                                        :class="{ active: checkoutStore.paymentMethod === 'momo' }"
+                                        @click="checkoutStore.paymentMethod = 'momo'"
+                                    >
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="payment-icon" style="color: #a50064;"><i class="ph ph-wallet"></i></div>
+                                            <div class="fw-bold x-small">Thanh toán qua ví MoMo</div>
+                                        </div>
+                                        <i v-if="checkoutStore.paymentMethod === 'momo'" class="ph-fill ph-check-circle text-dark ms-auto"></i>
                                     </label>
                                 </div>
                             </div>

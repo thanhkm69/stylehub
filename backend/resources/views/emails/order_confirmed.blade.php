@@ -30,11 +30,23 @@
             <h2>Thông tin đơn hàng #{{ $order->order_code }}</h2>
             <p><strong>Ngày đặt:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
             <p><strong>Trạng thái:</strong> <span class="badge">{{ $statusLabel }}</span></p>
+            <p><strong>Phương thức thanh toán:</strong> 
+                @if($order->payment_method === 'cod')
+                    Tiền mặt (COD)
+                @elseif($order->payment_method === 'momo')
+                    Ví MoMo
+                @elseif($order->payment_method === 'vnpay')
+                    Ví VNPay
+                @else
+                    {{ strtoupper($order->payment_method) }}
+                @endif
+            </p>
         </div>
 
         <table>
             <thead>
                 <tr>
+                    <th style="width: 60px;">Ảnh</th>
                     <th>Sản phẩm</th>
                     <th class="text-center">SL</th>
                     <th class="text-right">Giá</th>
@@ -43,7 +55,35 @@
             <tbody>
                 @foreach($order->orderDetails as $detail)
                 <tr>
-                    <td>
+                    <td style="width: 60px; padding: 10px 5px; vertical-align: middle;">
+                        @php
+                            $filename = $detail->productVariant?->image ?: $detail->product?->thumbnail;
+                            $imagePath = null;
+                            if ($filename) {
+                                try {
+                                    $imagePath = \Illuminate\Support\Facades\Storage::disk('public')->path($filename);
+                                } catch (\Exception $e) {
+                                    $imagePath = null;
+                                }
+                            }
+                            $embeddedUrl = null;
+                            if ($imagePath && file_exists($imagePath)) {
+                                try {
+                                    $embeddedUrl = $message->embed($imagePath);
+                                } catch (\Exception $e) {
+                                    $embeddedUrl = asset('storage/' . $filename);
+                                }
+                            } else if ($filename) {
+                                $embeddedUrl = asset('storage/' . $filename);
+                            }
+                        @endphp
+                        @if($embeddedUrl)
+                            <img src="{{ $embeddedUrl }}" alt="{{ $detail->product_name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; display: block;">
+                        @else
+                            <div style="width: 50px; height: 50px; background: #eee; border-radius: 4px; line-height: 50px; text-align: center; color: #999; font-size: 10px;">No image</div>
+                        @endif
+                    </td>
+                    <td style="vertical-align: middle;">
                         <div style="font-weight: bold;">{{ $detail->product_name }}</div>
                         @if($detail->variant_name)
                         <div style="font-size: 11px; color: #666;">
@@ -51,27 +91,27 @@
                         </div>
                         @endif
                     </td>
-                    <td class="text-center">{{ $detail->quantity }}</td>
-                    <td class="text-right">{{ number_format($detail->price, 0, ',', '.') }}đ</td>
+                    <td class="text-center" style="vertical-align: middle;">{{ $detail->quantity }}</td>
+                    <td class="text-right" style="vertical-align: middle;">{{ number_format($detail->price, 0, ',', '.') }}đ</td>
                 </tr>
                 @endforeach
                 
                 <tr>
-                    <td colspan="2" class="text-right" style="color: #666; padding-top: 20px;">Tạm tính:</td>
+                    <td colspan="3" class="text-right" style="color: #666; padding-top: 20px;">Tạm tính:</td>
                     <td class="text-right" style="padding-top: 20px;">{{ number_format($order->subtotal_amount, 0, ',', '.') }}đ</td>
                 </tr>
                 @if($order->discount_amount > 0)
                 <tr>
-                    <td colspan="2" class="text-right" style="color: #666;">Giảm giá:</td>
+                    <td colspan="3" class="text-right" style="color: #666;">Giảm giá:</td>
                     <td class="text-right">-{{ number_format($order->discount_amount, 0, ',', '.') }}đ</td>
                 </tr>
                 @endif
                 <tr>
-                    <td colspan="2" class="text-right" style="color: #666;">Phí vận chuyển:</td>
+                    <td colspan="3" class="text-right" style="color: #666;">Phí vận chuyển:</td>
                     <td class="text-right">+{{ number_format($order->shipping_fee, 0, ',', '.') }}đ</td>
                 </tr>
                 <tr class="total-row">
-                    <td colspan="2" class="text-right">TỔNG CỘNG:</td>
+                    <td colspan="3" class="text-right">TỔNG CỘNG:</td>
                     <td class="text-right" style="color: #000;">{{ number_format($order->total_amount, 0, ',', '.') }}đ</td>
                 </tr>
             </tbody>

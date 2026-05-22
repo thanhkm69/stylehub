@@ -114,6 +114,17 @@ const router = createRouter({
         { path: 'cart', name: 'Cart', component: () => import('@/views/CartView.vue'), meta: { requiresAuth: true } },
         { path: 'checkout', name: 'Checkout', component: () => import('@/views/Checkout.vue'), meta: { requiresAuth: true } },
         { path: 'order-success/:code', name: 'OrderSuccess', component: () => import('@/views/OrderSuccess.vue'), meta: { requiresAuth: true } },
+        {
+          path: 'payment/momo/return',
+          name: 'MoMoReturn',
+          component: () => import('@/views/user/payment/PaymentReturn.vue')
+        },
+        {
+          path: 'payment/status/:orderId',
+          name: 'PaymentStatus',
+          component: () => import('@/views/user/payment/PaymentStatus.vue'),
+          meta: { requiresAuth: true }
+        },
         { path: 'contact', name: 'Contact', component: () => import('@/views/Contact.vue') },
         { path: 'about', name: 'About', component: () => import('@/views/About.vue') },
         { path: 'blog', name: 'Blog', component: () => import('@/views/Blog.vue') },

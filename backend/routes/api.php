@@ -28,6 +28,8 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\BlogCategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\BlogPublicController;
+use App\Http\Controllers\VNPayController;
+use App\Http\Controllers\MoMoController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -66,6 +68,11 @@ Route::get('blog-categories/active', [BlogPublicController::class, 'categories']
 Route::get('blogs', [BlogPublicController::class, 'index']);
 Route::get('blogs/{slug}', [BlogPublicController::class, 'show']);
 
+// Public - MoMo callback
+Route::prefix('momo')->group(function () {
+    Route::get('return', [MoMoController::class, 'return']);
+    Route::post('notify', [MoMoController::class, 'notify']);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
   Route::post('logout', [AuthController::class, 'logout']);
@@ -107,6 +114,18 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::get('orders', [OrderController::class, 'index']);
   Route::get('orders/code/{code}', [OrderController::class, 'showByCode']);
   Route::get('orders/{order}', [OrderController::class, 'show']);
+
+  // VNPay Payment Routes
+  Route::controller(VNPayController::class)->group(function () {
+      Route::post('vnpay/create-payment', 'createPayment');
+      Route::get('vnpay/status/{order}', 'status');
+  });
+
+  // MoMo Payment Routes
+  Route::controller(MoMoController::class)->group(function () {
+      Route::post('momo/create-payment', 'createPayment');
+      Route::get('momo/status/{order}', 'status');
+  });
 
   Route::middleware('abilities:Admin')->group(function () {
 
