@@ -29,6 +29,14 @@ const props = defineProps({
     error: {
         type: [String, Array],
         default: ""
+    },
+    disabled: {
+        type: Boolean,
+        default: false
+    },
+    readonly: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -39,9 +47,17 @@ const value = defineModel();
     <div class="auth-form-group">
         <BaseInputLabel :customId="customId" :labelContent="labelContent" />
         <input :required="isRequired" :placeholder="customPlaceholderInput" v-model="value" :type="customType" :id="customId"
-            :class="[customClassInput, error ? 'is-invalid' : '']">
+            :disabled="disabled" :readonly="readonly" :class="[customClassInput, error ? 'is-invalid' : '']">
         <BaseInputError :error="error" />
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.auth-input:disabled,
+.auth-input[readonly] {
+    background-color: #f8fafc;
+    color: #64748b;
+    cursor: not-allowed;
+    opacity: 1;
+}
+</style>

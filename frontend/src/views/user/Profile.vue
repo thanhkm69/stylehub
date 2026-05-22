@@ -12,6 +12,7 @@ const tokenStore = useTokenStore()
 const profileStore = useProfileStore()
 const notify = useNotify()
 const user = computed(() => tokenStore.user?.data)
+const accountEmail = computed(() => user.value?.email || '')
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -36,7 +37,7 @@ const genderOptions = [
 const initForm = () => {
   form.value = {
     full_name: user.value?.name || '',
-    email: user.value?.email || '',
+    email: accountEmail.value,
     phone: '',
     gender: null,
     date_of_birth: '',
@@ -53,7 +54,7 @@ const loadProfile = async () => {
   if (result?.success && result?.data) {
     form.value = {
       full_name: result.data.full_name || form.value.full_name,
-      email: result.data.email || form.value.email,
+      email: accountEmail.value || result.data.email || form.value.email,
       phone: result.data.phone || '',
       gender: result.data.gender,
       date_of_birth: result.data.date_of_birth || '',
@@ -73,7 +74,6 @@ const handleUpdate = async () => {
 
   const result = await profileStore.updateCurrent({
     full_name: form.value.full_name,
-    email: form.value.email,
     phone: form.value.phone,
     gender: form.value.gender,
     date_of_birth: form.value.date_of_birth,
@@ -95,7 +95,8 @@ const handleUpdate = async () => {
 
 watch(user, (value) => {
   if (value) {
-    initForm()
+    form.value.full_name = form.value.full_name || value.name || ''
+    form.value.email = value.email || ''
   }
 })
 
@@ -199,43 +200,6 @@ onMounted(loadProfile)
     gap: 32px;
 }
 
-.content-header {
-    border-bottom: 1px solid #f1f5f9;
-    padding-bottom: 24px;
-}
-
-.content-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--text-main);
-    margin: 0 0 8px 0;
-    letter-spacing: -0.5px;
-}
-
-.content-subtitle {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin: 0;
-}
-
-.profile-form {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
 .form-hint {
     font-size: 12px;
     color: #94a3b8;
@@ -246,19 +210,6 @@ onMounted(loadProfile)
     margin-top: 16px;
     display: flex;
     justify-content: flex-start;
-}
-
-@media (max-width: 768px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
-<style scoped>
-.profile-content {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
 }
 
 .content-header {

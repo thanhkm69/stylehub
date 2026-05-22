@@ -139,6 +139,7 @@ class ProfileController extends Controller
         try {
             $user = $request->user();
             $data = $request->validated();
+            $data['email'] = $user->email;
 
             $profile = $user->profile;
             if ($profile) {

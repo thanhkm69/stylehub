@@ -2,11 +2,13 @@ import axios from 'axios'
 import { API_URL } from '@/config/env'
 import { useTokenStore } from '@/stores/token'
 
-const tokenStore = useTokenStore()
+const headers = () => {
+  const tokenStore = useTokenStore()
 
-const headers = () => ({
-  headers: { Authorization: `Bearer ${tokenStore.token}` },
-})
+  return {
+    headers: { Authorization: `Bearer ${tokenStore.token}` },
+  }
+}
 
 export const profileService = {
   me: () => axios.get(`${API_URL}/profile`, headers()),
