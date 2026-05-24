@@ -219,7 +219,7 @@ const formatCurrency = (val) =>
 </script>
 
 <template>
-    <BaseModal @close="emit('close')" :isShow="isShow" customWidth="1100px">
+    <BaseModal @close="emit('close')" :isShow="isShow" customWidth="1180px">
         <div class="fsi-container">
             <!-- Trái: Danh sách -->
             <div class="fsi-list">
@@ -228,61 +228,76 @@ const formatCurrency = (val) =>
                     <span style="color: var(--primary);">{{ flashSale?.name }}</span>
                 </h3>
 
-                <div class="admin-table-wrapper" style="max-height: 600px; overflow-y: auto;">
-                    <table class="table">
+                <div class="admin-table-wrapper fsi-table-wrapper">
+                    <table class="table fsi-table">
+                        <colgroup>
+                            <col class="col-index">
+                            <col class="col-product">
+                            <col class="col-discount">
+                            <col class="col-price">
+                            <col class="col-status">
+                            <col class="col-actions">
+                        </colgroup>
                         <thead>
                             <tr>
-                                <th>STT</th>
+                                <th class="cell-center">STT</th>
                                 <th>Sản phẩm</th>
-                                <th>Biến thể</th>
-                                <th>Loại</th>
-                                <th>Giảm</th>
-                                <th>Giá gốc</th>
-                                <th>Giá sale</th>
-                                <th>TT</th>
-                                <th>Hành động</th>
+                                <th>Mức giảm</th>
+                                <th>Giá bán</th>
+                                <th class="cell-center">Trạng thái</th>
+                                <th class="cell-center">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="loadingData">
-                                <td colspan="9" class="text-center" style="padding: 24px;">
+                                <td colspan="6" class="text-center" style="padding: 24px;">
                                     <BaseLoading />
                                 </td>
                             </tr>
                             <tr v-else-if="values.length === 0">
-                                <td colspan="9" class="text-center" style="padding: 24px; color: var(--text-muted);">
+                                <td colspan="6" class="text-center" style="padding: 24px; color: var(--text-muted);">
                                     Chưa có sản phẩm nào trong flash sale
                                 </td>
                             </tr>
                             <tr v-else v-for="(item, index) in values" :key="item.id">
-                                <td>{{ index + 1 }}</td>
+                                <td class="cell-center row-index">{{ index + 1 }}</td>
                                 <td>
-                                    <strong style="color: var(--text-main); font-size: 13px;">
-                                        {{ item.product?.name ?? '—' }}
-                                    </strong>
-                                </td>
-                                <td style="font-size: 12px; color: var(--text-muted);">
-                                    {{ item.product_variant?.sku ?? 'Tất cả' }}
-                                </td>
-                                <td>
-                                    <span :class="['badge-type', item.discount_type === 'percentage' ? 'badge-pct' : 'badge-fix']">
-                                        {{ item.discount_type === 'percentage' ? '%' : '₫' }}
-                                    </span>
-                                </td>
-                                <td style="color: var(--danger); font-weight: 600;">
-                                    {{ item.discount_type === 'percentage' ? `${item.discount_value}%` : formatCurrency(item.discount_value) }}
-                                </td>
-                                <td style="font-size: 12px;">{{ formatCurrency(item.original_price) }}</td>
-                                <td style="font-size: 12px; color: var(--primary); font-weight: 600;">
-                                    {{ formatCurrency(item.sale_price) }}
+                                    <div class="product-cell">
+                                        <strong class="product-name" :title="item.product?.name ?? '-'">
+                                            {{ item.product?.name ?? '—' }}
+                                        </strong>
+                                        <span class="product-variant">
+                                            Biến thể: {{ item.product_variant?.sku ?? 'Tất cả' }}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td>
+                                    <div class="discount-cell">
+                                        <span :class="['badge-type', item.discount_type === 'percentage' ? 'badge-pct' : 'badge-fix']">
+                                            {{ item.discount_type === 'percentage' ? '%' : '₫' }}
+                                        </span>
+                                        <span class="discount-value">
+                                            {{ item.discount_type === 'percentage' ? `${item.discount_value}%` : formatCurrency(item.discount_value) }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="price-cell">
+                                        <span class="price-old">
+                                            {{ formatCurrency(item.original_price) }}
+                                        </span>
+                                        <span class="price-current">
+                                            {{ formatCurrency(item.sale_price) }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="cell-center">
                                     <span :class="['badge-status', item.status ? 'badge-active' : 'badge-inactive']">
                                         {{ item.status ? 'Hiện' : 'Ẩn' }}
                                     </span>
                                 </td>
-                                <td>
-                                    <div class="action-group">
+                                <td class="cell-center">
+                                    <div class="action-group action-group-compact">
                                         <BaseButton @click="editValue(item)" customText="Sửa"
                                             customClass="btn-action btn-edit" />
                                         <BaseButton @click="destroyValue(item.id)" customText="Xóa"
@@ -366,11 +381,15 @@ const formatCurrency = (val) =>
 
 <style scoped>
 .fsi-container {
-    display: flex;
-    gap: 32px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 24px;
+    align-items: flex-start;
 }
-.fsi-list { flex: 6; }
-.fsi-form { flex: 4; }
+.fsi-list,
+.fsi-form {
+    min-width: 0;
+}
 
 .modal-title {
     font-size: 18px;
@@ -402,11 +421,138 @@ const formatCurrency = (val) =>
     margin-top: 16px;
 }
 
-.badge-type {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 20px;
+.fsi-table-wrapper {
+    max-height: 600px;
+    overflow: auto;
+}
+
+.fsi-table {
+    min-width: 760px;
+    table-layout: fixed;
+}
+
+.fsi-table :is(th, td) {
+    padding: 12px 14px;
+}
+
+.fsi-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.fsi-table th:nth-child(1),
+.fsi-table td:nth-child(1),
+.fsi-table th:nth-child(5),
+.fsi-table td:nth-child(5),
+.fsi-table th:nth-child(6),
+.fsi-table td:nth-child(6) {
+    text-align: center;
+}
+
+.col-index { width: 56px; }
+.col-product { width: 250px; }
+.col-discount { width: 138px; }
+.col-price { width: 150px; }
+.col-status { width: 104px; }
+.col-actions { width: 118px; }
+
+.cell-center {
+    text-align: center;
+}
+
+.row-index {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.product-cell {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.product-name {
+    display: block;
+    overflow: hidden;
+    color: var(--text-main);
+    font-size: 13px;
     font-weight: 700;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-variant {
+    display: block;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.discount-cell {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: 6px;
+}
+
+.discount-value {
+    overflow: hidden;
+    color: #dc2626;
+    font-size: 13px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.price-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.3;
+}
+
+.price-old {
+    color: var(--text-muted);
+    font-size: 12px;
+    text-decoration: line-through;
+}
+
+.price-current {
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.action-group-compact {
+    justify-content: center;
+    gap: 6px;
+}
+
+.action-group-compact :deep(.btn-action) {
+    min-width: 44px;
+    padding: 6px 9px;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.badge-type {
+    display: inline-flex;
+    min-width: 26px;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    padding: 3px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
 }
 .badge-pct  { background: #e0f2fe; color: #0369a1; }
 .badge-fix  { background: #fef3c7; color: #92400e; }
@@ -471,6 +617,12 @@ const formatCurrency = (val) =>
 }
 
 @media (max-width: 768px) {
-    .fsi-container { flex-direction: column; }
+    .fsi-container {
+        grid-template-columns: 1fr;
+    }
+
+    .fsi-table {
+        min-width: 720px;
+    }
 }
 </style>

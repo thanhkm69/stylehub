@@ -20,7 +20,7 @@ class CategoryPublicResource extends JsonResource
             'slug'     => $this->slug,
             'image'    => $this->image,
             'display'  => $this->display,
-            'children' => CategoryPublicResource::collection($this->whenLoaded('children')),
+            'children' => CategoryPublicResource::collection($this->whenLoaded('activeChildrenRecursive')),
         ];
     }
 }

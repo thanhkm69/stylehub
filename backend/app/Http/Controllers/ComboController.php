@@ -24,10 +24,6 @@ class ComboController extends Controller
                 $query->where('name', 'like', '%' . $request->search . '%');
             }
 
-            if ($request->filled('combo_type')) {
-                $query->where('combo_type', $request->combo_type);
-            }
-
             if ($request->filled('status')) {
                 $query->where('status', $request->status);
             }

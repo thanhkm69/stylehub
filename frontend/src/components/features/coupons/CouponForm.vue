@@ -69,12 +69,8 @@ const isFixed = computed(() => dataForm.value?.discount_type === 'fixed')
                                     :error="errors.min_order_value" />
                             </div>
 
-                            <div class="two-col-grid">
-                                <BaseInputNumber labelContent="Tổng lượt dùng" v-model="dataForm.usage_limit"
-                                    :error="errors.usage_limit" />
-                                <BaseInputNumber labelContent="Lượt/người" v-model="dataForm.usage_limit_per_user"
-                                    :error="errors.usage_limit_per_user" />
-                            </div>
+                            <BaseInputNumber labelContent="Tổng lượt dùng" v-model="dataForm.usage_limit"
+                                :error="errors.usage_limit" />
                         </div>
                     </div>
 

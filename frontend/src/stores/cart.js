@@ -10,7 +10,13 @@ export const useCartStore = defineStore('cart', () => {
   const items = useLocalStorage('cart_items', [])
   const summary = useLocalStorage('cart_summary', {
     total_items: 0,
-    total_price: 0
+    total_price: 0,
+    original_total_price: 0,
+    flash_sale_savings: 0,
+    subtotal_before_combo: 0,
+    combo_discount: 0,
+    applied_combos: [],
+    applied_combo: null
   })
   
   const loading = ref(false)
@@ -99,7 +105,7 @@ export const useCartStore = defineStore('cart', () => {
   const clear = async () => {
     if (!tokenStore.token) {
       items.value = []
-      summary.value = { total_items: 0, total_price: 0 }
+      summary.value = { total_items: 0, total_price: 0, original_total_price: 0, flash_sale_savings: 0, subtotal_before_combo: 0, combo_discount: 0, applied_combos: [], applied_combo: null }
       return { success: true }
     }
 
@@ -109,7 +115,7 @@ export const useCartStore = defineStore('cart', () => {
       })
       if (res.data.success) {
         items.value = []
-        summary.value = { total_items: 0, total_price: 0 }
+        summary.value = { total_items: 0, total_price: 0, original_total_price: 0, flash_sale_savings: 0, subtotal_before_combo: 0, combo_discount: 0, applied_combos: [], applied_combo: null }
       }
       return res.data
     } catch (error) {
@@ -120,7 +126,7 @@ export const useCartStore = defineStore('cart', () => {
   // ================= CLEAR LOCAL (Sau khi đặt hàng) =================
   const clearLocal = () => {
     items.value = []
-    summary.value = { total_items: 0, total_price: 0 }
+    summary.value = { total_items: 0, total_price: 0, original_total_price: 0, flash_sale_savings: 0, subtotal_before_combo: 0, combo_discount: 0, applied_combos: [], applied_combo: null }
   }
 
   return {

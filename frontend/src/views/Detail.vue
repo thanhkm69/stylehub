@@ -91,9 +91,46 @@ const matchedVariant = computed(() => {
   }) || null
 })
 
-const displayPrice = computed(() => {
+const regularPrice = computed(() => {
   if (matchedVariant.value) return matchedVariant.value.price
   return store.product?.price || 0
+})
+
+const activeFlashSale = computed(() => {
+  const flashSaleItems = store.product?.flash_sale_items || []
+  const applicableItems = flashSaleItems.filter((item) => {
+    if (matchedVariant.value) {
+      return !item.product_variant_id || item.product_variant_id === matchedVariant.value.id
+    }
+
+    return groupedAttributes.value.length ? true : !item.product_variant_id
+  })
+
+  return applicableItems
+    .filter((item) => {
+      const comparisonPrice = !matchedVariant.value && item.product_variant_id
+        ? item.original_price
+        : regularPrice.value
+      return Number(item.sale_price) < Number(comparisonPrice)
+    })
+    .sort((first, second) => Number(first.sale_price) - Number(second.sale_price))[0] || null
+})
+
+const showsStartingFlashSalePrice = computed(() => {
+  return Boolean(activeFlashSale.value?.product_variant_id && !matchedVariant.value)
+})
+
+const displayOriginalPrice = computed(() => {
+  return showsStartingFlashSalePrice.value ? activeFlashSale.value.original_price : regularPrice.value
+})
+
+const displayPrice = computed(() => {
+  return activeFlashSale.value?.sale_price ?? regularPrice.value
+})
+
+const flashSaleDiscount = computed(() => {
+  if (!activeFlashSale.value || !Number(displayOriginalPrice.value)) return 0
+  return Math.round((1 - Number(displayPrice.value) / Number(displayOriginalPrice.value)) * 100)
 })
 
 const displayStock = computed(() => {
@@ -224,15 +261,17 @@ watch(() => route.params.slug, (newSlug) => {
         <!-- Product Info -->
         <div class="product-info">
           <div class="info-header">
-            <router-link
-              v-if="store.product.category"
-              :to="{ name: 'Shop', query: { category_id: store.product.category.id } }"
-              class="product-category-link"
-            >
-              {{ store.product.category.name }}
-            </router-link>
             <div class="product-title-row">
-              <h1 class="product-title">{{ store.product.name }}</h1>
+              <div class="product-heading">
+                <router-link
+                  v-if="store.product.category"
+                  :to="{ name: 'Shop', query: { category_id: store.product.category.id } }"
+                  class="product-category-link"
+                >
+                  {{ store.product.category.name }}
+                </router-link>
+                <h1 class="product-title">{{ store.product.name }}</h1>
+              </div>
               <WishlistButton :product-id="store.product.id" size="lg" />
             </div>
             <div class="product-meta">
@@ -245,11 +284,20 @@ watch(() => route.params.slug, (newSlug) => {
             </div>
           </div>
 
+          <div v-if="activeFlashSale" class="flash-sale-notice">
+            <div class="notice-title">
+              <i class="ph-fill ph-lightning"></i>
+              FLASH SALE
+              <span>{{ activeFlashSale.flash_sale.name }}</span>
+            </div>
+            <span class="notice-expiry">Kết thúc: {{ formatDate(activeFlashSale.flash_sale.ends_at) }}</span>
+          </div>
+
           <div class="price-block">
-            <span class="current-price">{{ formatPrice(displayPrice) }}</span>
-            <span v-if="displayStock !== null" :class="['stock-badge', displayStock > 0 ? 'in-stock' : 'out-of-stock']">
-              {{ displayStock > 0 ? `Còn ${displayStock} sản phẩm` : 'Hết hàng' }}
-            </span>
+            <span v-if="showsStartingFlashSalePrice" class="price-prefix">Từ</span>
+            <span :class="['current-price', { 'sale-current-price': activeFlashSale }]">{{ formatPrice(displayPrice) }}</span>
+            <span v-if="activeFlashSale" class="regular-price">{{ formatPrice(displayOriginalPrice) }}</span>
+            <span v-if="flashSaleDiscount > 0" class="detail-sale-badge">-{{ flashSaleDiscount }}%</span>
           </div>
 
           <!-- Variant Attributes -->
@@ -276,20 +324,25 @@ watch(() => route.params.slug, (newSlug) => {
 
           <!-- Quantity & Actions -->
           <div class="actions-section">
-            <div class="quantity-selector">
-              <button class="qty-btn" @click="decreaseQty" :disabled="quantity <= 1">
-                <i class="ph ph-minus"></i>
-              </button>
-              <input
-                v-model.number="quantity"
-                type="number"
-                class="qty-input"
-                min="1"
-                @blur="handleQtyBlur"
-              />
-              <button class="qty-btn" @click="increaseQty">
-                <i class="ph ph-plus"></i>
-              </button>
+            <div class="quantity-control">
+              <div class="quantity-selector">
+                <button class="qty-btn" @click="decreaseQty" :disabled="quantity <= 1">
+                  <i class="ph ph-minus"></i>
+                </button>
+                <input
+                  v-model.number="quantity"
+                  type="number"
+                  class="qty-input"
+                  min="1"
+                  @blur="handleQtyBlur"
+                />
+                <button class="qty-btn" @click="increaseQty">
+                  <i class="ph ph-plus"></i>
+                </button>
+              </div>
+              <span v-if="displayStock !== null" :class="['stock-badge', displayStock > 0 ? 'in-stock' : 'out-of-stock']">
+                {{ displayStock > 0 ? `Còn ${displayStock} sản phẩm` : 'Hết hàng' }}
+              </span>
             </div>
             <BaseButton 
               variant="primary"
@@ -505,8 +558,15 @@ watch(() => route.params.slug, (newSlug) => {
 .product-info {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
   animation: slideUp 0.6s ease-out 0.3s both;
+}
+
+.product-heading {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .product-category-link {
@@ -516,7 +576,6 @@ watch(() => route.params.slug, (newSlug) => {
   text-transform: uppercase;
   letter-spacing: 1px;
   color: var(--text-muted);
-  margin-bottom: 8px;
   transition: var(--transition);
 }
 
@@ -535,15 +594,14 @@ watch(() => route.params.slug, (newSlug) => {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  margin-top: 10px;
+  gap: 16px;
 }
 
 .product-meta {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .meta-separator {
@@ -575,16 +633,82 @@ watch(() => route.params.slug, (newSlug) => {
 }
 
 /* Price */
+.flash-sale-notice {
+  align-items: center;
+  background: linear-gradient(110deg, #fff1ef, #fff8f2);
+  border: 1px solid #ffd0c4;
+  border-radius: 12px;
+  color: #dc2626;
+  display: flex;
+  justify-content: space-between;
+  padding: 11px 14px;
+}
+
+.notice-title {
+  align-items: center;
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 6px;
+}
+
+.notice-title i {
+  color: #ef3026;
+  font-size: 18px;
+}
+
+.notice-title span {
+  border-left: 1px solid #fecaca;
+  color: #991b1b;
+  font-weight: 700;
+  margin-left: 5px;
+  padding-left: 11px;
+}
+
+.notice-expiry {
+  color: #b45309;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .price-block {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .current-price {
   font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.5px;
+}
+
+.sale-current-price {
+  color: #e62920;
+  font-size: 30px;
+}
+
+.price-prefix {
+  color: #e62920;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.regular-price {
+  color: var(--text-muted);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: line-through;
+}
+
+.detail-sale-badge {
+  background: #ef3026;
+  border-radius: var(--radius-full);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 5px 10px;
 }
 
 .stock-badge {
@@ -608,13 +732,13 @@ watch(() => route.params.slug, (newSlug) => {
 .variants-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
 }
 
 .variant-label {
   font-size: 14px;
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: block;
 }
 
@@ -658,8 +782,16 @@ watch(() => route.params.slug, (newSlug) => {
 /* ── Actions ── */
 .actions-section {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
+}
+
+.quantity-control {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 7px;
 }
 
 .quantity-selector {
@@ -805,11 +937,22 @@ watch(() => route.params.slug, (newSlug) => {
 }
 
 @media (max-width: 768px) {
+  .product-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+
   .product-title {
     font-size: 24px;
   }
   .current-price {
     font-size: 24px;
+  }
+  .flash-sale-notice {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
   }
   .actions-section {
     flex-wrap: wrap;

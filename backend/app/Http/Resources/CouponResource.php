@@ -24,7 +24,6 @@ class CouponResource extends JsonResource
             'max_discount_amount' => $this->max_discount_amount,
             'min_order_value' => $this->min_order_value,
             'usage_limit' => $this->usage_limit,
-            'usage_limit_per_user' => $this->usage_limit_per_user,
             'starts_at' => $this->starts_at ? $this->starts_at->toDateTimeString() : null,
             'expires_at' => $this->expires_at ? $this->expires_at->toDateTimeString() : null,
             'status' => $this->status,

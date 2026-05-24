@@ -2,45 +2,51 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\AddressResource;
+use App\Http\Resources\CartResource;
+use App\Mail\OrderConfirmed;
+use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Order;
-use App\Models\Address;
-use App\Models\ProductVariant;
+use App\Services\ComboPricingService;
+use App\Services\CouponPricingService;
+use App\Services\FlashSalePricingService;
 use App\Services\GHNService;
-use App\Http\Resources\CartResource;
-use App\Http\Resources\OrderResource;
-use App\Http\Resources\AddressResource;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderConfirmed;
-
+use Illuminate\Validation\ValidationException;
 
 class CheckoutController extends Controller
 {
     protected $ghnService;
 
-    public function __construct(GHNService $ghnService)
-    {
+    public function __construct(
+        GHNService $ghnService,
+        private FlashSalePricingService $flashSalePricingService,
+        private ComboPricingService $comboPricingService,
+        private CouponPricingService $couponPricingService
+    ) {
         $this->ghnService = $ghnService;
     }
 
     public function index(): JsonResponse
     {
         $user = Auth::user();
-        
+
         // Ensure relationships are loaded
         $cartItems = Cart::where('user_id', $user->id)
             ->with(['product.category', 'productVariant.productVariantValues.attributeValue.attribute'])
             ->get();
+        $this->applyFlashSalePricing($cartItems);
 
         $addresses = Address::where('user_id', $user->id)
             ->orderBy('is_default', 'desc')
             ->get();
-            
+
         $defaultAddress = $addresses->where('is_default', true)->first();
 
         // Calculate initial shipping fee
@@ -64,27 +70,42 @@ class CheckoutController extends Controller
                 'addresses' => AddressResource::collection($addresses),
                 'default_address_id' => $defaultAddress ? $defaultAddress->id : ($addresses->first() ? $addresses->first()->id : null),
                 'initial_shipping_fee' => $shippingFee,
-                'cart_summary' => $this->getCartSummary($cartItems)
-            ]
+                'cart_summary' => $this->getCartSummary($cartItems),
+            ],
         ]);
     }
 
     public function preview(Request $request): JsonResponse
     {
-        $request->validate(['address_id' => 'required|exists:addresses,id']);
+        $request->validate([
+            'address_id' => 'required|exists:addresses,id',
+            'coupon_code' => 'nullable|string|max:50',
+        ]);
         $user = Auth::user();
         $address = Address::findOrFail($request->address_id);
-        
+
         if ($address->user_id !== $user->id) {
             return response()->json(['success' => false, 'message' => 'Địa chỉ không hợp lệ.'], 403);
         }
 
-        $cartItems = Cart::where('user_id', $user->id)->get();
+        $cartItems = Cart::where('user_id', $user->id)
+            ->with(['product', 'productVariant'])
+            ->get();
+        $this->applyFlashSalePricing($cartItems);
         $shippingFee = $this->calculateShippingFee($address, $cartItems);
+        $cartSummary = $this->getCartSummary($cartItems);
+        $couponPricing = $this->couponPricingService->calculate(
+            $request->input('coupon_code'),
+            $cartSummary['total_price']
+        );
 
         return response()->json([
             'success' => true,
-            'data' => ['shipping_fee' => $shippingFee]
+            'data' => [
+                'shipping_fee' => $shippingFee,
+                'coupon' => $couponPricing['coupon'],
+                'coupon_discount' => $couponPricing['discount_amount'],
+            ],
         ]);
     }
 
@@ -97,11 +118,12 @@ class CheckoutController extends Controller
             'customer_phone' => 'required|string|max:20',
             'customer_email' => 'required|email|max:255',
             'note' => 'nullable|string|max:500',
+            'coupon_code' => 'nullable|string|max:50',
         ]);
 
         $user = Auth::user();
         $address = Address::findOrFail($request->address_id);
-        
+
         if ($address->user_id !== $user->id) {
             return response()->json(['success' => false, 'message' => 'Địa chỉ không hợp lệ.'], 403);
         }
@@ -109,6 +131,7 @@ class CheckoutController extends Controller
         $cartItems = Cart::where('user_id', $user->id)
             ->with(['product', 'productVariant'])
             ->get();
+        $this->applyFlashSalePricing($cartItems);
 
         if ($cartItems->isEmpty()) {
             return response()->json(['success' => false, 'message' => 'Giỏ hàng trống.'], 422);
@@ -118,14 +141,20 @@ class CheckoutController extends Controller
         try {
             $shippingFee = $this->calculateShippingFee($address, $cartItems);
             $cartSummary = $this->getCartSummary($cartItems);
-            
-            $subtotal = $cartSummary['total_price'];
-            $discount = 0;
-            $total = $subtotal + $shippingFee - $discount;
+            $couponPricing = $this->couponPricingService->calculate(
+                $request->input('coupon_code'),
+                $cartSummary['total_price'],
+                true
+            );
+
+            $subtotal = $cartSummary['subtotal_before_combo'];
+            $discount = $cartSummary['combo_discount'] + $couponPricing['discount_amount'];
+            $total = max($subtotal - $discount, 0) + $shippingFee;
 
             $order = Order::create([
                 'user_id' => $user->id,
-                'order_code' => 'ORD-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3))),
+                'coupon_id' => $couponPricing['coupon_id'],
+                'order_code' => 'ORD-'.date('Ymd').'-'.strtoupper(bin2hex(random_bytes(3))),
                 'status' => 'pending',
                 'payment_method' => $request->payment_method,
                 'payment_status' => 'unpaid',
@@ -146,8 +175,8 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($cartItems as $item) {
-                $price = $item->product_variant_id ? $item->productVariant->price : $item->product->price;
-                
+                $price = $item->getAttribute('pricing')['price'];
+
                 $order->orderDetails()->create([
                     'product_id' => $item->product_id,
                     'variant_id' => $item->product_variant_id,
@@ -171,7 +200,7 @@ class CheckoutController extends Controller
             try {
                 Mail::to($order->shipping_email)->send(new OrderConfirmed($order));
             } catch (\Exception $e) {
-                Log::error('Gửi mail xác nhận đơn hàng thất bại: ' . $e->getMessage());
+                Log::error('Gửi mail xác nhận đơn hàng thất bại: '.$e->getMessage());
             }
 
             return response()->json([
@@ -179,12 +208,17 @@ class CheckoutController extends Controller
                 'message' => 'Đặt hàng thành công!',
                 'data' => [
                     'order_id' => $order->id,
-                    'order_code' => $order->order_code
-                ]
+                    'order_code' => $order->order_code,
+                ],
             ]);
 
+        } catch (ValidationException $e) {
+            DB::rollBack();
+
+            throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
@@ -213,18 +247,46 @@ class CheckoutController extends Controller
     {
         $totalItems = 0;
         $totalPrice = 0;
+        $originalTotalPrice = 0;
+
         foreach ($cartItems as $item) {
             $totalItems += $item->quantity;
-            $price = $item->product_variant_id ? $item->productVariant?->price : $item->product?->price;
+            $pricing = $item->getAttribute('pricing');
+            $price = $pricing['price'];
             $totalPrice += ($price * $item->quantity);
+            $originalTotalPrice += ($pricing['original_price'] * $item->quantity);
         }
-        return ['total_items' => (int) $totalItems, 'total_price' => (float) $totalPrice];
+
+        $comboPricing = $this->comboPricingService->calculate($cartItems);
+
+        return [
+            'total_items' => (int) $totalItems,
+            'total_price' => (float) max($totalPrice - $comboPricing['combo_discount'], 0),
+            'original_total_price' => (float) $originalTotalPrice,
+            'flash_sale_savings' => (float) ($originalTotalPrice - $totalPrice),
+            'subtotal_before_combo' => (float) $totalPrice,
+            'combo_discount' => $comboPricing['combo_discount'],
+            'applied_combos' => $comboPricing['applied_combos'],
+            'applied_combo' => $comboPricing['applied_combo'],
+            'coupon_discount' => 0.0,
+            'coupon' => null,
+        ];
+    }
+
+    private function applyFlashSalePricing($cartItems): void
+    {
+        $cartItems->each(function (Cart $item) {
+            $item->setAttribute(
+                'pricing',
+                $this->flashSalePricingService->forSelection($item->product, $item->productVariant)
+            );
+        });
     }
 
     private function getVariantName($variant): string
     {
-        return $variant->productVariantValues->map(function($pvv) {
-            return $pvv->attributeValue->attribute->name . ': ' . $pvv->attributeValue->value;
+        return $variant->productVariantValues->map(function ($pvv) {
+            return $pvv->attributeValue->attribute->name.': '.$pvv->attributeValue->value;
         })->implode(', ');
     }
 }

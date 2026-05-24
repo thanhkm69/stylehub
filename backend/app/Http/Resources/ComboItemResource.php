@@ -19,7 +19,6 @@ class ComboItemResource extends JsonResource
             'combo_id'           => $this->combo_id,
             'product_id'         => $this->product_id,
             'product_variant_id' => $this->product_variant_id,
-            'role'               => $this->role,
             'quantity'           => $this->quantity,
             'product'            => new ProductResource($this->whenLoaded('product')),
             'product_variant'    => new ProductVariantResource($this->whenLoaded('productVariant')),

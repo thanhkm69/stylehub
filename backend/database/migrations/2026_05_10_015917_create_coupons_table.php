@@ -21,7 +21,6 @@ return new class extends Migration
             $table->decimal('max_discount_amount', 15, 2)->nullable();
             $table->decimal('min_order_value', 15, 2)->default(0);
             $table->integer('usage_limit')->nullable();
-            $table->integer('usage_limit_per_user')->default(1);
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('expires_at')->nullable();
             $table->boolean('status')->default(true);

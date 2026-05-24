@@ -263,18 +263,19 @@ onMounted(() => {
 
 <template>
     <div>
-    <div class="admin-page-header">
-        <div style="display: flex; align-items: center; gap: 16px;">
-            <button @click="goBack" class="btn-back" title="Quay lại">
-                <i class="ph ph-arrow-left"></i>
-            </button>
-            <div>
-                <h2 class="admin-page-title">Biến thể: <span style="color: var(--primary);">{{ product?.name }}</span>
-                </h2>
-                <p class="admin-page-desc">Quản lý các biến thể của sản phẩm.</p>
+
+        <div class="admin-page-header">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <button @click="goBack" class="btn-back" title="Quay lại">
+                    <i class="ph ph-arrow-left"></i>
+                </button>
+                <div>
+                    <h2 class="admin-page-title">Biến thể: <span style="color: var(--primary);">{{ product?.name }}</span>
+                    </h2>
+                    <p class="admin-page-desc">Quản lý các biến thể của sản phẩm.</p>
+                </div>
             </div>
         </div>
-    </div>
 
     <!-- BaseAdmin Wrap -->
     <BaseAdmin :total="totalVariants" :totalPages="totalPages" :currentPage="params.page" v-model:params="params"
@@ -369,6 +370,7 @@ onMounted(() => {
                     <BaseInputNumber labelContent="Giá sản phẩm" v-model="dataForm.price" :error="errors.price" />
                     <BaseInputNumber labelContent="Số lượng tồn kho" v-model="dataForm.stock" :error="errors.stock" />
                     <BaseInputSelect labelContent="Trạng thái" v-model="dataForm.status" :values="statusMap" />
+                    </div>
                 </template>
                 <template #button>
                     <div class="form-actions">

@@ -21,13 +21,19 @@ const productImage = computed(() => {
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN').format(price) + '₫'
 }
+
+const salePercent = computed(() => {
+  if (!props.product.sale_price || !props.product.original_price) return 0
+  return Math.round((1 - props.product.sale_price / props.product.original_price) * 100)
+})
 </script>
 
 <template>
   <router-link :to="`/products/${product.slug}`" class="product-card">
     <div class="product-image-wrapper">
       <span v-if="showBadge" class="badge new">Mới</span>
-      <WishlistButton :product-id="product.id" class="card-wishlist-btn" />
+      <span v-if="product.sale_price" class="badge sale">-{{ salePercent }}%</span>
+      <WishlistButton :product-id="product.id" :class="['card-wishlist-btn', { 'has-sale': product.sale_price }]" />
       <img :src="productImage" :alt="product.name" class="product-image" />
       <div class="product-actions">
         <button class="action-btn cart-btn" title="Thêm vào giỏ" @click.prevent>
@@ -38,7 +44,12 @@ const formatPrice = (price) => {
     <div class="product-info">
       <div class="product-category">{{ product.category?.name || 'Chưa phân loại' }}</div>
       <h3 class="product-name">{{ product.name }}</h3>
-      <div class="product-price">{{ formatPrice(product.price) }}</div>
+      <div v-if="product.sale_price" class="product-pricing">
+        <span v-if="product.sale_price_from_variant" class="price-from">Từ</span>
+        <span class="product-price sale-price">{{ formatPrice(product.sale_price) }}</span>
+        <span class="original-price">{{ formatPrice(product.original_price) }}</span>
+      </div>
+      <div v-else class="product-price">{{ formatPrice(product.price) }}</div>
     </div>
   </router-link>
 </template>
@@ -95,6 +106,13 @@ const formatPrice = (price) => {
   z-index: 2;
 }
 .badge.new { color: #10b981; }
+
+.badge.sale {
+  background: #ef3026;
+  color: #fff;
+  left: auto;
+  right: 12px;
+}
 
 .product-actions {
   position: absolute;
@@ -171,5 +189,32 @@ const formatPrice = (price) => {
 .product-price {
   font-weight: 700;
   font-size: 18px;
+}
+
+.card-wishlist-btn.has-sale {
+  top: 54px;
+}
+
+.product-pricing {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.sale-price {
+  color: #e62920;
+}
+
+.price-from {
+  color: #e62920;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.original-price {
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: line-through;
 }
 </style>

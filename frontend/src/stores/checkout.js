@@ -12,18 +12,27 @@ export const useCheckoutStore = defineStore('checkout', {
     customerEmail: '',
     cartSummary: {
       total_items: 0,
-      total_price: 0
+      total_price: 0,
+      original_total_price: 0,
+      flash_sale_savings: 0,
+      subtotal_before_combo: 0,
+      combo_discount: 0,
+      applied_combos: [],
+      applied_combo: null,
+      coupon_discount: 0,
+      coupon: null
     },
     selectedAddressId: null,
     shippingFee: 0,
     paymentMethod: 'cod',
     note: '',
     loading: false,
-    processing: false
+    processing: false,
+    couponProcessing: false
   }),
 
   getters: {
-    totalAmount: (state) => state.cartSummary.total_price + state.shippingFee,
+    totalAmount: (state) => Math.max(state.cartSummary.total_price - (state.cartSummary.coupon_discount || 0), 0) + state.shippingFee,
     selectedAddress: (state) => state.addresses.find(addr => addr.id === state.selectedAddressId)
   },
 
@@ -86,15 +95,55 @@ export const useCheckoutStore = defineStore('checkout', {
       }
 
       try {
-        const res = await axios.post(`${API_URL}/checkout/preview`, { address_id: addressId }, {
+        const res = await axios.post(`${API_URL}/checkout/preview`, {
+          address_id: addressId,
+          coupon_code: this.cartSummary.coupon?.code || null
+        }, {
           headers: { Authorization: `Bearer ${tokenStore.token}` }
         })
         if (res.data.success) {
           this.shippingFee = res.data.data.shipping_fee
+          this.cartSummary.coupon = res.data.data.coupon
+          this.cartSummary.coupon_discount = res.data.data.coupon_discount
         }
       } catch (error) {
+        if (this.cartSummary.coupon) {
+          this.removeCoupon()
+        }
         console.error('Update shipping fee error', error)
       }
+    },
+
+    async applyCoupon(couponCode) {
+      const tokenStore = useTokenStore()
+      this.couponProcessing = true
+      try {
+        const res = await axios.post(`${API_URL}/checkout/preview`, {
+          address_id: this.selectedAddressId,
+          coupon_code: couponCode.trim()
+        }, {
+          headers: { Authorization: `Bearer ${tokenStore.token}` }
+        })
+
+        this.shippingFee = res.data.data.shipping_fee
+        this.cartSummary.coupon = res.data.data.coupon
+        this.cartSummary.coupon_discount = res.data.data.coupon_discount
+
+        return { success: true, message: 'Áp dụng mã giảm giá thành công.' }
+      } catch (error) {
+        const data = error.response?.data
+        return {
+          success: false,
+          message: data?.errors?.coupon_code?.[0] || data?.message || 'Mã giảm giá không hợp lệ.'
+        }
+      } finally {
+        this.couponProcessing = false
+      }
+    },
+
+    removeCoupon() {
+      this.cartSummary.coupon = null
+      this.cartSummary.coupon_discount = 0
     },
 
     async placeOrder() {
@@ -107,7 +156,8 @@ export const useCheckoutStore = defineStore('checkout', {
           note: this.note,
           customer_name: this.customerName,
           customer_phone: this.customerPhone,
-          customer_email: this.customerEmail
+          customer_email: this.customerEmail,
+          coupon_code: this.cartSummary.coupon?.code || null
         }, {
           headers: { Authorization: `Bearer ${tokenStore.token}` }
         })

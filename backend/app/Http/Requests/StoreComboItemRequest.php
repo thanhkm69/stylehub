@@ -25,7 +25,6 @@ class StoreComboItemRequest extends FormRequest
             'combo_id'           => 'required|exists:combos,id',
             'product_id'         => 'required|exists:products,id',
             'product_variant_id' => 'nullable|exists:product_variants,id',
-            'role'               => 'required|in:main,gift,bundle',
             'quantity'           => 'required|integer|min:1',
         ];
     }
@@ -41,8 +40,6 @@ class StoreComboItemRequest extends FormRequest
             'product_id.required'    => 'Sản phẩm không được để trống.',
             'product_id.exists'      => 'Sản phẩm không tồn tại.',
             'product_variant_id.exists' => 'Biến thể không tồn tại.',
-            'role.required'          => 'Vai trò không được để trống.',
-            'role.in'                => 'Vai trò không hợp lệ (main, gift, bundle).',
             'quantity.required'      => 'Số lượng không được để trống.',
             'quantity.integer'       => 'Số lượng phải là số nguyên.',
             'quantity.min'           => 'Số lượng tối thiểu là 1.',

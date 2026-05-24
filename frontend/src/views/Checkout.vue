@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { useCheckoutStore } from '@/stores/checkout'
@@ -32,12 +32,25 @@ onMounted(async () => {
     }
 })
 
-const applyCoupon = () => {
-    if (!couponCode.value) {
+const applyCoupon = async () => {
+    if (!couponCode.value.trim()) {
         toast.error('Vui lòng nhập mã giảm giá')
         return
     }
-    toast.info('Tính năng mã giảm giá đang được cập nhật!')
+
+    const res = await checkoutStore.applyCoupon(couponCode.value)
+    if (res.success) {
+        couponCode.value = checkoutStore.cartSummary.coupon.code
+        toast.success(res.message)
+    } else {
+        toast.error(res.message)
+    }
+}
+
+const removeCoupon = () => {
+    checkoutStore.removeCoupon()
+    couponCode.value = ''
+    toast.success('Đã bỏ mã giảm giá.')
 }
 
 const handlePlaceOrder = async () => {
@@ -253,23 +266,55 @@ const getProductImage = (item) => {
                                 <div class="item-details flex-grow-1 overflow-hidden">
                                     <div class="fw-bold text-truncate-2 small">{{ item.product?.name }}</div>
                                     <div v-if="item.variant_name" class="variant-text mt-1">Phân loại: {{ item.variant_name }}</div>
-                                    <div class="fw-black text-primary mt-1 small">{{ formatPrice(item.price) }}</div>
+                                    <div class="fw-black mt-1 small" :class="item.flash_sale ? 'text-danger' : 'text-primary'">
+                                        {{ formatPrice(item.price) }}
+                                        <span v-if="item.flash_sale" class="original-price ms-1">{{ formatPrice(item.original_price) }}</span>
+                                    </div>
+                                    <div v-if="item.flash_sale" class="flash-sale-label"><i class="ph-fill ph-lightning"></i> Flash Sale</div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="coupon-section mb-4">
                             <div class="input-group">
-                                <input type="text" v-model="couponCode" class="form-control input-premium border-end-0 py-2 x-small" placeholder="Mã giảm giá">
-                                <button @click="applyCoupon" class="btn btn-dark px-3 rounded-end-4 fw-bold x-small">Áp dụng</button>
+                                <input type="text" v-model="couponCode" @keyup.enter="applyCoupon" class="form-control input-premium border-end-0 py-2 x-small" placeholder="Mã giảm giá">
+                                <button @click="applyCoupon" :disabled="checkoutStore.couponProcessing" class="btn btn-dark px-3 rounded-end-4 fw-bold x-small">
+                                    {{ checkoutStore.couponProcessing ? 'Đang kiểm tra' : 'Áp dụng' }}
+                                </button>
+                            </div>
+                            <div v-if="checkoutStore.cartSummary.coupon" class="applied-coupon mt-2">
+                                <div>
+                                    <strong>{{ checkoutStore.cartSummary.coupon.code }}</strong>
+                                    <small>{{ checkoutStore.cartSummary.coupon.name }}</small>
+                                </div>
+                                <button type="button" @click="removeCoupon">Bỏ mã</button>
                             </div>
                         </div>
 
                         <div class="pricing-box">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted x-small">Tạm tính:</span>
-                                <span class="fw-bold x-small">{{ formatPrice(checkoutStore.cartSummary.total_price) }}</span>
-                            </div>
+                <div v-if="checkoutStore.cartSummary.applied_combos?.length" class="applied-combo mb-3">
+                  <div class="combo-label"><i class="ph-fill ph-tag"></i> Combo đã áp dụng</div>
+                  <div v-for="combo in checkoutStore.cartSummary.applied_combos" :key="combo.id" class="checkout-combo-line">
+                    <strong>{{ combo.name }}</strong>
+                    <small>-{{ formatPrice(combo.discount_amount) }}</small>
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="text-muted x-small">Tạm tính:</span>
+                  <span class="fw-bold x-small">{{ formatPrice(checkoutStore.cartSummary.subtotal_before_combo ?? checkoutStore.cartSummary.total_price) }}</span>
+                </div>
+                <div v-if="checkoutStore.cartSummary.flash_sale_savings > 0" class="d-flex justify-content-between mb-2 text-danger">
+                  <span class="fw-bold x-small">Tiết kiệm Flash Sale:</span>
+                  <span class="fw-bold x-small">-{{ formatPrice(checkoutStore.cartSummary.flash_sale_savings) }}</span>
+                </div>
+                <div v-if="checkoutStore.cartSummary.combo_discount > 0" class="d-flex justify-content-between mb-2 combo-saving">
+                  <span class="fw-bold x-small">Giảm giá Combo:</span>
+                  <span class="fw-bold x-small">-{{ formatPrice(checkoutStore.cartSummary.combo_discount) }}</span>
+                </div>
+                <div v-if="checkoutStore.cartSummary.coupon_discount > 0" class="d-flex justify-content-between mb-2 coupon-saving">
+                  <span class="fw-bold x-small">Mã giảm giá:</span>
+                  <span class="fw-bold x-small">-{{ formatPrice(checkoutStore.cartSummary.coupon_discount) }}</span>
+                </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted x-small">Phí vận chuyển:</span>
                                 <span class="fw-bold text-success x-small">+{{ formatPrice(checkoutStore.shippingFee) }}</span>
@@ -462,6 +507,43 @@ const getProductImage = (item) => {
 }
 
 .variant-text { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+.original-price { color: #94a3b8; font-size: 10px; font-weight: 600; text-decoration: line-through; }
+.flash-sale-label { color: #dc2626; font-size: 9px; font-weight: 800; margin-top: 2px; text-transform: uppercase; }
+.applied-combo {
+    background: linear-gradient(120deg, #fff4ef, #ffe7dc);
+    border: 1px solid #ffd0bf;
+    border-radius: 12px;
+    color: #892715;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 11px 12px;
+}
+.combo-label { color: #e24326; font-size: 9px; font-weight: 900; text-transform: uppercase; }
+.applied-combo strong { font-size: 12px; }
+.applied-combo small { color: #a5503e; font-size: 10px; font-weight: 700; }
+.checkout-combo-line { display: flex; justify-content: space-between; gap: 8px; }
+.combo-saving { color: #e24326; }
+.coupon-saving { color: #16a34a; }
+.applied-coupon {
+    align-items: center;
+    background: #effcf3;
+    border: 1px dashed #86efac;
+    border-radius: 12px;
+    color: #166534;
+    display: flex;
+    justify-content: space-between;
+    padding: 9px 12px;
+}
+.applied-coupon strong { display: block; font-size: 12px; }
+.applied-coupon small { color: #4b8060; display: block; font-size: 10px; }
+.applied-coupon button {
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 10px;
+    font-weight: 800;
+}
 
 .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;

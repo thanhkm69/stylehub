@@ -5,6 +5,8 @@ import { API_URL_IMAGE } from '@/config/env'
 import ProductCard from '@/components/features/products/ProductCard.vue'
 import BaseLoading from '@/components/base/BaseLoading.vue'
 import HomeCoupons from '@/components/home/HomeCoupons.vue'
+import HomeFlashSale from '@/components/home/HomeFlashSale.vue'
+import HomeCombos from '@/components/home/HomeCombos.vue'
 
 const store = useProductPublicStore()
 const carouselRef = ref(null)
@@ -63,29 +65,20 @@ onUnmounted(() => {
 <template>
   <main>
     <!-- Hero Section -->
-    <section class="hero container relative group" @mouseenter="stopAutoSlide" @mouseleave="startAutoSlide">
-      <div v-if="store.homeData.banners?.length" class="banner-carousel" ref="carouselRef">
-        <a :href="banner.link || '#'" :target="banner.link?.startsWith('http') ? '_blank' : '_self'" class="hero-inner" v-for="banner in store.homeData.banners" :key="banner.id">
-          <img :src="`${API_URL_IMAGE}/${banner.image}`" :alt="banner.title || 'Banner'" class="hero-image-full">
-        </a>
-      </div>
-      
-      <!-- Next/Prev Buttons -->
-      <button v-if="store.homeData.banners?.length > 1" @click="scrollCarousel('prev')" class="carousel-btn prev-btn">
-        <i class="ph ph-caret-left"></i>
-      </button>
-      <button v-if="store.homeData.banners?.length > 1" @click="scrollCarousel('next')" class="carousel-btn next-btn">
-        <i class="ph ph-caret-right"></i>
-      </button>
-
-      <!-- Fallback -->
-      <div v-if="!store.homeData.banners?.length" class="hero-inner">
-        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop" alt="Thời trang StyleHub" class="hero-image-full">
+    <section class="hero container">
+      <div class="hero-inner">
+        <div class="hero-content">
+          <h1>Định Hình<br>Phong Cách Của Bạn</h1>
+          <p>Khám phá bộ sưu tập mùa hè mới nhất với các thiết kế độc quyền, chất liệu cao cấp và form dáng chuẩn mực
+            dành riêng cho bạn.</p>
+          <router-link to="/shop" class="btn btn-primary">
+            Mua sắm ngay <i class="ph ph-arrow-right" style="margin-left: 8px;"></i>
+          </router-link>
+        </div>
+        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop"
+          alt="Thời trang StyleHub" class="hero-image">
       </div>
     </section>
-
-    <!-- Featured Coupons -->
-    <HomeCoupons />
 
     <!-- Categories Section -->
     <section v-if="store.homeData.categories?.length" class="categories-section container">
@@ -96,18 +89,12 @@ onUnmounted(() => {
         </div>
       </div>
       <div class="category-grid">
-        <router-link
-          v-for="cat in store.homeData.categories"
-          :key="cat.id"
-          :to="{ name: 'Shop', query: { category_id: cat.id } }"
-          class="category-card"
-        >
+        <router-link v-for="cat in store.homeData.categories" :key="cat.id"
+          :to="{ name: 'Shop', query: { category_id: cat.id } }" class="category-card">
           <div class="category-image-wrapper">
             <img
               :src="cat.image ? `${API_URL_IMAGE}/${cat.image}` : 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=500&auto=format&fit=crop'"
-              :alt="cat.name"
-              class="category-image"
-            />
+              :alt="cat.name" class="category-image" />
             <div class="category-overlay"></div>
           </div>
           <div class="category-info">
@@ -118,39 +105,29 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- New Arrivals Section -->
-    <section class="products-section container">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">Hàng mới về</h2>
-          <p style="color: var(--text-muted); margin-top: 8px;">Những mẫu thiết kế vừa cập bến StyleHub.</p>
-        </div>
-        <router-link to="/shop" class="view-all">Xem tất cả <i class="ph ph-caret-right"></i></router-link>
-      </div>
+    <!-- Flash Sale Section -->
+    <HomeFlashSale v-if="store.homeData.flash_sales?.length" :flashSales="store.homeData.flash_sales" />
 
-      <BaseLoading v-if="store.loading" text="Đang tải sản phẩm..." />
+    <!-- Combo Section -->
+    <HomeCombos v-if="store.homeData.combos?.length" :combos="store.homeData.combos" />
 
-      <div v-else-if="store.homeData.new_arrivals?.length" class="product-grid">
-        <ProductCard
-          v-for="product in store.homeData.new_arrivals"
-          :key="product.id"
-          :product="product"
-          :showBadge="true"
-        />
-      </div>
+      <!-- Featured Coupons -->
+    <HomeCoupons />
 
-      <div v-else-if="!store.loading" class="empty-state">
-        <i class="ph ph-package"></i>
-        <p>Chưa có sản phẩm nào.</p>
-      </div>
-    </section>
   </main>
 </template>
 
 <style scoped>
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero {
@@ -275,7 +252,7 @@ onUnmounted(() => {
 .category-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, transparent 60%);
 }
 
 .category-info {
@@ -309,14 +286,15 @@ onUnmounted(() => {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;
 }
+
 .product-name {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    display: -webkit-box;
-    /* -webkit-line-clamp: 1; */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  /* -webkit-line-clamp: 1; */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .empty-state {
@@ -336,9 +314,14 @@ onUnmounted(() => {
   .hero-inner {
     height: 400px;
   }
-  .hero-image-full {
+
+  .hero-image {
+    position: relative;
+    width: 100%;
+    height: 300px;
     border-radius: var(--radius-md);
   }
+
   .category-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -348,6 +331,7 @@ onUnmounted(() => {
   .hero-inner {
     height: 300px;
   }
+
   .product-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
