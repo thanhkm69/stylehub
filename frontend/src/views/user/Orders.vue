@@ -4,6 +4,7 @@ import axios from 'axios'
 import { API_URL, API_URL_IMAGE } from '@/config/env'
 import { useTokenStore } from '@/stores/token'
 import BaseLoading from '@/components/base/BaseLoading.vue'
+import UserReviewModal from '@/components/features/reviews/UserReviewModal.vue'
 
 const tokenStore = useTokenStore()
 const orders = ref([])
@@ -20,6 +21,18 @@ const pagination = ref({
 // Modal state
 const showModal = ref(false)
 const selectedOrder = ref(null)
+
+// Review Modal state
+const showReviewModal = ref(false)
+const reviewOrderId = ref(null)
+const reviewItems = ref([])
+
+const openWriteReview = (orderId, item) => {
+    reviewOrderId.value = orderId
+    reviewItems.value = [item]
+    showModal.value = false
+    showReviewModal.value = true
+}
 
 const filters = [
     { label: 'Tất cả', value: 'all' },
@@ -86,6 +99,20 @@ const changePage = (page) => {
 const openDetails = (order) => {
     selectedOrder.value = order
     showModal.value = true
+}
+
+const isOrderFullyReviewed = (order) => {
+    return (order.order_details || []).every(item => item.is_reviewed)
+}
+
+const openOrderReviewDirectly = (order) => {
+    const unreviewed = (order.order_details || []).filter(i => !i.is_reviewed)
+    if (unreviewed.length > 0) {
+        reviewOrderId.value = order.id
+        reviewItems.value = unreviewed
+        showModal.value = false
+        showReviewModal.value = true
+    }
 }
 
 const formatPrice = (price) => {
@@ -176,6 +203,7 @@ const getProductImage = (item) => {
                         </div>
                         <div class="fw-black text-primary xx-small">{{ formatPrice(item.price) }}</div>
                     </div>
+
                     <div v-if="order.order_details?.length > 2" class="text-center py-1 bg-light rounded-2 xxx-small fw-bold text-muted">
                         + {{ order.order_details.length - 2 }} sản phẩm khác
                     </div>
@@ -187,10 +215,19 @@ const getProductImage = (item) => {
                         <span class="text-muted xxx-small uppercase fw-bold d-block mb-0">Tổng cộng</span>
                         <span class="fw-black text-dark small mb-0">{{ formatPrice(order.total_amount) }}</span>
                     </div>
-                    <button @click="openDetails(order)" class="btn btn-dark rounded-pill px-3 py-1 xx-small fw-black">
-                        CHI TIẾT
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button v-if="order.status === 'delivered'" 
+                                :disabled="isOrderFullyReviewed(order)"
+                                @click="openOrderReviewDirectly(order)" 
+                                :class="['btn-write-review-footer', { 'btn-reviewed-footer': isOrderFullyReviewed(order) }]">
+                            {{ isOrderFullyReviewed(order) ? 'Đã đánh giá' : 'Đánh giá' }}
+                        </button>
+                        <button @click="openDetails(order)" class="btn btn-dark rounded-pill px-3 py-1 xx-small fw-black">
+                            CHI TIẾT
+                        </button>
+                    </div>
                 </div>
+
             </div>
 
             <!-- Pagination -->
@@ -279,7 +316,15 @@ const getProductImage = (item) => {
                                 <div v-if="item.variant_name" class="variant-tag-sm">{{ item.variant_name }}</div>
                                 <div class="d-flex justify-content-between align-items-center mt-1">
                                     <span class="xxx-small fw-bold text-muted">Số lượng: {{ item.quantity }}</span>
-                                    <span class="fw-black text-primary xx-small">{{ formatPrice(item.price) }}</span>
+                                    <div class="d-flex flex-column align-items-end gap-1">
+                                        <span class="fw-black text-primary xx-small">{{ formatPrice(item.price) }}</span>
+                                        <button v-if="selectedOrder.status === 'delivered'" 
+                                                :disabled="item.is_reviewed" 
+                                                @click="openWriteReview(selectedOrder.id, item)" 
+                                                :class="['btn-write-review mt-1', { 'btn-reviewed': item.is_reviewed }]">
+                                            {{ item.is_reviewed ? 'Đã đánh giá' : 'Viết đánh giá' }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -315,6 +360,14 @@ const getProductImage = (item) => {
                 </div>
             </div>
         </div>
+
+        <!-- User Review Modal -->
+        <UserReviewModal
+            v-model:isShow="showReviewModal"
+            :orderId="reviewOrderId"
+            :items="reviewItems"
+            @success="fetchOrders"
+        />
     </div>
 </template>
 
@@ -402,4 +455,58 @@ const getProductImage = (item) => {
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 .filter-tabs::-webkit-scrollbar { display: none; }
+
+.btn-write-review {
+    background: #eff6ff;
+    color: var(--primary);
+    border: 1px solid #bfdbfe;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+.btn-write-review:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-write-review.btn-reviewed {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: #cbd5e1;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-write-review-footer {
+    background: #eff6ff;
+    color: var(--primary);
+    border: 1px solid #bfdbfe;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 6px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.btn-write-review-footer:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.btn-write-review-footer.btn-reviewed-footer {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: #cbd5e1;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 </style>
+

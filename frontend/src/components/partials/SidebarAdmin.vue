@@ -16,6 +16,7 @@ const menuItems = [
     { name: 'Danh mục', path: '/admin/blog-categories', icon: 'ph-article' },
     { name: 'Bài viết', path: '/admin/posts', icon: 'ph-newspaper' },
     { name: 'Banner', path: '/admin/banners', icon: 'ph-image' },
+    { name: 'Đánh giá', path: '/admin/reviews', icon: 'ph-star' },
 
 ];
 
