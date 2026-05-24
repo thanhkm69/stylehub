@@ -300,9 +300,6 @@ watch(() => route.params.slug, (newSlug) => {
             >
               <i class="ph ph-shopping-cart-simple"></i> {{ displayStock !== null && displayStock <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng' }}
             </BaseButton>
-            <button class="btn btn-primary btn-add-cart">
-              <i class="ph ph-shopping-cart-simple"></i> Thêm vào giỏ hàng
-            </button>
           </div>
 
           <!-- Description -->

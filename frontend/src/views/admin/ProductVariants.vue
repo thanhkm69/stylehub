@@ -263,100 +263,6 @@ onMounted(() => {
 
 <template>
     <div>
-
-        <!-- BaseAdmin Wrap -->
-        <BaseAdmin title="Quản lý Biến thể" description="Quản lý các biến thể của sản phẩm." :total="totalVariants"
-            :totalPages="totalPages" :currentPage="params.page" v-model:params="params" :sortMap="sortMap"
-            :filterMap="filterMap" :limitMap="limitMap" @search="search" @open="openCreateForm"
-            @changePage="changePage">
-            <template #filters>
-                <BaseButton @click="goBack" customClass="btn btn-outline" customText="Quay lại"
-                    style="padding: 8px 16px; margin-right: 8px;" />
-            </template>
-            <template #table>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Ảnh</th>
-                            <th>SKU</th>
-                            <th>Giá</th>
-                            <th>Tồn kho</th>
-                            <th>Trạng thái</th>
-                            <th>Hành động</th>
-                            <th>Giá trị</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-if="loadingData">
-                            <td colspan="6" class="text-center" style="padding: 24px;">
-                                <BaseLoading />
-                            </td>
-                        </tr>
-                        <tr v-else-if="values.length === 0">
-                            <td colspan="6" class="text-center" style="padding: 24px; color: var(--text-muted);">
-                                Chưa có biến thể nào
-                            </td>
-                        </tr>
-                        <tr v-else v-for="item in values" :key="item.id">
-                            <td>
-                                <img v-if="item.image" :src="`${API_URL_IMAGE}/${item.image}`" alt="preview"
-                                    style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />
-                            </td>
-                            <td><strong style="color: var(--text-main);">{{ item.sku }}</strong></td>
-                            <td>{{ new Intl.NumberFormat('vi-VN', {
-                                style: 'currency', currency: 'VND'
-                            }).format(item.price)
-                            }}</td>
-                            <td>
-                                <span :style="{ color: item.stock > 0 ? 'var(--text-main)' : 'var(--danger)' }">
-                                    {{ item.stock > 0 ? item.stock : 'Hết hàng' }}
-                                </span>
-                            </td>
-                            <td>
-                                <span :class="['badge-status', item.status ? 'badge-active' : 'badge-inactive']">
-                                    {{ item.status ? 'Hiện' : 'Ẩn' }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="action-group">
-                                    <BaseButton @click="editValue(item)" customText="Sửa"
-                                        customClass="btn-action btn-edit" />
-                                    <BaseButton @click="destroyValue(item.id)" customText="Xóa"
-                                        customClass="btn-action btn-delete" />
-                                </div>
-                            </td>
-                            <td>
-                                <div class="action-group">
-                                    <BaseButton @click="openValues(item)" customText="Giá trị"
-                                        customClass="btn-action btn-attribute" />
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </template>
-        </BaseAdmin>
-
-        <!-- Modal Form Thêm/Sửa -->
-        <BaseModal @close="closeForm" :isShow="isShowFormModal" :title="isEdit ? 'Sửa biến thể' : 'Thêm biến thể mới'"
-            customWidth="600px">
-            <BaseForm @handleSubmit="submit">
-                <template #input>
-                    <div class="image-upload-wrapper" style="margin-bottom: 16px;">
-                        <div v-if="dataForm.preview" class="image-preview-large">
-                            <img :src="dataForm.preview" alt="Preview" />
-                            <div class="preview-overlay">Xem trước</div>
-                        </div>
-                        <div v-else class="image-placeholder">
-                            <i class="ph ph-image-square"></i>
-                            <p>Chưa có ảnh</p>
-                        </div>
-
-                        <div class="upload-input-container">
-                            <BaseInputFile labelContent="" customId="image" :error="errors.image" customAccept="image/*"
-                                @change="handleImageChange" />
-                            <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
-                        </div>
     <div class="admin-page-header">
         <div style="display: flex; align-items: center; gap: 16px;">
             <button @click="goBack" class="btn-back" title="Quay lại">
@@ -456,6 +362,7 @@ onMounted(() => {
                             @change="handleImageChange" />
                         <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
                     </div>
+                </div>
 
                     <BaseInputText labelContent="Mã SKU" customId="val_sku" v-model="dataForm.sku"
                         customPlaceholderInput="Ví dụ: AO-DO-M" :error="errors.sku" />
