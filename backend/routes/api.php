@@ -31,6 +31,7 @@ use App\Http\Controllers\BlogPublicController;
 use App\Http\Controllers\VNPayController;
 use App\Http\Controllers\MoMoController;
 use App\Http\Controllers\BannerController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -75,6 +76,10 @@ Route::prefix('momo')->group(function () {
     Route::get('return', [MoMoController::class, 'return']);
     Route::post('notify', [MoMoController::class, 'notify']);
 });
+
+// Public Reviews
+Route::get('reviews', [ReviewController::class, 'index']);
+Route::get('reviews/{review}', [ReviewController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {
   Route::post('logout', [AuthController::class, 'logout']);
@@ -128,6 +133,11 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::post('momo/create-payment', 'createPayment');
       Route::get('momo/status/{order}', 'status');
   });
+
+  // User Review Routes
+  Route::post('reviews', [ReviewController::class, 'store']);
+  Route::post('reviews/{review}', [ReviewController::class, 'update']);
+  Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
 
   Route::middleware('abilities:Admin')->group(function () {
 
@@ -289,6 +299,12 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('banners/{banner}', 'show');
       Route::post('banners/{banner}', 'update');
       Route::delete('banners/{banner}', 'destroy');
+    });
+
+    // Admin Review Routes
+    Route::controller(ReviewController::class)->group(function () {
+      Route::get('admin/reviews', 'adminIndex');
+      Route::post('admin/reviews/{review}/toggle-status', 'adminToggleStatus');
     });
   });
 });

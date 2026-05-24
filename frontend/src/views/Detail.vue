@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductPublicStore } from '@/stores/productPublic'
+import { useReviewStore } from '@/stores/review'
 import { useCartStore } from '@/stores/cart'
 import { useNotify } from '@/composables/useNotify'
 import { API_URL_IMAGE } from '@/config/env'
@@ -191,24 +192,44 @@ const handleAddToCart = async () => {
 }
 
 // ── Fetch ──
+const reviewStore = useReviewStore()
+const productReviews = ref([])
+const loadingReviews = ref(false)
+
+const loadProductReviews = async (productId) => {
+  loadingReviews.value = true
+  try {
+    const res = await reviewStore.index({ product_id: productId, status: 'true' })
+    if (res?.success) {
+      productReviews.value = res.data ?? []
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loadingReviews.value = false
+  }
+}
+
+const avgRating = computed(() => {
+  if (productReviews.value.length === 0) return '5.0'
+  const sum = productReviews.value.reduce((acc, r) => acc + r.rating, 0)
+  return (sum / productReviews.value.length).toFixed(1)
+})
+
 const loadProduct = async (slug) => {
   selectedImageIndex.value = 0
   selectedVariant.value = null
   selectedAttributes.value = {}
   quantity.value = 1
   await store.show(slug)
+  if (store.product) {
+    loadProductReviews(store.product.id)
+  }
 }
 
 onMounted(() => {
   loadProduct(route.params.slug)
 })
-
-const mockReviews = [
-  { id: 1, author: 'Nguyễn Văn A', rating: 5, date: '2026-05-10', comment: 'Sản phẩm tuyệt vời! Chất vải rất mềm và mát, form dáng chuẩn như hình. Giao hàng cực nhanh.' },
-  { id: 2, author: 'Trần Thị B', rating: 4, date: '2026-05-08', comment: 'Đồ đẹp, đường may sắc sảo. Tuy nhiên màu sắc thực tế hơi đậm hơn trên ảnh một chút nhưng vẫn rất hài lòng.' },
-  { id: 3, author: 'Lê Văn C', rating: 5, date: '2026-05-05', comment: 'Shop phục vụ rất nhiệt tình, tư vấn size chuẩn. Lần sau sẽ tiếp tục ủng hộ shop.' },
-  { id: 4, author: 'Phạm Minh D', rating: 5, date: '2026-05-01', comment: 'Xứng đáng 5 sao cho chất lượng và dịch vụ. Phối đồ rất dễ và trông rất sang.' }
-];
 
 watch(() => route.params.slug, (newSlug) => {
   if (newSlug) {
@@ -277,7 +298,7 @@ watch(() => route.params.slug, (newSlug) => {
             <div class="product-meta">
               <span class="meta-item star-rating">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#f59e0b" viewBox="0 0 256 256"><path d="M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z"></path></svg>
-                4.8 <span class="review-count">(124 đánh giá)</span>
+                {{ avgRating }} <span class="review-count">({{ productReviews.length }} đánh giá)</span>
               </span>
               <span class="meta-separator">•</span>
               <span class="meta-item"><i class="ph ph-eye"></i> {{ store.product.views }} lượt xem</span>
@@ -402,29 +423,45 @@ watch(() => route.params.slug, (newSlug) => {
         <div class="section-header">
           <h2 class="section-title">Đánh giá từ khách hàng</h2>
           <div class="rating-summary">
-            <div class="avg-rating">4.8</div>
+            <div class="avg-rating">{{ avgRating }}</div>
             <div class="rating-stars">
-              <i v-for="i in 5" :key="i" class="ph-fill ph-star" :style="{ color: i <= 4 ? '#f59e0b' : '#e2e8f0' }"></i>
+              <i v-for="i in 5" :key="i" class="ph-fill ph-star" :style="{ color: i <= Math.round(Number(avgRating)) ? '#f59e0b' : '#e2e8f0' }"></i>
             </div>
-            <div class="total-reviews">({{ mockReviews.length }} đánh giá)</div>
+            <div class="total-reviews">({{ productReviews.length }} đánh giá)</div>
           </div>
         </div>
-
-        <div class="reviews-list">
-          <div v-for="review in mockReviews" :key="review.id" class="review-item">
+ 
+        <div v-if="loadingReviews" style="text-align: center; padding: 24px 0;">
+          <BaseLoading text="Đang tải đánh giá..." />
+        </div>
+        <div v-else-if="productReviews.length === 0" class="no-reviews-box" style="text-align: center; padding: 40px 0; color: var(--text-muted);">
+          <i class="ph ph-chat-centered-dots" style="font-size: 40px; margin-bottom: 8px; display: block; color: #cbd5e1;"></i>
+          Chưa có đánh giá nào cho sản phẩm này.
+        </div>
+        <div v-else class="reviews-list">
+          <div v-for="review in productReviews" :key="review.id" class="review-item">
             <div class="review-user">
-              <div class="user-avatar">{{ review.author.charAt(0) }}</div>
+              <div class="user-avatar">{{ (review.user?.name || 'A').charAt(0) }}</div>
               <div class="user-info">
-                <h4 class="user-name">{{ review.author }}</h4>
+                <h4 class="user-name">{{ review.user?.name || 'Ẩn danh' }}</h4>
                 <div class="review-meta">
                   <div class="item-stars">
                     <i v-for="i in 5" :key="i" class="ph-fill ph-star" :style="{ color: i <= review.rating ? '#f59e0b' : '#e2e8f0' }"></i>
                   </div>
-                  <span class="review-date">{{ formatDate(review.date) }}</span>
+                  <span class="review-date">{{ formatDate(review.created_at) }}</span>
                 </div>
               </div>
             </div>
-            <p class="review-comment">{{ review.comment }}</p>
+            <p class="review-comment">{{ review.comment || 'Khách hàng không để lại bình luận.' }}</p>
+            
+            <!-- Uploaded Review Images -->
+            <div v-if="review.images && review.images.length > 0" class="review-images-row">
+              <div v-for="(img, idx) in review.images" :key="idx" class="review-img-wrapper">
+                <a :href="`${API_URL_IMAGE}/${img}`" target="_blank" title="Xem ảnh đầy đủ">
+                  <img :src="`${API_URL_IMAGE}/${img}`" alt="Review Photo" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1066,6 +1103,34 @@ watch(() => route.params.slug, (newSlug) => {
   line-height: 1.6;
   color: var(--text-main);
   opacity: 0.9;
+}
+
+.review-images-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.review-img-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+}
+
+.review-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s;
+}
+
+.review-img-wrapper:hover img {
+  transform: scale(1.05);
 }
 
 @media (max-width: 768px) {

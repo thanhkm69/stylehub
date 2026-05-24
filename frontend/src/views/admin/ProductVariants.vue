@@ -348,30 +348,31 @@ onMounted(() => {
         customWidth="600px">
         <BaseForm @handleSubmit="submit">
             <template #input>
-                <div class="image-upload-wrapper" style="margin-bottom: 16px;">
-                    <div v-if="dataForm.preview" class="image-preview-large">
-                        <img :src="dataForm.preview" alt="Preview" />
-                        <div class="preview-overlay">Xem trước</div>
-                    </div>
-                    <div v-else class="image-placeholder">
-                        <i class="ph ph-image-square"></i>
-                        <p>Chưa có ảnh</p>
-                    </div>
+                <div class="space-y-4">
+                    <div class="image-upload-wrapper" style="margin-bottom: 16px;">
+                        <div v-if="dataForm.preview" class="image-preview-large">
+                            <img :src="dataForm.preview" alt="Preview" />
+                            <div class="preview-overlay">Xem trước</div>
+                        </div>
+                        <div v-else class="image-placeholder">
+                            <i class="ph ph-image-square"></i>
+                            <p>Chưa có ảnh</p>
+                        </div>
 
-                    <div class="upload-input-container">
-                        <BaseInputFile labelContent="" customId="image" :error="errors.image" customAccept="image/*"
-                            @change="handleImageChange" />
-                        <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
+                        <div class="upload-input-container">
+                            <BaseInputFile labelContent="" customId="image" :error="errors.image" customAccept="image/*"
+                                @change="handleImageChange" />
+                            <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
+                        </div>
                     </div>
-                </div>
 
                     <BaseInputText labelContent="Mã SKU" customId="val_sku" v-model="dataForm.sku"
                         customPlaceholderInput="Ví dụ: AO-DO-M" :error="errors.sku" />
                     <BaseInputNumber labelContent="Giá sản phẩm" v-model="dataForm.price" :error="errors.price" />
                     <BaseInputNumber labelContent="Số lượng tồn kho" v-model="dataForm.stock" :error="errors.stock" />
                     <BaseInputSelect labelContent="Trạng thái" v-model="dataForm.status" :values="statusMap" />
-                    </div>
-                </template>
+                </div>
+            </template>
                 <template #button>
                     <div class="form-actions">
                         <BaseButton @click="closeForm" customType="button" customText="Hủy bỏ"

@@ -76,6 +76,11 @@ const router = createRouter({
           name: 'Banners',
           component: () => import('@/views/admin/Banners.vue'),
         },
+        {
+          path: 'reviews',
+          name: 'AdminReviews',
+          component: () => import('@/views/admin/Reviews.vue'),
+        },
       ],
     },
 

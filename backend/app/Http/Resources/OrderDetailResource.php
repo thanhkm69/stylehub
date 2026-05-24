@@ -20,6 +20,10 @@ class OrderDetailResource extends JsonResource
             'quantity' => (int) $this->quantity,
             'subtotal' => (float) $this->subtotal,
             'product_thumbnail' => $this->product?->thumbnail,
+            'is_reviewed' => \App\Models\Review::where('user_id', auth()->id() ?? $this->order?->user_id)
+                ->where('order_id', $this->order_id)
+                ->where('product_id', $this->product_id)
+                ->exists(),
             'product' => new ProductListResource($this->whenLoaded('product')),
             'variant' => new ProductVariantPublicResource($this->whenLoaded('productVariant')),
         ];
