@@ -30,6 +30,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\BlogPublicController;
 use App\Http\Controllers\VNPayController;
 use App\Http\Controllers\MoMoController;
+use App\Http\Controllers\BannerController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -279,6 +280,14 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('posts/{post}', 'show');
       Route::post('posts/{post}', 'update');
       Route::delete('posts/{post}', 'destroy');
+    });
+
+    Route::controller(BannerController::class)->group(function () {
+      Route::get('banners', 'index');
+      Route::post('banners', 'store');
+      Route::get('banners/{banner}', 'show');
+      Route::post('banners/{banner}', 'update');
+      Route::delete('banners/{banner}', 'destroy');
     });
   });
 });

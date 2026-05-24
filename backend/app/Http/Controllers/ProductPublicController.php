@@ -47,15 +47,31 @@ class ProductPublicController extends Controller
     public function home(): JsonResponse
     {
         try {
-            $data = null;
-            try {
-                $data = Cache::remember('home_data', 600, function () {
-                    return $this->getHomeData();
-                });
-            } catch (Exception $cacheException) {
-                // Graceful fallback if Redis/Cache server is down
-                $data = $this->getHomeData();
-            }
+            $data = Cache::remember('home_data', 600, function () {
+                $newArrivals = Product::with(['category', 'activeImages'])
+                    ->where('status', 1)
+                    ->orderBy('created_at', 'desc')
+                    ->limit(16)
+                    ->get();
+
+                $categories = Category::with('children')
+                    ->where('status', 1)
+                    ->whereNull('parent_id')
+                    ->orderBy('display', 'asc')
+                    ->limit(8)
+                    ->get();
+
+                $banners = \App\Models\Banner::where('status', 1)
+                    ->orderBy('position', 'asc')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                return [
+                    'new_arrivals' => ProductListResource::collection($newArrivals),
+                    'categories'   => CategoryPublicResource::collection($categories),
+                    'banners'      => $banners,
+                ];
+            });
 
             return response()->json([
                 'success' => true,

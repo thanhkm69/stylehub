@@ -6,6 +6,7 @@ import BaseInputText from '@/components/base/BaseInputText.vue';
 import BaseInputSelect from '@/components/base/BaseInputSelect.vue';
 import BaseButton from '@/components/base/BaseButton.vue';
 import BaseLoading from '@/components/base/BaseLoading.vue';
+import BaseSpinner from '@/components/base/BaseSpinner.vue';
 import { useAttributeValueStore } from '@/stores/attributeValue';
 import { swalConfirmDelete } from '@/composables/useSwal';
 import { useNotify } from '@/composables/useNotify';
