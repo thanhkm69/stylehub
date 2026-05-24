@@ -37,4 +37,9 @@ class Category extends Model
             ->where('status', 1)
             ->orderBy('display', 'asc');
     }
+
+    public function activeChildrenRecursive()
+    {
+        return $this->children()->with('activeChildrenRecursive');
+    }
 }

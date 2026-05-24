@@ -18,6 +18,10 @@ const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
 }
 
+const comboImage = (item) => {
+  return item.thumbnail ? `${API_URL_IMAGE}/${item.thumbnail}` : '/placeholder.png'
+}
+
 const handleUpdateQuantity = async (item, delta) => {
   const newQty = item.quantity + delta
   const maxStock = item.stock ?? 0
@@ -118,6 +122,44 @@ const handleClearCart = async () => {
           <span></span>
         </div>
 
+        <section v-if="cartStore.summary.applied_combos?.length" class="combo-detail-area">
+          <article
+            v-for="combo in cartStore.summary.applied_combos"
+            :key="combo.id"
+            class="combo-detail-card"
+          >
+            <div class="combo-detail-head">
+              <div>
+                <h3>{{ combo.name }}</h3>
+                <p>Áp dụng <strong>{{ combo.quantity }} bộ</strong></p>
+              </div>
+              <div class="combo-benefit">
+                <span>Giảm combo này</span>
+                <strong>-{{ formatPrice(combo.discount_amount) }}</strong>
+              </div>
+            </div>
+
+            <div class="combo-products">
+              <router-link
+                v-for="comboItem in combo.items"
+                :key="comboItem.id"
+                :to="{ name: 'ProductDetail', params: { slug: comboItem.product_slug } }"
+                class="combo-product"
+              >
+                <img :src="comboImage(comboItem)" :alt="comboItem.product_name" />
+                <div>
+                  <strong>{{ comboItem.product_name }}</strong>
+                  <small>
+                    <template v-if="comboItem.variant_sku">{{ comboItem.variant_sku }} · </template>
+                    Số lượng: {{ comboItem.quantity }}
+                  </small>
+                </div>
+                <i class="ph ph-caret-right detail-arrow"></i>
+              </router-link>
+            </div>
+          </article>
+        </section>
+
         <div class="items-list">
           <div v-for="item in cartStore.items" :key="item.id" class="cart-item">
             <div class="product-col">
@@ -133,7 +175,13 @@ const handleClearCart = async () => {
                     {{ val.attribute.name }}: {{ val.value }}
                   </span>
                 </div>
-                <div class="unit-price">{{ formatPrice(item.variant ? item.variant.price : item.product.price) }}</div>
+                <div v-if="item.flash_sale" class="item-flash-sale">
+                  <i class="ph-fill ph-lightning"></i> {{ item.flash_sale.name }}
+                </div>
+                <div class="unit-price" :class="{ sale: item.flash_sale }">
+                  {{ formatPrice(item.price) }}
+                  <span v-if="item.flash_sale" class="unit-original-price">{{ formatPrice(item.original_price) }}</span>
+                </div>
               </div>
             </div>
 
@@ -184,10 +232,30 @@ const handleClearCart = async () => {
       <aside class="cart-summary-section">
         <div class="summary-card">
           <h3 class="summary-title">Tóm tắt đơn hàng</h3>
+
+          <div v-if="cartStore.summary.applied_combos?.length" class="combo-applied">
+            <div class="combo-applied-title">
+              <i class="ph-fill ph-tag"></i>
+              {{ cartStore.summary.applied_combos.length }} combo đã áp dụng
+            </div>
+            <span v-for="combo in cartStore.summary.applied_combos" :key="combo.id">
+              {{ combo.name }}: -{{ formatPrice(combo.discount_amount) }}
+            </span>
+          </div>
           
           <div class="summary-row">
             <span>Tạm tính</span>
-            <span>{{ formatPrice(cartStore.summary.total_price) }}</span>
+            <span>{{ formatPrice(cartStore.summary.subtotal_before_combo ?? cartStore.summary.total_price) }}</span>
+          </div>
+
+          <div v-if="cartStore.summary.flash_sale_savings > 0" class="summary-row saving">
+            <span>Tiết kiệm Flash Sale</span>
+            <span>-{{ formatPrice(cartStore.summary.flash_sale_savings) }}</span>
+          </div>
+
+          <div v-if="cartStore.summary.combo_discount > 0" class="summary-row combo-saving">
+            <span>Giảm giá Combo</span>
+            <span>-{{ formatPrice(cartStore.summary.combo_discount) }}</span>
           </div>
           
           <div class="summary-row">
@@ -289,6 +357,129 @@ const handleClearCart = async () => {
   flex-direction: column;
 }
 
+.combo-detail-area {
+  background: linear-gradient(135deg, #fff9f6, #fff1ea);
+  border-bottom: 1px solid #f5dacc;
+  padding: 22px 24px;
+}
+
+.combo-detail-card {
+  background: #fff;
+  border: 1px solid #f3ddd4;
+  border-radius: 18px;
+  margin-bottom: 13px;
+  padding: 16px;
+}
+
+.combo-detail-card:last-child {
+  margin-bottom: 0;
+}
+
+.combo-detail-head {
+  align-items: center;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+
+.combo-detail-head h3 {
+  color: #491a10;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 4px;
+}
+
+.combo-detail-head p {
+  color: #a0523d;
+  font-size: 13px;
+  margin: 0;
+}
+
+.combo-benefit {
+  background: #fff;
+  border: 1px solid #ffd4c5;
+  border-radius: 14px;
+  flex-shrink: 0;
+  padding: 11px 15px;
+  text-align: right;
+}
+
+.combo-benefit span {
+  color: #9f5c48;
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.combo-benefit strong {
+  color: #e12f20;
+  display: block;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.combo-products {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.combo-product {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #f0ddd6;
+  border-radius: 14px;
+  display: flex;
+  gap: 11px;
+  min-width: 0;
+  padding: 9px;
+  position: relative;
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.combo-product:hover {
+  box-shadow: 0 7px 17px rgba(97, 37, 20, 0.1);
+  transform: translateY(-2px);
+}
+
+.combo-product img {
+  border-radius: 9px;
+  flex-shrink: 0;
+  height: 55px;
+  object-fit: cover;
+  width: 55px;
+}
+
+.combo-product div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-right: 15px;
+}
+
+.combo-product strong {
+  color: var(--text-main);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.combo-product small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.detail-arrow {
+  color: #cfb0a5;
+  font-size: 14px;
+  position: absolute;
+  right: 9px;
+}
+
 .cart-item {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 50px;
@@ -364,6 +555,27 @@ const handleClearCart = async () => {
   font-weight: 600;
   color: var(--primary);
   font-size: 14px;
+}
+
+.unit-price.sale {
+  color: #e62920;
+}
+
+.unit-original-price {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 7px;
+  text-decoration: line-through;
+}
+
+.item-flash-sale {
+  align-items: center;
+  color: #e62920;
+  display: flex;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 4px;
 }
 
 /* Quantity Column */
@@ -495,6 +707,38 @@ const handleClearCart = async () => {
   color: var(--text-main);
 }
 
+.combo-applied {
+  background: linear-gradient(120deg, #fff4ef, #ffe8de);
+  border: 1px solid #ffd1c2;
+  border-radius: 14px;
+  color: #a93620;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 22px;
+  padding: 13px 14px;
+}
+
+.combo-applied-title {
+  align-items: center;
+  color: #e24326;
+  display: flex;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 5px;
+  text-transform: uppercase;
+}
+
+.combo-applied strong {
+  color: #7f2414;
+  font-size: 14px;
+}
+
+.combo-applied span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .summary-row {
   display: flex;
   justify-content: space-between;
@@ -508,6 +752,16 @@ const handleClearCart = async () => {
   font-size: 18px;
   font-weight: 800;
   color: var(--text-main);
+}
+
+.summary-row.saving {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.summary-row.combo-saving {
+  color: #e24326;
+  font-weight: 700;
 }
 
 .total-price {
@@ -618,6 +872,15 @@ const handleClearCart = async () => {
   
   .page-title {
     font-size: 24px;
+  }
+
+  .combo-detail-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .combo-benefit {
+    text-align: left;
   }
 }
 </style>

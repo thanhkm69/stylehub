@@ -22,6 +22,8 @@ class AttributeValueController extends Controller
                 $query->where('attribute_id', $request->attribute_id);
             }
 
+            $query->orderBy('attribute_id', 'asc');
+
             $data = $query->get();
 
             return response()->json([

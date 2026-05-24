@@ -14,7 +14,6 @@ class ComboResource extends JsonResource
             'name'           => $this->name,
             'description'    => $this->description,
             'thumbnail'      => $this->thumbnail,
-            'combo_type'     => $this->combo_type,
             'discount_type'  => $this->discount_type,
             'discount_value' => $this->discount_value,
             'starts_at'      => $this->starts_at?->toDateTimeString(),

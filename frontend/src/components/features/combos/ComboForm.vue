@@ -11,7 +11,6 @@ import BaseSpinner from '@/components/base/BaseSpinner.vue'
 
 defineProps({
     errors:        { type: Object, default: () => ({}) },
-    comboTypes:    Array,
     discountTypes: Array,
     statusMap:     Array,
 })
@@ -39,12 +38,8 @@ const loadingSubmit = defineModel('loadingSubmit')
                             <BaseInputText labelContent="Tên Combo" customId="name" v-model="dataForm.name"
                                 customPlaceholderInput="Ví dụ: Combo Mùa Hè" :error="errors.name" />
 
-                            <div class="two-col-grid">
-                                <BaseInputSelect labelContent="Loại Combo" v-model="dataForm.combo_type"
-                                    :values="comboTypes" :error="errors.combo_type" />
-                                <BaseInputSelect labelContent="Loại giảm giá" v-model="dataForm.discount_type"
-                                    :values="discountTypes" :error="errors.discount_type" />
-                            </div>
+                            <BaseInputSelect labelContent="Loại giảm giá" v-model="dataForm.discount_type"
+                                :values="discountTypes" :error="errors.discount_type" />
 
                             <BaseInputNumber labelContent="Giá trị giảm" v-model="dataForm.discount_value"
                                 :error="errors.discount_value" />

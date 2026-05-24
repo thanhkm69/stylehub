@@ -3,20 +3,18 @@ import { RouterLink, useRoute } from 'vue-router';
 const route = useRoute();
 
 const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: 'ph-house-line' },
+    { name: 'Tổng quan', path: '/admin', icon: 'ph-house-line' },
+    { name: 'Người dùng', path: '/admin/users', icon: 'ph-users' },
     { name: 'Thuộc tính', path: '/admin/attributes', icon: 'ph-list-bullets' },
     { name: 'Danh mục', path: '/admin/categories', icon: 'ph-squares-four' },
     { name: 'Sản phẩm', path: '/admin/products', icon: 'ph-package' },
-    { name: 'Liên hệ', path: '/admin/contacts', icon: 'ph-envelope-simple' },
     { name: 'Mã giảm giá', path: '/admin/coupons', icon: 'ph-ticket' },
     { name: 'Flash Sale', path: '/admin/flash-sales', icon: 'ph-lightning' },
     { name: 'Combo', path: '/admin/combos', icon: 'ph-stack' },
     { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
-    { name: 'Khách hàng', path: '/admin/users', icon: 'ph-users' },
-    { name: 'Danh mục Blog', path: '/admin/blog-categories', icon: 'ph-article' },
+    { name: 'Liên hệ', path: '/admin/contacts', icon: 'ph-envelope-simple' },
+    { name: 'Danh mục', path: '/admin/blog-categories', icon: 'ph-article' },
     { name: 'Bài viết', path: '/admin/posts', icon: 'ph-newspaper' },
-    // { name: 'Đơn hàng', path: '/admin/orders', icon: 'ph-shopping-cart' },
-
 ];
 
 const isActive = (path) => {

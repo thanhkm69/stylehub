@@ -14,7 +14,6 @@ class ComboItem extends Model
         'combo_id',
         'product_id',
         'product_variant_id',
-        'role',
         'quantity',
     ];
 

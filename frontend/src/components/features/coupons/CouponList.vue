@@ -49,7 +49,6 @@ const dataForm = ref({
     max_discount_amount: null,
     min_order_value: 0,
     usage_limit: null,
-    usage_limit_per_user: 1,
     starts_at: '',
     expires_at: '',
     status: 1
@@ -101,7 +100,6 @@ const resetForm = () => {
         max_discount_amount: null,
         min_order_value: 0,
         usage_limit: null,
-        usage_limit_per_user: 1,
         starts_at: '',
         expires_at: '',
         status: 1
@@ -174,7 +172,6 @@ const submit = async () => {
                 max_discount_amount: result.errors.max_discount_amount?.[0] ?? '',
                 min_order_value: result.errors.min_order_value?.[0] ?? '',
                 usage_limit: result.errors.usage_limit?.[0] ?? '',
-                usage_limit_per_user: result.errors.usage_limit_per_user?.[0] ?? '',
                 starts_at: result.errors.starts_at?.[0] ?? '',
                 expires_at: result.errors.expires_at?.[0] ?? '',
                 status: result.errors.status?.[0] ?? '',

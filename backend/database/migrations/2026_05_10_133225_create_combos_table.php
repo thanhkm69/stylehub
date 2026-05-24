@@ -13,8 +13,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->text('description')->nullable();
             $table->string('thumbnail', 255)->nullable();
-            $table->enum('combo_type', ['fixed_combo', 'buy_get', 'bundle']);
-            $table->enum('discount_type', ['percentage', 'fixed_price', 'bundle_price'])->default('percentage');
+            $table->enum('discount_type', ['percentage', 'fixed_price'])->default('percentage');
             $table->decimal('discount_value', 15, 2)->default(0);
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();
@@ -22,7 +21,6 @@ return new class extends Migration
             $table->integer('display')->default(0);
             $table->timestamps();
 
-            $table->index('combo_type');
             $table->index('status');
             $table->index('starts_at');
             $table->index('ends_at');

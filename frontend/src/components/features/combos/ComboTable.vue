@@ -10,16 +10,9 @@ defineProps({
 
 const emit = defineEmits(['update', 'destroy', 'manageItems'])
 
-const comboTypeLabel = {
-    fixed_combo: { text: 'Combo cố định', cls: 'badge-fixed' },
-    buy_get:     { text: 'Mua tặng',      cls: 'badge-buy' },
-    bundle:      { text: 'Gói sản phẩm',  cls: 'badge-bundle' },
-}
-
 const discountTypeLabel = {
     percentage:   '%',
     fixed_price:  '₫ giảm',
-    bundle_price: '₫ gói',
 }
 
 const formatCurrency = (val) =>
@@ -32,10 +25,7 @@ const formatCurrency = (val) =>
             <thead>
                 <tr>
                     <th>STT</th>
-                    <th>Ảnh</th>
-                    <th>Tên Combo</th>
-                    <th>Loại combo</th>
-                    <th>Giảm giá</th>
+                    <th>Combo</th>
                     <th>Bắt đầu</th>
                     <th>Kết thúc</th>
                     <th>Thứ tự</th>
@@ -45,12 +35,12 @@ const formatCurrency = (val) =>
             </thead>
             <tbody>
                 <tr v-if="loadingData">
-                    <td colspan="10" class="text-center" style="padding: 32px 0;">
+                    <td colspan="7" class="text-center" style="padding: 32px 0;">
                         <BaseLoading />
                     </td>
                 </tr>
                 <tr v-else-if="!data || data.length === 0">
-                    <td colspan="10" class="text-center" style="padding: 32px 0; color: var(--text-muted);">
+                    <td colspan="7" class="text-center" style="padding: 32px 0; color: var(--text-muted);">
                         Không có dữ liệu
                     </td>
                 </tr>
@@ -58,28 +48,20 @@ const formatCurrency = (val) =>
                     <td>{{ (params.page - 1) * params.limit + index + 1 }}</td>
 
                     <td>
-                        <img v-if="item.thumbnail"
-                            :src="'http://localhost:8000/storage/' + item.thumbnail"
-                            alt="thumbnail"
-                            style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" />
-                        <span v-else style="color: var(--text-muted); font-size: 12px;">N/A</span>
-                    </td>
-
-                    <td>
-                        <strong style="color: var(--text-main);">{{ item.name }}</strong>
-                    </td>
-
-                    <td>
-                        <span :class="['badge-type', comboTypeLabel[item.combo_type]?.cls]">
-                            {{ comboTypeLabel[item.combo_type]?.text ?? item.combo_type }}
-                        </span>
-                    </td>
-
-                    <td style="color: var(--danger); font-weight: 600;">
-                        {{ item.discount_value }}
-                        <span style="font-size: 11px; color: var(--text-muted);">
-                            {{ discountTypeLabel[item.discount_type] }}
-                        </span>
+                        <div class="combo-summary">
+                            <img v-if="item.thumbnail"
+                                :src="'http://localhost:8000/storage/' + item.thumbnail"
+                                :alt="item.name"
+                                class="combo-thumbnail" />
+                            <div v-else class="combo-thumbnail combo-thumbnail-empty">N/A</div>
+                            <div class="combo-summary-content">
+                                <strong>{{ item.name }}</strong>
+                                <span class="combo-discount">
+                                    {{ item.discount_value }}
+                                    <small>{{ discountTypeLabel[item.discount_type] }}</small>
+                                </span>
+                            </div>
+                        </div>
                     </td>
 
                     <td style="font-size: 12px; color: var(--text-muted);">{{ item.starts_at ?? '—' }}</td>
@@ -109,13 +91,50 @@ const formatCurrency = (val) =>
 </template>
 
 <style scoped>
-.badge-type {
-    font-size: 11px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: 600;
+.combo-summary {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    min-width: 245px;
 }
-.badge-fixed  { background: #e0f2fe; color: #0369a1; }
-.badge-buy    { background: #fef3c7; color: #92400e; }
-.badge-bundle { background: #f3e8ff; color: #7c3aed; }
+
+.combo-thumbnail {
+    border-radius: 8px;
+    flex-shrink: 0;
+    height: 58px;
+    object-fit: cover;
+    width: 58px;
+}
+
+.combo-thumbnail-empty {
+    align-items: center;
+    background: var(--background);
+    color: var(--text-muted);
+    display: flex;
+    font-size: 11px;
+    justify-content: center;
+}
+
+.combo-summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.combo-summary-content strong {
+    color: var(--text-main);
+}
+
+.combo-discount {
+    color: var(--danger);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.combo-discount small {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 3px;
+}
 </style>

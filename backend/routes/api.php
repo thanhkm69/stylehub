@@ -52,6 +52,7 @@ Route::post('reset', [AuthController::class, 'resetPassword']);
 Route::get('coupons/active', [CouponController::class, 'getActive']);
 
 Route::get('home', [ProductPublicController::class, 'home']);
+Route::get('shop/categories', [ProductPublicController::class, 'categories']);
 Route::get('shop', [ProductPublicController::class, 'index']);
 Route::get('shop/{product:slug}', [ProductPublicController::class, 'show']);
 

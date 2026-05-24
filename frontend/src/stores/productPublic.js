@@ -15,15 +15,18 @@ export const useProductPublicStore = defineStore('productPublic', () => {
   const homeData = ref({
     new_arrivals: [],
     categories: [],
+    flash_sales: [],
+    combos: [],
   })
   const loading = ref(false)
   const error = ref(null)
+  const categories = ref([])
 
   // ── Actions ────────────────────────────────────────────
 
   /**
    * GET /api/home
-   * Fetches homepage data: new_arrivals + categories
+   * Fetches homepage data: new_arrivals + categories + active flash sales + combos
    */
   const home = async () => {
     loading.value = true
@@ -64,6 +67,16 @@ export const useProductPublicStore = defineStore('productPublic', () => {
     }
   }
 
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/shop/categories`)
+      categories.value = res.data.data ?? []
+      return res.data
+    } catch (err) {
+      return err.response?.data || {}
+    }
+  }
+
   /**
    * GET /api/products/{slug}
    * Fetches single product detail + related_products
@@ -90,8 +103,10 @@ export const useProductPublicStore = defineStore('productPublic', () => {
     homeData,
     loading,
     error,
+    categories,
     home,
     index,
+    fetchCategories,
     show,
   }
 })

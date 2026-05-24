@@ -32,7 +32,6 @@ const selectedCombo = ref(null)
 const params = ref({
     search: '',
     sort: 'created_at_desc',
-    combo_type: '',
     status: '',
     limit: 15,
     page: 1,
@@ -40,7 +39,7 @@ const params = ref({
 
 const dataForm = ref({
     id: null, name: '', description: '', thumbnail: null, preview: '',
-    combo_type: 'fixed_combo', discount_type: 'percentage', discount_value: 0,
+    discount_type: 'percentage', discount_value: 0,
     starts_at: '', ends_at: '', status: true, display: 0,
 })
 
@@ -52,27 +51,14 @@ const sortMap = [
     { id: 'display_desc', name: 'Thứ tự giảm' },
 ]
 
-const filterMap = [
-    { id: 'fixed_combo', name: 'Combo cố định' },
-    { id: 'buy_get', name: 'Mua tặng' },
-    { id: 'bundle', name: 'Gói sản phẩm' },
-]
-
 const limitMap = [
     { id: 15, name: '15' }, { id: 30, name: '30' },
     { id: 50, name: '50' }, { id: 100, name: '100' },
 ]
 
-const comboTypes = [
-    { id: 'fixed_combo', name: 'Combo cố định' },
-    { id: 'buy_get', name: 'Mua tặng' },
-    { id: 'bundle', name: 'Gói sản phẩm' },
-]
-
 const discountTypes = [
     { id: 'percentage', name: 'Phần trăm (%)' },
     { id: 'fixed_price', name: 'Giảm cố định (₫)' },
-    { id: 'bundle_price', name: 'Giá gói (₫)' },
 ]
 
 const statusMap = [
@@ -90,7 +76,7 @@ const loadData = async () => {
 const resetForm = () => {
     dataForm.value = {
         id: null, name: '', description: '', thumbnail: null, preview: '',
-        combo_type: 'fixed_combo', discount_type: 'percentage', discount_value: 0,
+        discount_type: 'percentage', discount_value: 0,
         starts_at: '', ends_at: '', status: true, display: 0,
     }
     errors.value = {}
@@ -110,7 +96,6 @@ const openCreateForm = () => {
 const validate = () => {
     errors.value = {}
     if (!dataForm.value.name?.trim()) errors.value.name = 'Tên combo không được để trống'
-    if (!dataForm.value.combo_type) errors.value.combo_type = 'Vui lòng chọn loại combo'
     if (!dataForm.value.discount_type) errors.value.discount_type = 'Vui lòng chọn loại giảm giá'
 
     const val = parseFloat(dataForm.value.discount_value)
@@ -151,7 +136,6 @@ const submit = async () => {
     const formData = new FormData()
     formData.append('name', dataForm.value.name)
     formData.append('description', dataForm.value.description ?? '')
-    formData.append('combo_type', dataForm.value.combo_type)
     formData.append('discount_type', dataForm.value.discount_type)
     formData.append('discount_value', dataForm.value.discount_value ?? 0)
     formData.append('starts_at', dataForm.value.starts_at ?? '')
@@ -172,7 +156,6 @@ const submit = async () => {
             errors.value = {
                 name: result.errors.name?.[0] ?? '',
                 thumbnail: result.errors.thumbnail?.[0] ?? '',
-                combo_type: result.errors.combo_type?.[0] ?? '',
                 discount_type: result.errors.discount_type?.[0] ?? '',
                 discount_value: result.errors.discount_value?.[0] ?? '',
                 starts_at: result.errors.starts_at?.[0] ?? '',
@@ -230,7 +213,7 @@ onMounted(() => loadData())
 
 <template>
     <BaseAdmin :title="props.title" :description="props.description" :total="totalItems" :totalPages="totalPages"
-        :currentPage="params.page" v-model:params="params" :sortMap="sortMap" :filterMap="filterMap"
+        :currentPage="params.page" v-model:params="params" :sortMap="sortMap"
         :limitMap="limitMap" @search="search" @open="openCreateForm" @changePage="changePage">
         <template #table>
             <ComboTable :params="params" :loadingData="loadingData" :data="combos" @update="update" @destroy="destroy"
@@ -239,7 +222,7 @@ onMounted(() => loadData())
     </BaseAdmin>
 
     <ComboForm v-model:isShow="isShow" v-model:dataForm="dataForm" v-model:loadingSubmit="loadingSubmit"
-        :errors="errors" :comboTypes="comboTypes" :discountTypes="discountTypes" :statusMap="statusMap" @submit="submit"
+        :errors="errors" :discountTypes="discountTypes" :statusMap="statusMap" @submit="submit"
         @close="closeForm" @handleImageChange="handleImageChange" />
 
     <ComboItemModal v-if="selectedCombo" v-model:isShow="isShowItem" :combo="selectedCombo" @itemsChanged="loadData"

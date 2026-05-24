@@ -21,6 +21,11 @@ class FlashSale extends Model
 
     protected $casts = [
         'starts_at' => 'datetime',
-        'ends_at'   => 'datetime',
+        'ends_at' => 'datetime',
     ];
+
+    public function items()
+    {
+        return $this->hasMany(FlashSaleItem::class, 'flash_sale_id');
+    }
 }

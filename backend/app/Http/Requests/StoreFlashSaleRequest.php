@@ -16,7 +16,7 @@ class StoreFlashSaleRequest extends FormRequest
         return [
             'name'        => 'required|string|max:100',
             'description' => 'nullable|string',
-            'thumbnail'   => 'nullable|image|mimes:png,jpg,jpeg,webp|max:2048',
+            'thumbnail'   => 'nullable|image|mimes:png,jpg,jpeg,webp|max:5120',
             'starts_at'   => 'required|date',
             'ends_at'     => 'required|date|after:starts_at',
             'status'      => 'nullable|in:draft,active,ended,cancelled',
@@ -31,7 +31,7 @@ class StoreFlashSaleRequest extends FormRequest
             'name.max'             => 'Tên flash sale tối đa 100 ký tự.',
             'thumbnail.image'      => 'Thumbnail phải là hình ảnh.',
             'thumbnail.mimes'      => 'Thumbnail chỉ chấp nhận định dạng: png, jpg, jpeg, webp.',
-            'thumbnail.max'        => 'Thumbnail tối đa 2MB.',
+            'thumbnail.max'        => 'Thumbnail tối đa 5MB.',
             'starts_at.required'   => 'Ngày bắt đầu không được để trống.',
             'starts_at.date'       => 'Ngày bắt đầu không hợp lệ.',
             'ends_at.required'     => 'Ngày kết thúc không được để trống.',

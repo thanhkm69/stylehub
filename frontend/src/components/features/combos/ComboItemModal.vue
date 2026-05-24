@@ -35,16 +35,8 @@ const dataForm = ref({
     combo_id: null,
     product_id: null,
     product_variant_id: null,
-    role: 'main',
     quantity: 1,
 })
-
-// ================= MAP =================
-const roleMap = [
-    { id: 'main',   name: 'Sản phẩm chính' },
-    { id: 'gift',   name: 'Quà tặng' },
-    { id: 'bundle', name: 'Sản phẩm đi kèm' },
-]
 
 const productOptions = computed(() =>
     productStore.products.map(p => ({ id: p.id, name: p.name }))
@@ -70,7 +62,6 @@ const resetForm = () => {
         combo_id: props.combo?.id || null,
         product_id: null,
         product_variant_id: null,
-        role: 'main',
         quantity: 1,
     }
     isEdit.value = false
@@ -80,7 +71,6 @@ const resetForm = () => {
 const validate = () => {
     errors.value = {}
     if (!dataForm.value.product_id)    errors.value.product_id = 'Vui lòng chọn sản phẩm'
-    if (!dataForm.value.role)          errors.value.role = 'Vui lòng chọn vai trò'
     if (dataForm.value.quantity < 1)   errors.value.quantity = 'Số lượng tối thiểu là 1'
     return Object.keys(errors.value).length === 0
 }
@@ -104,7 +94,6 @@ const submit = async () => {
             errors.value = {
                 product_id:         result.errors.product_id?.[0] ?? '',
                 product_variant_id: result.errors.product_variant_id?.[0] ?? '',
-                role:               result.errors.role?.[0] ?? '',
                 quantity:           result.errors.quantity?.[0] ?? '',
             }
         }
@@ -141,29 +130,16 @@ watch(() => dataForm.value.product_id, async (newId) => {
     if (newId) await variantStore.index({ product_id: newId })
 })
 
-watch(() => isShow.value, async (newVal) => {
-    if (newVal) {
+watch([() => isShow.value, () => props.combo?.id], async ([newVal, comboId]) => {
+    if (newVal && comboId) {
         resetForm()
         await Promise.all([
             loadData(),
             productStore.index(),
         ])
     }
-})
+}, { immediate: true })
 
-const getRoleBadgeClass = (role) => {
-    switch (role) {
-        case 'main':   return 'badge-main';
-        case 'gift':   return 'badge-gift';
-        case 'bundle': return 'badge-bundle';
-        default:       return '';
-    }
-}
-
-const getRoleText = (role) => {
-    const found = roleMap.find(r => r.id === role);
-    return found ? found.name : role;
-}
 </script>
 
 <template>
@@ -183,19 +159,18 @@ const getRoleText = (role) => {
                                 <th>STT</th>
                                 <th>Sản phẩm</th>
                                 <th>Biến thể</th>
-                                <th>Vai trò</th>
                                 <th>SL</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="loadingData">
-                                <td colspan="6" class="text-center" style="padding: 24px;">
+                                <td colspan="5" class="text-center" style="padding: 24px;">
                                     <BaseLoading />
                                 </td>
                             </tr>
                             <tr v-else-if="values.length === 0">
-                                <td colspan="6" class="text-center" style="padding: 24px; color: var(--text-muted);">
+                                <td colspan="5" class="text-center" style="padding: 24px; color: var(--text-muted);">
                                     Chưa có sản phẩm nào trong combo
                                 </td>
                             </tr>
@@ -208,11 +183,6 @@ const getRoleText = (role) => {
                                 </td>
                                 <td style="font-size: 12px; color: var(--text-muted);">
                                     {{ item.product_variant?.sku ?? 'Tất cả' }}
-                                </td>
-                                <td>
-                                    <span :class="['badge-role', getRoleBadgeClass(item.role)]">
-                                        {{ getRoleText(item.role) }}
-                                    </span>
                                 </td>
                                 <td>{{ item.quantity }}</td>
                                 <td>
@@ -241,9 +211,6 @@ const getRoleText = (role) => {
                             <BaseInputSelect labelContent="Biến thể (tùy chọn)" v-model="dataForm.product_variant_id"
                                 :values="[{ id: null, name: '— Tất cả biến thể —' }, ...variantOptions]"
                                 :error="errors.product_variant_id" />
-
-                            <BaseInputSelect labelContent="Vai trò" v-model="dataForm.role"
-                                :values="roleMap" :error="errors.role" />
 
                             <BaseInputNumber labelContent="Số lượng" v-model="dataForm.quantity"
                                 :error="errors.quantity" />
@@ -306,16 +273,6 @@ const getRoleText = (role) => {
     gap: 12px;
     margin-top: 16px;
 }
-
-.badge-role {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-weight: 700;
-}
-.badge-main   { background: #e0f2fe; color: #0369a1; }
-.badge-gift   { background: #fef3c7; color: #92400e; }
-.badge-bundle { background: #f3e8ff; color: #7c3aed; }
 
 @media (max-width: 768px) {
     .ci-container { flex-direction: column; }

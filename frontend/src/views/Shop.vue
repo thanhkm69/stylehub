@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductPublicStore } from '@/stores/productPublic'
 import ProductCard from '@/components/features/products/ProductCard.vue'
@@ -77,28 +77,25 @@ const clearFilters = () => {
   loadProducts()
 }
 
-// Fetch categories for filter sidebar
-const categories = ref([])
+const flattenCategories = (items, level = 0) => items.flatMap((category) => [
+  {
+    id: category.id,
+    name: `${'— '.repeat(level)}${category.name}`,
+  },
+  ...flattenCategories(category.children || [], level + 1),
+])
+
+const categoryOptions = computed(() => flattenCategories(store.categories))
+
 const fetchCategories = async () => {
-  try {
-    const res = await store.home()
-    if (res?.data?.categories) {
-      categories.value = res.data.categories
-    }
-  } catch {
-    // silent — categories filter is optional
-  }
+  await store.fetchCategories()
 }
 
 // ── Lifecycle ──
 onMounted(() => {
   syncFromQuery()
   loadProducts()
-  if (!store.homeData.categories?.length) {
-    fetchCategories()
-  } else {
-    categories.value = store.homeData.categories
-  }
+  if (!store.categories.length) fetchCategories()
 })
 
 // Watch for category_id changes via router (e.g. from Home page category click)
@@ -159,24 +156,14 @@ const visiblePages = () => {
         </div>
 
         <!-- Category Filter -->
-        <div v-if="categories.length" class="filter-group">
+        <div class="filter-group">
           <label class="filter-label">Danh mục</label>
-          <div class="category-filter-list">
-            <button
-              :class="['category-filter-item', { active: !categoryId }]"
-              @click="categoryId = ''; handleFilter()"
-            >
-              Tất cả
-            </button>
-            <button
-              v-for="cat in categories"
-              :key="cat.id"
-              :class="['category-filter-item', { active: categoryId == cat.id }]"
-              @click="categoryId = cat.id; handleFilter()"
-            >
-              {{ cat.name }}
-            </button>
-          </div>
+          <select v-model="categoryId" class="filter-input category-select" @change="handleFilter">
+            <option value="">Tất cả danh mục</option>
+            <option v-for="category in categoryOptions" :key="category.id" :value="category.id">
+              {{ category.name }}
+            </option>
+          </select>
         </div>
 
         <!-- Price Range -->
@@ -363,34 +350,8 @@ const visiblePages = () => {
   box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
 }
 
-/* Category filter */
-.category-filter-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.category-filter-item {
-  text-align: left;
-  padding: 8px 14px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  background: transparent;
-  border: none;
-  color: var(--text-main);
+.category-select {
   cursor: pointer;
-  transition: var(--transition);
-}
-
-.category-filter-item:hover {
-  background: var(--accent);
-}
-
-.category-filter-item.active {
-  background: var(--primary);
-  color: #fff;
-  font-weight: 600;
 }
 
 /* Price range */
@@ -585,10 +546,6 @@ const visiblePages = () => {
   .filter-group {
     min-width: 200px;
     flex: 1;
-  }
-  .category-filter-list {
-    flex-direction: row;
-    flex-wrap: wrap;
   }
 }
 

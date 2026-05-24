@@ -78,7 +78,7 @@ const loadingSubmit = defineModel("loadingSubmit")
                                     <BaseInputFile labelContent="" customId="thumbnail" :error="errors.thumbnail"
                                         customAccept="image/*"
                                         @change="(event) => emit('handleImageChange', event)" />
-                                    <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
+                                    <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 5MB.</p>
                                 </div>
                             </div>
                         </div>

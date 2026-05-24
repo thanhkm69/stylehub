@@ -33,6 +33,8 @@ const isShowItemsModal = ref(false)
 const isEdit = ref(false)
 const errors = ref({})
 const selectedFlashSale = ref(null)
+const MAX_THUMBNAIL_SIZE_MB = 5
+const MAX_THUMBNAIL_SIZE = MAX_THUMBNAIL_SIZE_MB * 1024 * 1024
 
 const params = ref({
     search: '',
@@ -135,7 +137,7 @@ const validate = () => {
         const file = dataForm.value.thumbnail
         const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
         if (!validTypes.includes(file.type)) errors.value.thumbnail = 'Chỉ chấp nhận png, jpg, jpeg, webp'
-        if (file.size > 2 * 1024 * 1024) errors.value.thumbnail = 'Ảnh tối đa 2MB'
+        if (file.size > MAX_THUMBNAIL_SIZE) errors.value.thumbnail = `Ảnh tối đa ${MAX_THUMBNAIL_SIZE_MB}MB`
     }
 
     return Object.keys(errors.value).length === 0
