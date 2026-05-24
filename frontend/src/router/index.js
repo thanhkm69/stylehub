@@ -71,6 +71,11 @@ const router = createRouter({
           name: 'Posts',
           component: () => import('@/views/admin/Posts.vue'),
         },
+        {
+          path: 'banners',
+          name: 'Banners',
+          component: () => import('@/views/admin/Banners.vue'),
+        },
       ],
     },
 

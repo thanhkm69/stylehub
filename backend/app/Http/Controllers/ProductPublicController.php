@@ -37,9 +37,15 @@ class ProductPublicController extends Controller
                     ->limit(8)
                     ->get();
 
+                $banners = \App\Models\Banner::where('status', 1)
+                    ->orderBy('position', 'asc')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
                 return [
                     'new_arrivals' => ProductListResource::collection($newArrivals),
                     'categories'   => CategoryPublicResource::collection($categories),
+                    'banners'      => $banners,
                 ];
             });
 
