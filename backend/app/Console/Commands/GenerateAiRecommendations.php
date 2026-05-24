@@ -123,6 +123,9 @@ class GenerateAiRecommendations extends Command
                             }
                         }
 
+                        // Clear cache so frontend sees recommendations immediately
+                        \Illuminate\Support\Facades\Cache::forget('product_' . $product->slug);
+
                         $this->info("Successfully generated for Product #{$product->id}");
                     } else {
                         $this->error("Invalid JSON structure returned by AI for Product #{$product->id}");

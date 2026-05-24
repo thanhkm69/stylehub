@@ -15,6 +15,8 @@ const menuItems = [
     { name: 'Liên hệ', path: '/admin/contacts', icon: 'ph-envelope-simple' },
     { name: 'Danh mục', path: '/admin/blog-categories', icon: 'ph-article' },
     { name: 'Bài viết', path: '/admin/posts', icon: 'ph-newspaper' },
+    { name: 'Banner', path: '/admin/banners', icon: 'ph-image' },
+
 ];
 
 const isActive = (path) => {

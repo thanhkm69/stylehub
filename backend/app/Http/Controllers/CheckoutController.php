@@ -113,7 +113,7 @@ class CheckoutController extends Controller
     {
         $request->validate([
             'address_id' => 'required|exists:addresses,id',
-            'payment_method' => 'required|in:cod,vnpay',
+            'payment_method' => 'required|in:cod,vnpay,momo',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|string|max:20',
             'customer_email' => 'required|email|max:255',

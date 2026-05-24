@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useProductPublicStore } from '@/stores/productPublic'
 import { API_URL_IMAGE } from '@/config/env'
 import ProductCard from '@/components/features/products/ProductCard.vue'
@@ -9,9 +9,56 @@ import HomeFlashSale from '@/components/home/HomeFlashSale.vue'
 import HomeCombos from '@/components/home/HomeCombos.vue'
 
 const store = useProductPublicStore()
+const carouselRef = ref(null)
+let slideInterval = null
 
-onMounted(() => {
-  store.home()
+const scrollCarousel = (direction) => {
+  if (carouselRef.value) {
+    const scrollAmount = carouselRef.value.clientWidth + 20 // 20px is the gap
+    const currentScroll = carouselRef.value.scrollLeft
+    const maxScroll = carouselRef.value.scrollWidth - carouselRef.value.clientWidth
+
+    let targetScroll = 0
+    if (direction === 'next') {
+      if (currentScroll >= maxScroll - 10) {
+        targetScroll = 0
+      } else {
+        targetScroll = currentScroll + scrollAmount
+      }
+    } else {
+      if (currentScroll <= 10) {
+        targetScroll = maxScroll
+      } else {
+        targetScroll = currentScroll - scrollAmount
+      }
+    }
+
+    carouselRef.value.scrollTo({
+      left: targetScroll,
+      behavior: 'smooth'
+    })
+  }
+}
+
+const startAutoSlide = () => {
+  slideInterval = setInterval(() => {
+    scrollCarousel('next')
+  }, 4000)
+}
+
+const stopAutoSlide = () => {
+  if (slideInterval) clearInterval(slideInterval)
+}
+
+onMounted(async () => {
+  await store.home()
+  if (store.homeData.banners?.length > 1) {
+    startAutoSlide()
+  }
+})
+
+onUnmounted(() => {
+  stopAutoSlide()
 })
 </script>
 
@@ -88,45 +135,75 @@ onMounted(() => {
   animation: fadeInUp 0.8s ease-out forwards;
 }
 
-.hero-inner {
-  background-color: var(--accent);
-  border-radius: var(--radius-lg);
+.banner-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: 20px;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.banner-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  background-color: white;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  color: var(--text-main);
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  border: none;
+  z-index: 10;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.carousel-btn:hover {
+  background-color: var(--primary);
+  color: white;
+  opacity: 1;
+}
+
+.hero.group:hover .carousel-btn {
+  opacity: 1;
+}
+
+.prev-btn {
+  left: 20px;
+}
+
+.next-btn {
+  right: 20px;
+}
+
+.hero-inner {
+  scroll-snap-align: center;
+  flex: 0 0 100%;
+  border-radius: var(--radius-lg);
+  display: block;
   overflow: hidden;
-  padding: 60px;
-  min-height: 500px;
+  height: 500px;
   position: relative;
+  text-decoration: none;
 }
 
-.hero-content {
-  max-width: 500px;
-  z-index: 2;
-}
-
-.hero-content h1 {
-  font-size: 56px;
-  font-weight: 700;
-  line-height: 1.1;
-  margin-bottom: 24px;
-  letter-spacing: -1.5px;
-}
-
-.hero-content p {
-  font-size: 18px;
-  color: var(--text-muted);
-  margin-bottom: 32px;
-}
-
-.hero-image {
-  position: absolute;
-  right: 0;
-  top: 0;
+.hero-image-full {
+  width: 100%;
   height: 100%;
-  width: 50%;
   object-fit: cover;
-  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+  border-radius: var(--radius-lg);
+  display: block;
 }
 
 /* ── Categories ── */
@@ -235,8 +312,7 @@ onMounted(() => {
 /* ── Responsive ── */
 @media (max-width: 992px) {
   .hero-inner {
-    flex-direction: column;
-    padding: 40px;
+    height: 400px;
   }
 
   .hero-image {
@@ -244,7 +320,6 @@ onMounted(() => {
     width: 100%;
     height: 300px;
     border-radius: var(--radius-md);
-    margin-top: 32px;
   }
 
   .category-grid {
@@ -253,8 +328,8 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .hero-content h1 {
-    font-size: 40px;
+  .hero-inner {
+    height: 300px;
   }
 
   .product-grid {

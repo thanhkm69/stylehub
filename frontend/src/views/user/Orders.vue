@@ -253,8 +253,17 @@ const getProductImage = (item) => {
                         </div>
                         <div class="col-6">
                             <div class="info-box-status text-end">
-                                <span class="xxx-small uppercase fw-bold text-muted mb-1 d-block">Thanh toán</span>
-                                <span class="fw-black xx-small text-dark">{{ selectedOrder.payment_method === 'cod' ? 'TIỀN MẶT (COD)' : 'CHUYỂN KHOẢN' }}</span>
+                                <span class="xxx-small uppercase fw-bold text-muted mb-1 d-block">Phương thức thanh toán</span>
+                                <span class="fw-black xx-small text-dark d-block mb-1">
+                                    {{ 
+                                        selectedOrder.payment_method === 'cod' ? 'TIỀN MẶT (COD)' : 
+                                        selectedOrder.payment_method === 'momo' ? 'MOMO' : 
+                                        selectedOrder.payment_method === 'vnpay' ? 'VNPAY' : selectedOrder.payment_method.toUpperCase()
+                                    }}
+                                </span>
+                                <span class="badge-status w-fit ms-auto d-block" :class="selectedOrder.payment_status === 'paid' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                                    {{ selectedOrder.payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' }}
+                                </span>
                             </div>
                         </div>
                     </div>

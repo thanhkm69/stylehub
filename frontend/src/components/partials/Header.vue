@@ -7,14 +7,19 @@ import { useTokenStore } from '@/stores/token';
 import { useWishlistStore } from '@/stores/wishlist';
 import { useCartStore } from '@/stores/cart';
 import { useNotify } from '@/composables/useNotify';
+import { useProfileStore } from '@/stores/profile';
 
 const tokenStore = useTokenStore()
 const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
+const profileStore = useProfileStore()
 const toast = useNotify()
 
 const isAuth = computed(() => tokenStore.token)
 const user = computed(() => tokenStore.user)
+const userData = computed(() => user.value?.data)
+const displayName = computed(() => profileStore.profile?.full_name || userData.value?.name || 'Người dùng')
+const displayEmail = computed(() => userData.value?.email || profileStore.profile?.email || '')
 
 const loading = ref(false)
 
@@ -45,7 +50,8 @@ onMounted(async () => {
     if (tokenStore.token) {
         await Promise.all([
             wishlistStore.ids(),
-            cartStore.index()
+            cartStore.index(),
+            profileStore.me()
         ])
         await wishlistStore.ids()
     }
@@ -96,23 +102,23 @@ onMounted(async () => {
                             <div class="avatar-circle">
                                 <i class="ph-fill ph-user"></i>
                             </div>
-                            <span class="user-name hide-on-mobile">{{ user?.data?.name }}</span>
+                            <span class="user-name hide-on-mobile">{{ displayName }}</span>
                             <i class="ph ph-caret-down dropdown-arrow"></i>
                         </div>
 
                         <div class="user-dropdown-menu">
                             <div class="dropdown-header">
-                                <p class="user-display-name">{{ user?.data?.name }}</p>
-                                <p class="user-email">{{ user?.data?.email }}</p>
-                                <span :class="['role-badge', user?.data?.role === 'Admin' ? 'Admin' : 'User']">
-                                    {{ user?.data?.role === 'Admin' ? 'Quản trị viên' : 'Thành viên' }}
+                                <p class="user-display-name">{{ displayName }}</p>
+                                <p class="user-email">{{ displayEmail }}</p>
+                                <span :class="['role-badge', userData?.role === 'Admin' ? 'Admin' : 'User']">
+                                    {{ userData?.role === 'Admin' ? 'Quản trị viên' : 'Thành viên' }}
                                 </span>
                             </div>
 
                             <div class="dropdown-divider"></div>
 
                             <div class="dropdown-links">
-                                <RouterLink v-if="user?.data?.role === 'Admin'" to="/admin" class="dropdown-item">
+                                <RouterLink v-if="userData?.role === 'Admin'" to="/admin" class="dropdown-item">
                                     <i class="ph-bold ph-layout"></i>
                                     <span>Trang quản trị</span>
                                 </RouterLink>

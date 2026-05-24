@@ -363,6 +363,7 @@ onMounted(() => {
                             @change="handleImageChange" />
                         <p class="upload-hint">Định dạng: JPG, PNG, WEBP. Tối đa 2MB.</p>
                     </div>
+                </div>
 
                     <BaseInputText labelContent="Mã SKU" customId="val_sku" v-model="dataForm.sku"
                         customPlaceholderInput="Ví dụ: AO-DO-M" :error="errors.sku" />

@@ -17,6 +17,35 @@ class Product extends Model
         'views',
     ];
 
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        static::saved(function ($product) {
+            // Clear cache
+            \Illuminate\Support\Facades\Cache::forget('product_' . $product->slug);
+            \Illuminate\Support\Facades\Cache::forget('home_data');
+
+            // Dispatch job to generate recommendations
+            if ($product->status == 1) {
+                dispatch(new \App\Jobs\GenerateProductRecommendationsJob($product->id));
+            }
+        });
+
+        static::deleted(function ($product) {
+            // Clear cache
+            \Illuminate\Support\Facades\Cache::forget('product_' . $product->slug);
+            \Illuminate\Support\Facades\Cache::forget('home_data');
+
+            // Clear old recommendations in recommendations table
+            \App\Models\ProductRecommendation::where('product_id', $product->id)
+                ->orWhere('recommended_product_id', $product->id)
+                ->delete();
+        });
+    }
+
+
     public function category()
     {
         return $this->belongsTo(Category::class);
