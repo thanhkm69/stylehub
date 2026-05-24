@@ -1,6 +1,16 @@
 <script setup>
+import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { useTokenStore } from '@/stores/token';
+import { useProfileStore } from '@/stores/profile';
+
 const route = useRoute();
+const tokenStore = useTokenStore();
+const profileStore = useProfileStore();
+
+const user = computed(() => tokenStore.user?.data);
+const displayName = computed(() => profileStore.profile?.full_name || user.value?.name || 'Người dùng');
+const displayEmail = computed(() => user.value?.email || profileStore.profile?.email || '');
 
 const userMenu = [
     { name: 'Hồ sơ cá nhân', path: '/user', icon: 'ph-user' },
@@ -14,6 +24,12 @@ const isActive = (path) => {
     if (path === '/user') return route.path === '/user';
     return route.path.startsWith(path);
 };
+
+onMounted(() => {
+    if (tokenStore.token && !profileStore.profile) {
+        profileStore.me();
+    }
+});
 </script>
 
 <template>
@@ -24,8 +40,8 @@ const isActive = (path) => {
                     <i class="ph-fill ph-user"></i>
                 </div>
                 <div class="user-meta">
-                    <h3 class="user-name">Thanh Nguyễn</h3>
-                    <p class="user-email">thanh@example.com</p>
+                    <h3 class="user-name">{{ displayName }}</h3>
+                    <p class="user-email">{{ displayEmail }}</p>
                 </div>
             </div>
             
