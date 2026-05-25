@@ -36,10 +36,10 @@ const params = ref({
     page: 1
 })
 
-// ================= MAPS =================
 const filterMap = [
-    { id: 'true', name: 'Đang hiển thị' },
-    { id: 'false', name: 'Đang ẩn' },
+    { id: '1', name: 'Đang hiển thị' },
+    { id: '0', name: 'Đang ẩn' },
+    { id: '2', name: 'Chờ duyệt' },
 ]
 
 const limitMap = [
@@ -186,6 +186,7 @@ onMounted(loadData)
         :review="selectedReview" 
         @close="closeDetail"
         @toggleStatus="toggleStatus"
+        @updated="loadData"
     />
 </template>
 

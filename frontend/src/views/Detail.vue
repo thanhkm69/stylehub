@@ -199,7 +199,7 @@ const loadingReviews = ref(false)
 const loadProductReviews = async (productId) => {
   loadingReviews.value = true
   try {
-    const res = await reviewStore.index({ product_id: productId, status: 'true' })
+    const res = await reviewStore.index({ product_id: productId, status: 1 })
     if (res?.success) {
       productReviews.value = res.data ?? []
     }

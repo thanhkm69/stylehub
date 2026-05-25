@@ -319,10 +319,9 @@ const getProductImage = (item) => {
                                     <div class="d-flex flex-column align-items-end gap-1">
                                         <span class="fw-black text-primary xx-small">{{ formatPrice(item.price) }}</span>
                                         <button v-if="selectedOrder.status === 'delivered'" 
-                                                :disabled="item.is_reviewed" 
                                                 @click="openWriteReview(selectedOrder.id, item)" 
-                                                :class="['btn-write-review mt-1', { 'btn-reviewed': item.is_reviewed }]">
-                                            {{ item.is_reviewed ? 'Đã đánh giá' : 'Viết đánh giá' }}
+                                                :class="[item.is_reviewed ? 'btn-edit-review' : 'btn-write-review', 'mt-1']">
+                                            {{ item.is_reviewed ? 'Sửa đánh giá' : 'Viết đánh giá' }}
                                         </button>
                                     </div>
                                 </div>
@@ -474,12 +473,22 @@ const getProductImage = (item) => {
     border-color: var(--primary);
 }
 
-.btn-write-review.btn-reviewed {
+.btn-edit-review {
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+.btn-edit-review:hover {
     background: #f1f5f9;
-    color: #94a3b8;
-    border-color: #cbd5e1;
-    cursor: not-allowed;
-    pointer-events: none;
+    color: #0f172a;
+    border-color: #94a3b8;
 }
 
 .btn-write-review-footer {

@@ -1,20 +1,69 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
 import BaseButton from '@/components/base/BaseButton.vue'
 import { API_URL_IMAGE } from '@/config/env'
+import { useReviewStore } from '@/stores/review'
+import { useNotify } from '@/composables/useNotify'
 
 const props = defineProps({
     review: Object,
     isShow: Boolean
 })
 
-const emit = defineEmits(['update:isShow', 'close', 'toggleStatus'])
+const emit = defineEmits(['update:isShow', 'close', 'toggleStatus', 'updated'])
+
+const reviewStore = useReviewStore()
+const toast = useNotify()
 
 const isShowComputed = computed({
     get: () => props.isShow,
     set: (value) => emit('update:isShow', value)
 })
+
+const loadingSave = ref(false)
+
+const handleApprove = async () => {
+    loadingSave.value = true
+    try {
+        const formData = new FormData()
+        formData.append('status', '1')
+
+        const res = await reviewStore.update(props.review.id, formData)
+        if (res?.success) {
+            toast.success("Phê duyệt đánh giá thành công!")
+            emit('updated')
+            emit('close')
+        } else {
+            toast.error(res?.message || "Không thể phê duyệt đánh giá.")
+        }
+    } catch (e) {
+        toast.error("Lỗi kết nối khi cập nhật đánh giá.")
+    } finally {
+        loadingSave.value = false
+    }
+}
+
+const handleHide = async () => {
+    loadingSave.value = true
+    try {
+        const formData = new FormData()
+        formData.append('status', '0')
+
+        const res = await reviewStore.update(props.review.id, formData)
+        if (res?.success) {
+            toast.success("Đã ẩn đánh giá thành công!")
+            emit('updated')
+            emit('close')
+        } else {
+            toast.error(res?.message || "Không thể ẩn đánh giá.")
+        }
+    } catch (e) {
+        toast.error("Lỗi kết nối khi cập nhật đánh giá.")
+    } finally {
+        loadingSave.value = false
+    }
+}
 </script>
 
 <template>
@@ -94,12 +143,25 @@ const isShowComputed = computed({
             <div class="status-summary-row">
                 <div class="status-indicator">
                     <span class="status-label">Trạng thái hiển thị:</span>
-                    <span :class="['badge-status', review.status ? 'badge-active' : 'badge-inactive']">
-                        {{ review.status ? 'Hiển thị công khai' : 'Đang ẩn' }}
-                    </span>
+                    <span v-if="review.status == 1" class="badge-status badge-active">Hiển thị công khai</span>
+                    <span v-else-if="review.status == 2" class="badge-status badge-pending">Chờ duyệt</span>
+                    <span v-else class="badge-status badge-inactive">Đang ẩn</span>
                 </div>
                 <div class="status-actions">
-                    <BaseButton @click="emit('toggleStatus', review)" :customText="review.status ? 'Ẩn đánh giá này' : 'Hiển thị đánh giá'" :customClass="['btn-action', review.status ? 'btn-deactivate' : 'btn-activate']" />
+                    <BaseButton 
+                        v-if="review.status != 1"
+                        @click="handleApprove" 
+                        :loading="loadingSave" 
+                        customText="Phê duyệt (Hiển thị)" 
+                        customClass="btn-action btn-activate mr-2" 
+                    />
+                    <BaseButton 
+                        v-if="review.status != 0"
+                        @click="handleHide" 
+                        :loading="loadingSave" 
+                        customText="Ẩn đánh giá" 
+                        customClass="btn-action btn-deactivate" 
+                    />
                 </div>
             </div>
         </div>
@@ -381,6 +443,10 @@ const isShowComputed = computed({
     font-weight: 600;
     font-size: 14px;
     color: var(--text-main);
+}
+
+.mr-2 {
+    margin-right: 8px;
 }
 
 :deep(.btn-action) {
