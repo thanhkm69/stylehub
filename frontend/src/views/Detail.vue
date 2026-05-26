@@ -47,6 +47,7 @@ const currentImage = computed(() => {
 // ── Variant Selection ──
 const selectedVariant = ref(null)
 const quantity = ref(1)
+const lastValidQty = ref(1)
 
 const groupedAttributes = computed(() => {
   if (!store.product?.variants?.length) return []
@@ -153,13 +154,21 @@ const increaseQty = () => {
 const decreaseQty = () => { if (quantity.value > 1) quantity.value-- }
 const handleQtyBlur = () => {
   if (typeof quantity.value !== 'number' || isNaN(quantity.value) || quantity.value < 1) {
-    quantity.value = 1
+    quantity.value = lastValidQty.value
   }
   if (displayStock.value !== null && quantity.value > displayStock.value) {
     toast.warning(`Chỉ còn ${displayStock.value} sản phẩm trong kho`)
-    quantity.value = displayStock.value
+    quantity.value = lastValidQty.value
+  } else {
+    lastValidQty.value = quantity.value
   }
 }
+
+watch(quantity, (newVal) => {
+  if (displayStock.value !== null && newVal <= displayStock.value && newVal >= 1) {
+    lastValidQty.value = newVal
+  }
+})
 
 // ── Format ──
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN').format(price) + '₫'
