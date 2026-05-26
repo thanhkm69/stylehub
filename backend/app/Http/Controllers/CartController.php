@@ -6,12 +6,14 @@ use App\Http\Requests\StoreCartRequest;
 use App\Http\Requests\UpdateCartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\ComboPricingService;
 use App\Services\FlashSalePricingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
@@ -102,6 +104,108 @@ class CartController extends Controller
             'message' => 'Đã thêm vào giỏ hàng thành công',
             'data' => new CartResource($cartItem),
             'cart_summary' => $this->getCartSummary($cartItems),
+        ]);
+    }
+
+    public function reorder(Order $order): JsonResponse
+    {
+        if ($order->user_id !== Auth::id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hành động không được phép.',
+            ], 403);
+        }
+
+        if (! in_array($order->status, ['delivered', 'cancelled'], true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Chỉ có thể mua lại đơn hàng đã hoàn thành hoặc đã hủy.',
+            ], 422);
+        }
+
+        $order->load(['orderDetails.product', 'orderDetails.productVariant']);
+        $addedQuantity = 0;
+        $adjustedItems = [];
+
+        DB::transaction(function () use ($order, &$addedQuantity, &$adjustedItems): void {
+            foreach ($order->orderDetails as $detail) {
+                $product = $detail->product;
+
+                if (! $product || $product->status != 1) {
+                    $adjustedItems[] = [
+                        'product_name' => $detail->product_name,
+                        'message' => 'Sản phẩm hiện không còn khả dụng.',
+                    ];
+
+                    continue;
+                }
+
+                $variant = $detail->variant_id ? $detail->productVariant : null;
+                if ($detail->variant_id && (
+                    ! $variant ||
+                    $variant->product_id !== $product->id ||
+                    $variant->status != 1 ||
+                    $variant->stock < 1
+                )) {
+                    $adjustedItems[] = [
+                        'product_name' => $detail->product_name,
+                        'message' => 'Phân loại sản phẩm hiện không còn hàng.',
+                    ];
+
+                    continue;
+                }
+
+                $cart = Cart::firstOrNew([
+                    'user_id' => Auth::id(),
+                    'product_id' => $product->id,
+                    'product_variant_id' => $variant?->id,
+                ]);
+
+                $currentQuantity = (int) ($cart->quantity ?? 0);
+                $maximumQuantity = $variant ? min(99, (int) $variant->stock) : 99;
+                $quantityToAdd = min((int) $detail->quantity, max($maximumQuantity - $currentQuantity, 0));
+
+                if ($quantityToAdd < 1) {
+                    $adjustedItems[] = [
+                        'product_name' => $detail->product_name,
+                        'message' => 'Số lượng trong giỏ đã đạt giới hạn hiện có.',
+                    ];
+
+                    continue;
+                }
+
+                $cart->quantity = $currentQuantity + $quantityToAdd;
+                $cart->save();
+                $addedQuantity += $quantityToAdd;
+
+                if ($quantityToAdd < (int) $detail->quantity) {
+                    $adjustedItems[] = [
+                        'product_name' => $detail->product_name,
+                        'message' => "Chỉ thêm được {$quantityToAdd} sản phẩm theo tồn kho hiện tại.",
+                    ];
+                }
+            }
+        });
+
+        if ($addedQuantity < 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có sản phẩm nào có thể thêm lại vào giỏ hàng.',
+                'adjusted_items' => $adjustedItems,
+            ], 422);
+        }
+
+        $cartItems = $this->loadCartItems(Auth::id());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã thêm sản phẩm mua lại vào giỏ hàng.',
+            'data' => [
+                'added_quantity' => $addedQuantity,
+                'adjusted_items' => $adjustedItems,
+                'cart_items' => CartResource::collection($cartItems),
+                'cart_summary' => $this->getCartSummary($cartItems),
+            ],
         ]);
     }
 
