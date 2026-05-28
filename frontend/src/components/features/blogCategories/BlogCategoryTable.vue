@@ -1,6 +1,6 @@
 <script setup>
 import BaseButton from '@/components/base/BaseButton.vue';
-import BaseSpinner from '@/components/base/BaseSpinner.vue';
+import BaseLoading from '@/components/base/BaseLoading.vue';
 
 const props = defineProps({
     params: Object,
@@ -13,11 +13,7 @@ const emit = defineEmits(["update", "destroy", "show"])
 </script>
 
 <template>
-    <div v-if="loadingData" class="text-center py-5">
-        <BaseSpinner />
-    </div>
-
-    <table v-else class="admin-table">
+    <table class="admin-table">
         <thead>
             <tr>
                 <th>ID</th>
@@ -28,7 +24,12 @@ const emit = defineEmits(["update", "destroy", "show"])
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(item, index) in data" :key="index">
+            <tr v-if="loadingData">
+                <td colspan="5" class="loading-cell">
+                    <BaseLoading />
+                </td>
+            </tr>
+            <tr v-else v-for="item in data" :key="item.id">
                 <td>#{{ item.id }}</td>
                 <td>
                     <div class="fw-medium text-dark">{{ item.name }}</div>
@@ -46,7 +47,7 @@ const emit = defineEmits(["update", "destroy", "show"])
                     </div>
                 </td>
             </tr>
-            <tr v-if="data.length === 0">
+            <tr v-if="!loadingData && data.length === 0">
                 <td colspan="5" class="text-center py-5 text-muted">
                     <div class="empty-state">
                         <i class="ph-light ph-folder-dashed empty-icon"></i>
@@ -81,6 +82,11 @@ const emit = defineEmits(["update", "destroy", "show"])
     padding: 16px;
     border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
+}
+
+.loading-cell {
+    height: 320px;
+    padding: 0 !important;
 }
 
 .admin-table tbody tr {

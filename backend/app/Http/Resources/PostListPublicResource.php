@@ -19,7 +19,7 @@ class PostListPublicResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'summary' => $this->summary,
-            'image' => $this->image ? asset('storage/' . $this->image) : null,
+            'image' => $this->image ? asset('storage/'.$this->image) : null,
             'category' => $this->whenLoaded('category', function () {
                 return [
                     'name' => $this->category->name,
@@ -27,6 +27,7 @@ class PostListPublicResource extends JsonResource
                 ];
             }),
             'published_at' => $this->published_at,
+            'created_at' => $this->created_at,
         ];
     }
 }
