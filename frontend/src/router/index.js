@@ -81,6 +81,12 @@ const router = createRouter({
           name: 'AdminReviews',
           component: () => import('@/views/admin/Reviews.vue'),
         },
+        {
+          path: 'chats',
+          name: 'ChatManager',
+          component: () => import('@/views/admin/ChatManager.vue'),
+        },
+
       ],
     },
 

@@ -17,6 +17,7 @@ const menuItems = [
     { name: 'Bài viết', path: '/admin/posts', icon: 'ph-newspaper' },
     { name: 'Banner', path: '/admin/banners', icon: 'ph-image' },
     { name: 'Đánh giá', path: '/admin/reviews', icon: 'ph-star' },
+    { name: 'Hỗ trợ Chat', path: '/admin/chats', icon: 'ph-chats' },
 
 ];
 
