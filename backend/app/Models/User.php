@@ -5,11 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Models\Profile;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -27,7 +26,7 @@ class User extends Authenticatable
         'email_verified_at',
         'password',
         'role',
-        'status'
+        'status',
     ];
 
     /**
@@ -58,8 +57,14 @@ class User extends Authenticatable
     {
         return $this->hasOne(Profile::class);
     }
-    public function addresses():HasMany
+
+    public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
+    }
+
+    public function postComments(): HasMany
+    {
+        return $this->hasMany(PostComment::class);
     }
 }

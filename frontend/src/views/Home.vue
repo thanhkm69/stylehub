@@ -63,44 +63,41 @@ onUnmounted(() => {
 <template>
   <main>
     <!-- Hero Section -->
-    <section class="hero container" :class="{ group: store.homeData.banners?.length > 1 }">
-      <div v-if="store.homeData.banners?.length" ref="carouselRef" class="banner-carousel">
-        <component
-          :is="banner.link ? 'a' : 'div'"
-          v-for="banner in store.homeData.banners"
-          :key="banner.id"
-          :href="banner.link || undefined"
-          class="hero-inner"
-        >
-          <img
-            :src="`${API_URL_IMAGE}/${banner.image}`"
-            :alt="banner.title || 'Banner StyleHub'"
-            class="hero-image-full"
-          />
-        </component>
-      </div>
+    <section class="hero container group" style="position: relative;">
+      <button class="carousel-btn prev-btn" @click="scrollCarousel('prev')" v-if="store.homeData.banners?.length > 1">
+        <i class="ph ph-caret-left"></i>
+      </button>
 
-      <template v-if="store.homeData.banners?.length > 1">
-        <button type="button" class="carousel-btn prev-btn" aria-label="Banner trước" @click="scrollCarousel('prev')">
-          <i class="ph ph-caret-left"></i>
-        </button>
-        <button type="button" class="carousel-btn next-btn" aria-label="Banner tiếp theo" @click="scrollCarousel('next')">
-          <i class="ph ph-caret-right"></i>
-        </button>
-      </template>
-
-      <div v-else-if="!store.homeData.banners?.length" class="default-hero">
-        <div class="hero-content">
-          <h1>Định Hình<br>Phong Cách Của Bạn</h1>
-          <p>Khám phá bộ sưu tập mùa hè mới nhất với các thiết kế độc quyền, chất liệu cao cấp và form dáng chuẩn mực
-            dành riêng cho bạn.</p>
-          <router-link to="/shop" class="btn btn-primary">
-            Mua sắm ngay <i class="ph ph-arrow-right" style="margin-left: 8px;"></i>
+      <div class="banner-carousel" ref="carouselRef" @mouseenter="stopAutoSlide" @mouseleave="startAutoSlide">
+        <template v-if="store.homeData.banners?.length">
+          <router-link 
+            v-for="banner in store.homeData.banners" 
+            :key="banner.id"
+            :to="banner.link || '/shop'" 
+            class="hero-inner"
+          >
+            <img :src="`${API_URL_IMAGE}/${banner.image}`" :alt="banner.title" class="hero-image-full">
           </router-link>
-        </div>
-        <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop"
-          alt="Thời trang StyleHub" class="hero-image">
+        </template>
+        <template v-else>
+          <div class="hero-inner" style="display: flex; align-items: center; background-color: var(--surface);">
+            <div class="hero-content" style="position: absolute; left: 60px; max-width: 500px; z-index: 2;">
+              <h1 style="font-size: 48px; line-height: 1.2; margin-bottom: 16px;">Định Hình<br>Phong Cách Của Bạn</h1>
+              <p style="color: var(--text-muted); margin-bottom: 24px;">Khám phá bộ sưu tập mùa hè mới nhất với các thiết kế độc quyền, chất liệu cao cấp và form dáng chuẩn mực
+                dành riêng cho bạn.</p>
+              <router-link to="/shop" class="btn btn-primary" style="display: inline-flex; align-items: center; padding: 12px 24px; background: var(--text-main); color: white; border-radius: 30px; text-decoration: none; font-weight: 500;">
+                Mua sắm ngay <i class="ph ph-arrow-right" style="margin-left: 8px;"></i>
+              </router-link>
+            </div>
+            <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop"
+              alt="Thời trang StyleHub" class="hero-image-full" style="object-position: top;">
+          </div>
+        </template>
       </div>
+
+      <button class="carousel-btn next-btn" @click="scrollCarousel('next')" v-if="store.homeData.banners?.length > 1">
+        <i class="ph ph-caret-right"></i>
+      </button>
     </section>
 
     <!-- Categories Section -->

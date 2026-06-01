@@ -32,6 +32,7 @@ use App\Http\Controllers\VNPayController;
 use App\Http\Controllers\MoMoController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\PostCommentController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
@@ -70,6 +71,7 @@ Route::prefix('ghn')->group(function () {
 Route::get('blog-categories/active', [BlogPublicController::class, 'categories']);
 Route::get('blogs', [BlogPublicController::class, 'index']);
 Route::get('blogs/{slug}', [BlogPublicController::class, 'show']);
+Route::get('blogs/{post:slug}/comments', [PostCommentController::class, 'index']);
 
 // Public - MoMo callback
 Route::prefix('momo')->group(function () {
@@ -120,6 +122,7 @@ Route::middleware('auth:sanctum')->group(function () {
   // User Order Routes
   Route::get('orders', [OrderController::class, 'index']);
   Route::get('orders/code/{code}', [OrderController::class, 'showByCode']);
+  Route::post('orders/{order}/reorder', [CartController::class, 'reorder']);
   Route::get('orders/{order}', [OrderController::class, 'show']);
 
   // VNPay Payment Routes
@@ -138,6 +141,14 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('reviews', [ReviewController::class, 'store']);
   Route::post('reviews/{review}', [ReviewController::class, 'update']);
   Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
+
+  // Chat Routes
+  Route::get('chat/my-conversation', [App\Http\Controllers\ChatController::class, 'myConversation']);
+  Route::get('chat/{conversation}/messages', [App\Http\Controllers\ChatController::class, 'getMessages']);
+  Route::post('chat/{conversation}/messages', [App\Http\Controllers\ChatController::class, 'sendMessage']);
+  Route::post('blogs/{post:slug}/comments', [PostCommentController::class, 'store']);
+  Route::put('post-comments/{postComment}', [PostCommentController::class, 'update']);
+  Route::delete('post-comments/{postComment}', [PostCommentController::class, 'destroy']);
 
   Route::middleware('abilities:Admin')->group(function () {
 
@@ -289,7 +300,7 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('posts', 'index');
       Route::post('posts', 'store');
       Route::get('posts/{post}', 'show');
-      Route::post('posts/{post}', 'update');
+      Route::put('posts/{post}', 'update');
       Route::delete('posts/{post}', 'destroy');
     });
 
@@ -305,6 +316,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::controller(ReviewController::class)->group(function () {
       Route::get('admin/reviews', 'adminIndex');
       Route::post('admin/reviews/{review}/toggle-status', 'adminToggleStatus');
+    });
+
+    // Admin Chat Routes
+    Route::get('admin/chats', [App\Http\Controllers\ChatController::class, 'getConversations']);
+
+    Route::controller(PostCommentController::class)->group(function () {
+      Route::get('admin/post-comments', 'adminIndex');
+      Route::get('admin/post-comments/moderation/settings', 'adminModerationSettings');
+      Route::patch('admin/post-comments/moderation/toggle', 'adminToggleModeration');
+      Route::patch('admin/post-comments/{postComment}/moderate', 'adminModerate');
+      Route::patch('admin/post-comments/{postComment}/toggle-status', 'adminToggleStatus');
+      Route::delete('admin/post-comments/{postComment}', 'destroy');
     });
   });
 });

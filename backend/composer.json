@@ -11,10 +11,12 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
+        "laravel/reverb": "*",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "*",
         "laravel/tinker": "^2.10.1",
-        "predis/predis": "*"
+        "predis/predis": "*",
+        "pusher/pusher-php-server": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

@@ -46,11 +46,11 @@ class UserController extends Controller
         $plainPassword = Str::random(10);
 
         $user = User::create([
-            'name'              => $request->name,
-            'email'             => $request->email,
-            'password'          => $plainPassword,
-            'role'              => $request->role ?? 'user',
-            'status'            => $request->status ?? true,
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $plainPassword,
+            'role' => $request->role ?? 'user',
+            'status' => $request->status ?? true,
             'email_verified_at' => now(),
         ]);
 
@@ -59,7 +59,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Tạo người dùng thành công. Mật khẩu đã được gửi về email.',
-            'data'    => new UserResource($user),
+            'data' => new UserResource($user),
         ], 201);
     }
 
@@ -68,14 +68,14 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Lấy thông tin người dùng thành công',
-            'data'    => new UserResource($user),
+            'data' => new UserResource($user),
         ]);
     }
 
     public function update(UpdateUserRequest $request, User $user): JsonResponse
     {
         $data = $request->validated();
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             SendPasswordJob::dispatch($user->name, $user->email, $data['password']);
         } else {
             unset($data['password']);
@@ -86,17 +86,25 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Cập nhật người dùng thành công',
-            'data'    => new UserResource($user),
+            'data' => new UserResource($user),
         ]);
     }
 
     public function destroy(User $user): JsonResponse
     {
+        if (strcasecmp((string) $user->role, 'admin') === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa tài khoản Admin',
+                'data' => null,
+            ], 403);
+        }
+
         if (auth()->id() === $user->id) {
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể xóa chính mình',
-                'data'    => null,
+                'data' => null,
             ], 403);
         }
 
@@ -105,7 +113,7 @@ class UserController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Xóa người dùng thành công',
-            'data'    => null,
+            'data' => null,
         ]);
     }
 }

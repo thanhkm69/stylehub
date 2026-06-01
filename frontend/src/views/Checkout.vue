@@ -402,7 +402,7 @@ const getProductImage = (item) => {
 }
 
 .label-custom {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
     color: #64748b;
@@ -416,7 +416,7 @@ const getProductImage = (item) => {
     border: 2px solid #f1f5f9;
     border-radius: 14px;
     padding: 10px 15px;
-    font-size: 13px;
+    font-size: 14px;
     transition: all 0.3s ease;
 }
 
@@ -441,9 +441,9 @@ const getProductImage = (item) => {
 .badge-default {
     background: #000;
     color: #fff;
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 800;
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 100px;
     text-transform: uppercase;
 }
@@ -455,7 +455,7 @@ const getProductImage = (item) => {
     background: none;
     border: none;
     color: #000;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 800;
     display: flex; align-items: center; gap: 5px; padding: 0;
 }
@@ -493,10 +493,10 @@ const getProductImage = (item) => {
     right: -6px; 
     background: #000; 
     color: #fff;
-    font-size: 10px; 
+    font-size: 11px; 
     font-weight: 900; 
-    width: 20px; 
-    height: 20px;
+    width: 22px; 
+    height: 22px;
     display: flex; 
     align-items: center; 
     justify-content: center; 
@@ -506,9 +506,9 @@ const getProductImage = (item) => {
     z-index: 2;
 }
 
-.variant-text { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
-.original-price { color: #94a3b8; font-size: 10px; font-weight: 600; text-decoration: line-through; }
-.flash-sale-label { color: #dc2626; font-size: 9px; font-weight: 800; margin-top: 2px; text-transform: uppercase; }
+.variant-text { font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
+.original-price { color: #94a3b8; font-size: 12px; font-weight: 600; text-decoration: line-through; }
+.flash-sale-label { color: #dc2626; font-size: 11px; font-weight: 800; margin-top: 2px; text-transform: uppercase; }
 .applied-combo {
     background: linear-gradient(120deg, #fff4ef, #ffe7dc);
     border: 1px solid #ffd0bf;
@@ -519,9 +519,9 @@ const getProductImage = (item) => {
     gap: 3px;
     padding: 11px 12px;
 }
-.combo-label { color: #e24326; font-size: 9px; font-weight: 900; text-transform: uppercase; }
-.applied-combo strong { font-size: 12px; }
-.applied-combo small { color: #a5503e; font-size: 10px; font-weight: 700; }
+.combo-label { color: #e24326; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.applied-combo strong { font-size: 13px; }
+.applied-combo small { color: #a5503e; font-size: 12px; font-weight: 700; }
 .checkout-combo-line { display: flex; justify-content: space-between; gap: 8px; }
 .combo-saving { color: #e24326; }
 .coupon-saving { color: #16a34a; }
@@ -535,13 +535,13 @@ const getProductImage = (item) => {
     justify-content: space-between;
     padding: 9px 12px;
 }
-.applied-coupon strong { display: block; font-size: 12px; }
-.applied-coupon small { color: #4b8060; display: block; font-size: 10px; }
+.applied-coupon strong { display: block; font-size: 13px; }
+.applied-coupon small { color: #4b8060; display: block; font-size: 12px; }
 .applied-coupon button {
     background: none;
     border: none;
     color: #dc2626;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 800;
 }
 
@@ -563,7 +563,7 @@ const getProductImage = (item) => {
 .fw-black { font-weight: 900 !important; }
 .uppercase { text-transform: uppercase; }
 .tracking-wider { letter-spacing: 0.05em; }
-.x-small { font-size: 11px; }
+.x-small { font-size: 13px; }
 .max-vh-40 { max-height: 40vh; overflow-y: auto; }
 .address-scroll-box { max-height: 50vh; overflow-y: auto; }
 

@@ -6,9 +6,9 @@ use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Review;
 use App\Models\User;
-use Laravel\Sanctum\Sanctum;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
 
 beforeEach(function () {
     if (! in_array('sqlite', PDO::getAvailableDrivers(), true)) {
@@ -44,7 +44,7 @@ test('public reviews listing defaults to active status and supports filters', fu
         'product_id' => $product1->id,
         'rating' => 5,
         'comment' => 'Excellent quality!',
-        'status' => true,
+        'status' => 1,
     ]);
 
     // 2. Inactive review on Product 1
@@ -53,7 +53,7 @@ test('public reviews listing defaults to active status and supports filters', fu
         'product_id' => $product1->id,
         'rating' => 2,
         'comment' => 'Poor quality!',
-        'status' => false,
+        'status' => 0,
     ]);
 
     // 3. Active review on Product 2
@@ -62,7 +62,7 @@ test('public reviews listing defaults to active status and supports filters', fu
         'product_id' => $product2->id,
         'rating' => 4,
         'comment' => 'Very good dress',
-        'status' => true,
+        'status' => 1,
     ]);
 
     // Test default public list (should only show active reviews: count = 2)
@@ -72,7 +72,7 @@ test('public reviews listing defaults to active status and supports filters', fu
         ->assertJsonCount(2, 'data');
 
     // Test filter by product_id
-    $responseProduct = $this->getJson('/api/reviews?product_id=' . $product1->id);
+    $responseProduct = $this->getJson('/api/reviews?product_id='.$product1->id);
     $responseProduct->assertStatus(200)
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.comment', 'Excellent quality!');
@@ -100,10 +100,10 @@ test('public review detail displays correct nested fields', function () {
         'product_id' => $product->id,
         'rating' => 5,
         'comment' => 'Fabulous',
-        'status' => true,
+        'status' => 1,
     ]);
 
-    $response = $this->getJson('/api/reviews/' . $review->id);
+    $response = $this->getJson('/api/reviews/'.$review->id);
     $response->assertStatus(200)
         ->assertJson([
             'success' => true,
@@ -121,8 +121,8 @@ test('public review detail displays correct nested fields', function () {
                     'name' => 'Dress',
                     'slug' => 'dress',
                     'thumbnail' => 'prod.jpg',
-                ]
-            ]
+                ],
+            ],
         ]);
 });
 
@@ -203,7 +203,7 @@ test('user can review product from delivered order successfully and upload image
         'order_id' => $order->id,
         'rating' => 5,
         'comment' => 'Perfect quality!',
-        'images' => [$image1, $image2]
+        'images' => [$image1, $image2],
     ]);
 
     $response->assertStatus(201)
@@ -289,7 +289,7 @@ test('user can update their own review', function () {
 
     Sanctum::actingAs($user);
 
-    $response = $this->postJson('/api/reviews/' . $review->id, [
+    $response = $this->postJson('/api/reviews/'.$review->id, [
         'rating' => 5,
         'comment' => 'Actually it is great!',
     ]);
@@ -325,7 +325,7 @@ test('user cannot update another user review', function () {
 
     Sanctum::actingAs($other);
 
-    $response = $this->postJson('/api/reviews/' . $review->id, [
+    $response = $this->postJson('/api/reviews/'.$review->id, [
         'rating' => 5,
     ]);
 
@@ -364,12 +364,12 @@ test('user can delete their own review but not others unless admin', function ()
 
     // 1. Other user tries to delete review1 -> Forbidden
     Sanctum::actingAs($other);
-    $response = $this->deleteJson('/api/reviews/' . $review1->id);
+    $response = $this->deleteJson('/api/reviews/'.$review1->id);
     $response->assertStatus(403);
 
     // 2. Owner deletes review1 -> Success
     Sanctum::actingAs($owner);
-    $response = $this->deleteJson('/api/reviews/' . $review1->id);
+    $response = $this->deleteJson('/api/reviews/'.$review1->id);
     $response->assertStatus(200)
         ->assertJsonPath('success', true)
         ->assertJsonPath('message', 'Xóa đánh giá thành công');
@@ -378,7 +378,7 @@ test('user can delete their own review but not others unless admin', function ()
 
     // 3. Admin deletes review2 -> Success
     Sanctum::actingAs($admin, ['Admin']);
-    $response = $this->deleteJson('/api/reviews/' . $review2->id);
+    $response = $this->deleteJson('/api/reviews/'.$review2->id);
     $response->assertStatus(200);
 
     expect(Review::find($review2->id))->toBeNull();
@@ -402,7 +402,7 @@ test('admin review management handles search, filtering, and status toggle', fun
         'product_id' => $product->id,
         'rating' => 5,
         'comment' => 'Perfect shirt!',
-        'status' => true,
+        'status' => 1,
     ]);
 
     Sanctum::actingAs($admin, ['Admin']);
@@ -423,8 +423,8 @@ test('admin review management handles search, filtering, and status toggle', fun
     // Toggle status
     $responseToggle = $this->postJson("/api/admin/reviews/{$review->id}/toggle-status");
     $responseToggle->assertStatus(200)
-        ->assertJsonPath('data.status', false);
+        ->assertJsonPath('data.status', 0);
 
     $review->refresh();
-    expect($review->status)->toBeFalse();
+    expect($review->status)->toBe(0);
 });

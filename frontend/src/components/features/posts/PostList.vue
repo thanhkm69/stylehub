@@ -36,7 +36,7 @@ const errors = ref({})
 const params = ref({
     search: '',
     sort: 'created_at_desc',
-    status: null,
+    status: '',
     limit: 10,
     page: 1
 })
@@ -81,11 +81,14 @@ const statusMap = [
 // ================= METHODS =================
 const loadData = async () => {
     loadingData.value = true
-    await Promise.all([
-        store.fetchPosts(params.value.page),
-        categoryStore.categories.length === 0 ? categoryStore.fetchCategories() : Promise.resolve()
-    ])
-    loadingData.value = false
+    try {
+        await Promise.all([
+            store.fetchPosts(params.value),
+            categoryStore.categories.length === 0 ? categoryStore.fetchCategories() : Promise.resolve()
+        ])
+    } finally {
+        loadingData.value = false
+    }
 }
 
 const resetForm = () => {
@@ -199,20 +202,34 @@ const destroy = async (id) => {
 }
 
 const search = () => {
-    params.value.page = 1
+    if (params.value.page !== 1) {
+        params.value.page = 1
+        return
+    }
+
     loadData()
 }
 
 const changePage = (page) => {
     params.value.page = page
-    loadData()
 }
 
 // ================= WATCH =================
 watch(
-    () => ({ ...params.value }),
-    () => {},
-    { deep: true }
+    () => [params.value.status, params.value.sort, params.value.limit],
+    () => {
+        if (params.value.page !== 1) {
+            params.value.page = 1
+            return
+        }
+
+        loadData()
+    }
+)
+
+watch(
+    () => params.value.page,
+    loadData
 )
 
 // ================= INIT =================
