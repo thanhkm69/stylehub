@@ -56,5 +56,6 @@ return [
         'api_key' => env('GROQ_API_KEY'),
         'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
         'moderation_model' => env('GROQ_MODERATION_MODEL', 'openai/gpt-oss-safeguard-20b'),
+        'chat_model' => env('GROQ_CHAT_MODEL', 'llama-3.1-8b-instant'),
     ],
 ];

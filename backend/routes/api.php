@@ -146,6 +146,9 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::get('chat/my-conversation', [App\Http\Controllers\ChatController::class, 'myConversation']);
   Route::get('chat/{conversation}/messages', [App\Http\Controllers\ChatController::class, 'getMessages']);
   Route::post('chat/{conversation}/messages', [App\Http\Controllers\ChatController::class, 'sendMessage']);
+  Route::post('ai/chat', [App\Http\Controllers\AiChatBotController::class, 'chat']);
+  Route::get('ai/product-details/{product}', [App\Http\Controllers\AiChatBotController::class, 'productDetails']);
+  Route::post('ai/quick-order', [App\Http\Controllers\AiChatBotController::class, 'quickOrder']);
   Route::post('blogs/{post:slug}/comments', [PostCommentController::class, 'store']);
   Route::put('post-comments/{postComment}', [PostCommentController::class, 'update']);
   Route::delete('post-comments/{postComment}', [PostCommentController::class, 'destroy']);
