@@ -73,6 +73,7 @@ onMounted(async () => {
                 <a href="#">Bộ sưu tập</a>
                 <router-link to="/about" active-class="active">Về chúng tôi</router-link>
                 <router-link to="/blog" active-class="active">Blog</router-link>
+                <router-link to="/contact" active-class="active">Liên hệ</router-link>
             </nav>
 
             <!-- Actions & Auth -->

@@ -1,5 +1,5 @@
 <template>
-  <div class="blog-detail-wrapper bg-light py-5 min-vh-100">
+  <div class="blog-detail-wrapper min-vh-100">
     <!-- Loading State -->
     <div v-if="blogStore.loading" class="container max-w-800px">
       <div class="placeholder-glow mb-4">
@@ -29,9 +29,10 @@
     </div>
 
     <!-- Post Detail -->
-    <article v-else class="container max-w-800px">
+    <article v-else class="article-shell h-entry">
+      <a :href="canonicalUrl" class="u-url visually-hidden" tabindex="-1" aria-hidden="true">{{ post.title }}</a>
       <!-- Breadcrumb -->
-      <nav aria-label="breadcrumb" class="mb-5">
+      <nav aria-label="breadcrumb" class="article-breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><router-link to="/" class="text-decoration-none text-muted breadcrumb-link">Trang chủ</router-link></li>
           <li class="breadcrumb-item"><router-link to="/blog" class="text-decoration-none text-muted breadcrumb-link">Tin tức</router-link></li>
@@ -41,48 +42,67 @@
         </ol>
       </nav>
 
-      <header class="mb-5 text-center">
-        <router-link :to="`/blog?category=${post.category?.slug}`" class="badge rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-2 text-decoration-none mb-4 hover-badge transition-all">
-          {{ post.category?.name }}
-        </router-link>
-        <h1 class="display-4 fw-bold text-dark mb-4 article-title">{{ post.title }}</h1>
-        <div class="d-flex align-items-center justify-content-center text-muted small gap-4">
-          <span><i class="bi bi-calendar3 me-2"></i> {{ formatDate(post.published_at || post.created_at) }}</span>
-          <span><i class="bi bi-person me-2"></i> Quản trị viên</span>
-        </div>
-      </header>
+      <section class="article-hero">
+        <header class="article-header">
+          <router-link :to="`/blog?category=${post.category?.slug}`" class="category-chip text-decoration-none">
+            {{ post.category?.name }}
+          </router-link>
+          <h1 class="article-title p-name">{{ post.title }}</h1>
+          <p v-if="post.summary" class="article-summary">{{ post.summary }}</p>
+          <div class="article-meta">
+            <time class="dt-published" :datetime="post.published_at || post.created_at">
+              <i class="bi bi-calendar3"></i> {{ formatDate(post.published_at || post.created_at) }}
+            </time>
+            <span class="meta-dot"></span>
+            <span class="p-author h-card"><i class="bi bi-person"></i> Quản trị viên</span>
+          </div>
+        </header>
 
-      <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
-        <div v-if="post.image" class="article-hero-img-wrapper">
-          <img :src="post.image" :alt="post.title" class="w-100 article-hero-img">
-        </div>
-        
-        <div class="card-body p-4 p-md-5">
-          <div class="article-content text-dark" v-html="post.content"></div>
+        <figure v-if="post.image" class="article-cover">
+          <img :src="post.image" :alt="post.title" class="article-hero-img u-photo">
+        </figure>
+      </section>
+
+      <div class="reading-layout">
+        <aside class="reading-aside">
+          <span class="reading-aside-label">StyleHub Journal</span>
+          <p>Mẹo phối đồ thanh lịch và ứng dụng cho phong cách công sở hiện đại.</p>
+        </aside>
+
+        <div class="article-body">
+          <div class="article-content text-dark e-content" v-html="articleContent"></div>
         </div>
       </div>
 
       <!-- Share -->
-      <div class="d-flex align-items-center justify-content-between py-4 border-top border-bottom mb-5">
-        <span class="fw-semibold text-dark">Chia sẻ bài viết:</span>
-        <div class="d-flex gap-2">
-          <button @click="shareOn('facebook')" class="btn btn-primary rounded-circle share-btn d-flex align-items-center justify-content-center" style="background-color: #1877f2; border-color: #1877f2;">
-            <i class="bi bi-facebook"></i>
+      <div class="article-share">
+        <span class="share-label">Chia sẻ bài viết</span>
+        <div class="share-actions">
+          <button @click="shareOn('facebook')" class="share-btn share-facebook"
+            title="Đăng nhập Facebook để chia sẻ" aria-label="Đăng nhập Facebook để chia sẻ">
+            <svg class="share-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M13.5 22v-8h2.75l.5-3h-3.25V9.1c0-.87.3-1.46 1.63-1.46h1.74V4.96c-.3-.04-1.33-.13-2.53-.13-2.5 0-4.21 1.52-4.21 4.32V11H8.3v3h2.83v8h2.37Z" />
+            </svg>
           </button>
-          <button @click="shareOn('twitter')" class="btn btn-info text-white rounded-circle share-btn d-flex align-items-center justify-content-center" style="background-color: #1da1f2; border-color: #1da1f2;">
-            <i class="bi bi-twitter-x"></i>
+          <button @click="shareOn('twitter')" class="share-btn share-twitter" aria-label="Chia sẻ X">
+            <svg class="share-icon share-x-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18.9 2h3.7l-8.1 9.25L24 22h-7.43l-5.82-7.52L4.17 22H.46l8.66-9.9L0 2h7.62l5.26 6.95L18.9 2Zm-1.3 18h2.05L6.5 3.9H4.3L17.6 20Z" />
+            </svg>
           </button>
-          <button @click="copyLink" class="btn btn-light rounded-circle share-btn shadow-sm d-flex align-items-center justify-content-center" title="Sao chép liên kết">
-            <i class="bi bi-link-45deg text-dark" style="font-size: 1.2rem;"></i>
+          <button @click="copyLink" class="share-btn share-copy" title="Sao chép liên kết" aria-label="Sao chép liên kết">
+            <svg class="share-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10.59 13.41a1 1 0 0 1 0-1.41l2.83-2.83a3 3 0 1 1 4.24 4.24l-3.18 3.18a3 3 0 0 1-4.24 0 1 1 0 1 1 1.41-1.41 1 1 0 0 0 1.41 0L16.24 12a1 1 0 0 0-1.41-1.41L12 13.41a1 1 0 0 1-1.41 0Z" />
+              <path d="M13.41 10.59a1 1 0 0 1 0 1.41l-2.83 2.83a3 3 0 1 1-4.24-4.24l3.18-3.18a3 3 0 0 1 4.24 0 1 1 0 1 1-1.41 1.41 1 1 0 0 0-1.41 0L7.76 12a1 1 0 0 0 1.41 1.41L12 10.59a1 1 0 0 1 1.41 0Z" />
+            </svg>
           </button>
         </div>
       </div>
 
       <!-- Related Posts -->
-      <div class="mt-5 pt-4">
-        <h3 class="h3 fw-bold text-dark mb-4 d-flex align-items-center">
-          <i class="bi bi-journals me-3 text-primary"></i> Bài viết liên quan
-        </h3>
+      <section class="related-section">
+        <h2 class="related-heading">
+          Bài viết liên quan
+        </h2>
         <div v-if="relatedPosts.length > 0" class="row g-4">
           <div v-for="related in relatedPosts" :key="related.id" class="col-12 col-md-4">
             <router-link :to="`/blog/${related.slug}`" class="card h-100 border-0 shadow-sm rounded-4 text-decoration-none related-card transition-all">
@@ -106,7 +126,9 @@
           <i class="bi bi-journal-x text-muted opacity-50 mb-2 d-block" style="font-size: 2rem;"></i>
           <p class="text-muted mb-0">Chưa có bài viết liên quan nào.</p>
         </div>
-      </div>
+      </section>
+
+      <PostCommentSection :post-slug="post.slug" />
     </article>
   </div>
 </template>
@@ -117,6 +139,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useBlogPublicStore } from '@/stores/blogPublic';
 import { useHead } from '@unhead/vue';
 import { useToast } from 'vue-toastification';
+import PostCommentSection from '@/components/features/postComments/PostCommentSection.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -125,6 +148,109 @@ const toast = useToast();
 
 const post = computed(() => blogStore.post);
 const relatedPosts = computed(() => blogStore.relatedPosts);
+const canonicalUrl = computed(() => {
+  if (typeof window === 'undefined') {
+    return route.path;
+  }
+
+  return `${window.location.origin}${route.path}`;
+});
+const seoTitle = computed(() => post.value?.meta_title || (post.value ? `${post.value.title} | StyleHub` : 'StyleHub'));
+const seoDescription = computed(() => {
+  return post.value?.meta_description || post.value?.summary || 'Đọc bài viết thời trang mới nhất trên StyleHub.';
+});
+const articleContent = computed(() => {
+  if (!post.value?.content) {
+    return '';
+  }
+
+  let content = post.value.content;
+
+  if (typeof DOMParser === 'undefined') {
+    return content.replace(/<h1\b[^>]*>[\s\S]*?<\/h1>/i, '');
+  }
+
+  if (content.includes('&lt;')) {
+    const escapedContent = new DOMParser().parseFromString(content, 'text/html');
+    content = escapedContent.body.textContent || content;
+  }
+
+  const parsedContent = new DOMParser().parseFromString(content, 'text/html');
+  parsedContent.body.querySelectorAll('h1').forEach((heading) => heading.remove());
+  parsedContent.body.querySelectorAll('p').forEach((paragraph) => {
+    const text = paragraph.textContent.replace(/\u00a0/g, ' ').trim();
+
+    if (!text && !paragraph.querySelector('img')) {
+      paragraph.remove();
+      return;
+    }
+
+    if (!text.startsWith('-')) {
+      return;
+    }
+
+    let list = paragraph.previousElementSibling;
+    if (!list || !list.classList.contains('generated-list')) {
+      list = parsedContent.createElement('ul');
+      list.classList.add('generated-list');
+      paragraph.before(list);
+    }
+
+    const item = parsedContent.createElement('li');
+    item.innerHTML = paragraph.innerHTML.replace(/^(?:&nbsp;|\s)*-(?:&nbsp;|\s)*/i, '');
+    list.appendChild(item);
+    paragraph.remove();
+  });
+
+  return parsedContent.body.innerHTML;
+});
+const structuredData = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.value?.title || '',
+  description: seoDescription.value,
+  image: post.value?.image ? [post.value.image] : undefined,
+  datePublished: post.value?.published_at || post.value?.created_at || undefined,
+  author: {
+    '@type': 'Organization',
+    name: 'StyleHub',
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'StyleHub',
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': canonicalUrl.value,
+  },
+}));
+
+useHead({
+  title: () => seoTitle.value,
+  meta: [
+    { name: 'description', content: () => seoDescription.value },
+    { name: 'keywords', content: () => post.value?.meta_keywords || '' },
+    { property: 'og:title', content: () => seoTitle.value },
+    { property: 'og:description', content: () => seoDescription.value },
+    { property: 'og:image', content: () => post.value?.image || '' },
+    { property: 'og:url', content: () => canonicalUrl.value },
+    { property: 'og:type', content: 'article' },
+    { property: 'article:published_time', content: () => post.value?.published_at || post.value?.created_at || '' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: () => seoTitle.value },
+    { name: 'twitter:description', content: () => seoDescription.value },
+    { name: 'twitter:image', content: () => post.value?.image || '' },
+  ],
+  link: [
+    { rel: 'canonical', href: () => canonicalUrl.value },
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: () => JSON.stringify(structuredData.value),
+    },
+  ],
+});
 
 const loadPost = async () => {
   const slug = route.params.slug;
@@ -133,23 +259,7 @@ const loadPost = async () => {
     return;
   }
   
-  const fetchedPost = await blogStore.fetchPost(slug);
-  
-  // DYNAMIC SEO IMPLEMENTATION
-  if (fetchedPost) {
-    useHead({
-      title: fetchedPost.meta_title || `${fetchedPost.title} - StyleHub`,
-      meta: [
-        { name: 'description', content: fetchedPost.meta_description || fetchedPost.summary || 'Đọc bài viết trên StyleHub.' },
-        { name: 'keywords', content: fetchedPost.meta_keywords || '' },
-        { property: 'og:title', content: fetchedPost.meta_title || fetchedPost.title },
-        { property: 'og:description', content: fetchedPost.meta_description || fetchedPost.summary },
-        { property: 'og:image', content: fetchedPost.image || 'https://stylehub.com/default-share-image.jpg' },
-        { property: 'og:type', content: 'article' },
-        { property: 'article:published_time', content: fetchedPost.published_at || fetchedPost.created_at }
-      ]
-    });
-  }
+  await blogStore.fetchPost(slug);
 };
 
 onMounted(() => {
@@ -177,13 +287,14 @@ const shareOn = (platform) => {
   let shareUrl = '';
 
   if (platform === 'facebook') {
-    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    shareUrl = `https://www.facebook.com/login.php?next=${encodeURIComponent(facebookShareUrl)}`;
   } else if (platform === 'twitter') {
     shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
   }
 
   if (shareUrl) {
-    window.open(shareUrl, '_blank', 'width=600,height=400');
+    window.open(shareUrl, '_blank', 'width=680,height=680');
   }
 };
 
@@ -198,70 +309,317 @@ const copyLink = async () => {
 </script>
 
 <style scoped>
+.blog-detail-wrapper {
+  background:
+    radial-gradient(circle at 88% 9%, rgba(210, 187, 160, 0.2), transparent 28%),
+    #faf9f7;
+  color: #161616;
+  padding: clamp(1.5rem, 3vw, 2.5rem) 0 5rem;
+}
+
+.article-shell {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 clamp(1.1rem, 3.5vw, 3rem);
+}
+
 .transition-all {
   transition: all 0.3s ease;
 }
 
-.breadcrumb-link:hover {
-  color: var(--bs-primary) !important;
+.article-breadcrumb {
+  margin: 0 0 clamp(1.5rem, 3vw, 2.4rem);
+  font-size: 0.9rem;
 }
 
-.hover-badge:hover {
-  background-color: rgba(var(--bs-primary-rgb), 0.15) !important;
+.breadcrumb-link:hover {
+  color: #111 !important;
+}
+
+.article-hero {
+  align-items: stretch;
+  display: grid;
+  gap: clamp(2rem, 4vw, 4.5rem);
+  grid-template-columns: minmax(360px, 0.94fr) minmax(400px, 0.86fr);
+  margin-bottom: clamp(3.25rem, 7vw, 5.75rem);
+}
+
+.article-header {
+  align-self: center;
+  max-width: 620px;
+  padding: clamp(1rem, 3vw, 2rem) 0;
+  text-align: left;
+}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #111;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  margin-bottom: clamp(1.4rem, 3vw, 2rem);
+  padding: 0.65rem 1.15rem;
+  text-transform: uppercase;
+}
+
+.category-chip:hover {
+  background: #383838;
+  color: #fff;
 }
 
 .article-title {
-  letter-spacing: -1px;
+  color: #111;
+  font-size: clamp(2.45rem, 4vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.065em;
+  line-height: 1.06;
+  margin: 0 0 clamp(1.25rem, 2vw, 1.65rem);
+  text-wrap: balance;
 }
 
-.article-hero-img-wrapper {
-  max-height: 500px;
+.article-summary {
+  color: #59544d;
+  font-size: clamp(1.04rem, 1.25vw, 1.16rem);
+  line-height: 1.75;
+  margin: 0 0 clamp(1.6rem, 3vw, 2.2rem);
+  max-width: 560px;
+}
+
+.article-meta {
+  align-items: center;
+  color: #777;
+  display: flex;
+  font-size: 0.9rem;
+  gap: 0.9rem;
+  justify-content: flex-start;
+}
+
+.article-meta time,
+.article-meta span:not(.meta-dot) {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.meta-dot {
+  background: #c6bbae;
+  border-radius: 50%;
+  height: 4px;
+  width: 4px;
+}
+
+.article-cover {
+  background: #efeae4;
+  border-radius: 26px;
+  box-shadow: 0 22px 56px rgba(36, 28, 19, 0.12);
+  height: min(72vh, 720px);
+  margin: 0;
   overflow: hidden;
+  position: relative;
+}
+
+.article-cover::after {
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 19px;
+  content: '';
+  inset: 14px;
+  pointer-events: none;
+  position: absolute;
 }
 
 .article-hero-img {
-  object-fit: cover;
-  width: 100%;
+  display: block;
   height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  width: 100%;
 }
 
-.article-content :deep(h2), .article-content :deep(h3) {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+.reading-layout {
+  display: grid;
+  gap: 1.15rem;
+  grid-template-columns: minmax(0, 1120px);
+  justify-content: center;
+}
+
+.reading-aside {
+  align-items: center;
+  background: #f2ede6;
+  border-radius: 18px;
+  color: #686259;
+  display: flex;
+  font-size: 0.88rem;
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  line-height: 1.65;
+  padding: 1.1rem clamp(1.25rem, 3vw, 1.8rem);
+}
+
+.reading-aside p {
+  border-left: 1px solid #d9cec1;
+  margin: 0;
+  padding-left: clamp(1.25rem, 3vw, 2.25rem);
+}
+
+.reading-aside-label {
+  color: #131313;
+  display: block;
+  flex: 0 0 auto;
+  font-size: 0.73rem;
   font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.article-body {
+  background: #fff;
+  border: 1px solid #eee8e1;
+  border-radius: 24px;
+  box-shadow: 0 12px 36px rgba(34, 27, 18, 0.045);
+  padding: clamp(2rem, 4.5vw, 4rem) clamp(1.4rem, 4vw, 3.75rem);
+}
+
+.article-content {
+  color: #282624;
+  font-size: 1.04rem;
+  line-height: 1.9;
+}
+
+.article-content :deep(h2) {
+  color: #111;
+  font-size: clamp(1.4rem, 2vw, 1.62rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.35;
+  margin: 2.9rem 0 1rem;
+}
+
+.article-content :deep(h3) {
+  color: #171717;
+  font-size: 1.25rem;
+  font-weight: 650;
+  margin: 2.2rem 0 0.85rem;
 }
 
 .article-content :deep(p) {
-  line-height: 1.8;
-  margin-bottom: 1.5rem;
+  margin: 0 0 1.35rem;
+}
+
+.article-content :deep(strong) {
+  color: #111;
+  font-weight: 650;
+}
+
+.article-content :deep(ul),
+.article-content :deep(ol) {
+  background: #faf8f5;
+  border-left: 3px solid #161616;
+  border-radius: 0 14px 14px 0;
+  margin: 1.35rem 0 2rem;
+  padding: 1.15rem 1.35rem 1.15rem 2rem;
+}
+
+.article-content :deep(li) {
+  margin: 0.45rem 0;
 }
 
 .article-content :deep(img) {
   max-width: 100%;
   height: auto;
-  border-radius: 1rem;
-  margin: 2rem 0;
-  box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+  border-radius: 18px;
+  margin: 2.3rem 0;
+}
+
+.article-share {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #ede7df;
+  border-radius: 18px;
+  display: flex;
+  justify-content: space-between;
+  margin: 2rem auto 0;
+  max-width: 1120px;
+  padding: 0.85rem 1rem 0.85rem 1.4rem;
+}
+
+.share-label {
+  color: #2b2825;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.share-actions {
+  display: flex;
+  gap: 0.45rem;
 }
 
 .share-btn {
+  align-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  justify-content: center;
   width: 40px;
   height: 40px;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .share-btn:hover {
   transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.share-icon {
+  fill: currentColor;
+  height: 21px;
+  width: 21px;
+}
+
+.share-x-icon {
+  height: 18px;
+  width: 18px;
+}
+
+.share-facebook {
+  background: #1877f2;
+}
+
+.share-twitter {
+  background: #111;
+}
+
+.share-copy {
+  background: #f3efea;
+  color: #222;
+}
+
+.related-section {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1070px;
+  margin-top: clamp(3rem, 5vw, 4.5rem);
+}
+
+.related-heading {
+  color: #121212;
+  font-size: clamp(1.5rem, 2vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  margin: 0 0 1.7rem;
 }
 
 .related-card {
-  border: 1px solid transparent !important;
+  border: 1px solid #ede7df !important;
+  overflow: hidden;
 }
 
 .related-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
-  border-color: rgba(var(--bs-primary-rgb), 0.2) !important;
+  border-color: #dfd4c8 !important;
 }
 
 .related-img {
@@ -277,7 +635,7 @@ const copyLink = async () => {
 }
 
 .related-card:hover .related-title {
-  color: var(--bs-primary) !important;
+  color: #73553c !important;
 }
 
 .text-truncate-2 {
@@ -288,8 +646,85 @@ const copyLink = async () => {
 }
 
 @media (max-width: 768px) {
+  .blog-detail-wrapper {
+    padding-top: 1.5rem;
+  }
+
+  .article-shell {
+    padding: 0 16px;
+  }
+
+  .article-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .article-header {
+    order: 0;
+    padding: 0;
+  }
+
   .article-title {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 10vw, 2.65rem);
+    letter-spacing: -0.045em;
+  }
+
+  .article-meta {
+    flex-wrap: wrap;
+  }
+
+  .article-cover {
+    border-radius: 18px;
+    height: min(120vw, 560px);
+    order: 1;
+  }
+
+  .article-cover::after {
+    border-radius: 12px;
+    inset: 9px;
+  }
+
+  .reading-layout {
+    display: block;
+  }
+
+  .reading-aside {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 1rem;
+  }
+
+  .reading-aside p {
+    border: 0;
+    padding-left: 0;
+  }
+
+  .article-body {
+    border-radius: 18px;
+  }
+
+  .article-share {
+    margin-top: 1.25rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .article-hero {
+    grid-template-columns: 1fr 0.84fr;
+    gap: 2rem;
+  }
+
+  .article-cover {
+    height: min(62vw, 650px);
+  }
+
+  .reading-layout {
+    max-width: 1120px;
+    margin: 0 auto;
   }
 }
 </style>

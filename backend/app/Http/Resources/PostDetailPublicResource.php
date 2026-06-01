@@ -20,12 +20,13 @@ class PostDetailPublicResource extends JsonResource
             'slug' => $this->slug,
             'summary' => $this->summary,
             'content' => $this->content,
-            'image' => $this->image ? asset('storage/' . $this->image) : null,
+            'image' => $this->image ? asset('storage/'.$this->image) : null,
             'category' => clone new BlogCategoryPublicResource($this->whenLoaded('category')),
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
             'meta_keywords' => $this->meta_keywords,
             'published_at' => $this->published_at,
+            'created_at' => $this->created_at,
         ];
     }
 }

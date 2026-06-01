@@ -51,4 +51,10 @@ return [
         'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
         'redirect' => env('FACEBOOK_CLIENT_REDIRECT'),
     ],
+
+    'groq' => [
+        'api_key' => env('GROQ_API_KEY'),
+        'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+        'moderation_model' => env('GROQ_MODERATION_MODEL', 'openai/gpt-oss-safeguard-20b'),
+    ],
 ];

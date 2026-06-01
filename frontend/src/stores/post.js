@@ -10,20 +10,27 @@ export const usePostStore = defineStore('post', {
     state: () => ({
         posts: [],
         post: null,
+        pagination: {
+            total: 0,
+            last_page: 1,
+        },
         loading: false,
         error: null,
     }),
     actions: {
-        async fetchPosts() {
+        async fetchPosts(params = {}) {
             this.loading = true;
             try {
                 const tokenStore = useTokenStore();
                 const response = await axios.get(`${API_URL}/posts`, {
+                    params,
                     headers: {
                         Authorization: `Bearer ${tokenStore.token}`
                     }
                 });
                 this.posts = response.data.data;
+                this.pagination.total = response.data.meta?.total ?? this.posts.length;
+                this.pagination.last_page = response.data.meta?.last_page ?? 1;
             } catch (err) {
                 this.error = err.response?.data?.message || 'Error fetching posts';
                 toast.error(this.error);
