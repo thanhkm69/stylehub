@@ -3,7 +3,7 @@
 Tài liệu này dùng **một quy trình chuẩn, hay dùng nhất** cho dự án:
 - `backend`: Laravel 12
 - `frontend`: Vue 3 + Vite
-- chạy phát triển bằng **3 terminal riêng** (API, queue, frontend)
+- chạy phát triển đầy đủ bằng **4 terminal riêng** (API, queue, Reverb, frontend)
 
 ## 1) Yêu cầu môi trường
 
@@ -46,7 +46,7 @@ npm install
 
 ## 3) Cách chạy chuẩn khi phát triển (khuyên dùng)
 
-Mở **3 terminal** tại thư mục gốc dự án:
+Mở **4 terminal** tại thư mục gốc dự án:
 
 ### Terminal 1 - Chạy API Laravel
 
@@ -62,7 +62,16 @@ cd backend
 php artisan queue:work
 ```
 
-### Terminal 3 - Chạy frontend Vue
+### Terminal 3 - Chạy Laravel Reverb
+
+Reverb xử lý kết nối WebSocket cho các chức năng realtime như chat. Có thể bỏ qua terminal này nếu không sử dụng chức năng realtime.
+
+```bash
+cd backend
+php artisan reverb:start
+```
+
+### Terminal 4 - Chạy frontend Vue
 
 ```bash
 cd frontend
@@ -71,6 +80,7 @@ npm run dev
 
 Sau khi chạy:
 - Backend: `http://localhost:8000`
+- Reverb WebSocket: `http://localhost:8080`
 - Frontend: `http://localhost:5173`
 
 ## 4) Lệnh thường dùng
@@ -95,4 +105,5 @@ npm run preview
 - **Không kết nối được database**: kiểm tra lại `DB_*` trong `backend/.env`.
 - **Lỗi CORS/API**: đảm bảo `FRONT_END` trong `backend/.env` đúng `http://localhost:5173`.
 - **OTP/mail không gửi**: kiểm tra terminal queue có đang chạy không.
+- **Chat/realtime không cập nhật**: kiểm tra terminal Reverb có đang chạy `php artisan reverb:start` không.
 - **Frontend không cập nhật**: chạy lại `npm run dev` hoặc `npm run build`.
