@@ -2,8 +2,6 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useProductPublicStore } from '@/stores/productPublic'
 import { API_URL_IMAGE } from '@/config/env'
-import ProductCard from '@/components/features/products/ProductCard.vue'
-import BaseLoading from '@/components/base/BaseLoading.vue'
 import HomeCoupons from '@/components/home/HomeCoupons.vue'
 import HomeFlashSale from '@/components/home/HomeFlashSale.vue'
 import HomeCombos from '@/components/home/HomeCombos.vue'
@@ -155,6 +153,7 @@ onUnmounted(() => {
 .hero {
   padding: 60px 0;
   animation: fadeInUp 0.8s ease-out forwards;
+  position: relative;
 }
 
 .banner-carousel {
@@ -209,7 +208,8 @@ onUnmounted(() => {
   right: 20px;
 }
 
-.hero-inner {
+.hero-inner,
+.default-hero {
   scroll-snap-align: center;
   flex: 0 0 100%;
   border-radius: var(--radius-lg);
@@ -218,6 +218,10 @@ onUnmounted(() => {
   height: 500px;
   position: relative;
   text-decoration: none;
+}
+
+.default-hero {
+  display: block;
 }
 
 .hero-image-full {
