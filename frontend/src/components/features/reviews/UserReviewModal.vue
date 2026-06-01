@@ -28,22 +28,48 @@ const getProductImage = (item) => {
     return filename ? `${API_URL_IMAGE}/${filename}` : '/placeholder.png'
 }
 
-watch(() => props.items, (newItems) => {
+watch(() => props.items, async (newItems) => {
     // Reset previous previews
     reviewsData.value.forEach(review => {
-        review.previews.forEach(p => URL.revokeObjectURL(p))
+        review.previews.forEach(p => {
+            if (p.startsWith('blob:')) {
+                URL.revokeObjectURL(p)
+            }
+        })
     })
 
     if (newItems && newItems.length > 0) {
-        reviewsData.value = newItems.map(item => ({
-            product_id: item.product_id,
-            product_name: item.product_name,
-            product_image: getProductImage(item),
-            rating: 5,
-            comment: '',
-            images: [],
-            previews: []
+        const mapped = await Promise.all(newItems.map(async (item) => {
+            let rating = 5
+            let comment = ''
+            let previews = []
+            let existingImages = []
+
+            if (item.review_id) {
+                const res = await reviewStore.show(item.review_id)
+                if (res?.success && res.data) {
+                    rating = res.data.rating || 5
+                    comment = res.data.comment || ''
+                    if (res.data.images && res.data.images.length > 0) {
+                        previews = res.data.images.map(img => `${API_URL_IMAGE}/${img}`)
+                        existingImages = res.data.images
+                    }
+                }
+            }
+
+            return {
+                review_id: item.review_id || null,
+                product_id: item.product_id,
+                product_name: item.product_name,
+                product_image: getProductImage(item),
+                rating,
+                comment,
+                images: [],
+                previews,
+                existingImages
+            }
         }))
+        reviewsData.value = mapped
     } else {
         reviewsData.value = []
     }
@@ -56,6 +82,12 @@ const setRating = (index, ratingValue) => {
 const handleFileChange = (e, index) => {
     const files = Array.from(e.target.files)
     const review = reviewsData.value[index]
+
+    if (review.existingImages && review.existingImages.length > 0) {
+        review.previews = []
+        review.existingImages = []
+        toast.info('Hình ảnh cũ đã được gỡ bỏ để thay bằng ảnh mới tải lên.')
+    }
 
     if (review.images.length + files.length > 5) {
         toast.error('Bạn chỉ có thể tải lên tối đa 5 hình ảnh.')
@@ -79,6 +111,16 @@ const handleFileChange = (e, index) => {
 
 const removeImage = (reviewIndex, imgIdx) => {
     const review = reviewsData.value[reviewIndex]
+    const previewUrl = review.previews[imgIdx]
+
+    if (previewUrl && !previewUrl.startsWith('blob:')) {
+        review.previews = []
+        review.existingImages = []
+        review.images = []
+        toast.info('Đã gỡ bỏ ảnh cũ. Hãy tải lên ảnh mới nếu muốn thay thế.')
+        return
+    }
+
     review.images.splice(imgIdx, 1)
     URL.revokeObjectURL(review.previews[imgIdx])
     review.previews.splice(imgIdx, 1)
@@ -106,14 +148,23 @@ const submitReview = async () => {
                 formData.append('images[]', file)
             })
 
-            return reviewStore.store(formData)
+            if (review.review_id) {
+                return reviewStore.update(review.review_id, formData)
+            } else {
+                return reviewStore.store(formData)
+            }
         })
 
         const results = await Promise.all(promises)
         const allSuccess = results.every(res => res?.success)
 
         if (allSuccess) {
-            toast.success('Đánh giá sản phẩm thành công!')
+            const hasPending = results.some(res => res?.data?.status == 2)
+            if (hasPending) {
+                toast.warning('Đánh giá của bạn đang chờ duyệt do chứa từ ngữ không phù hợp. Vui lòng chỉnh sửa nội dung để hiển thị công khai.')
+            } else {
+                toast.success(reviewsData.value[0]?.review_id ? 'Cập nhật đánh giá thành công!' : 'Đánh giá sản phẩm thành công!')
+            }
             emit('success')
             closeModal()
         } else {
@@ -121,6 +172,7 @@ const submitReview = async () => {
             toast.error(failed?.message || 'Có lỗi xảy ra khi gửi đánh giá. Vui lòng kiểm tra lại.')
         }
     } catch (e) {
+        console.error('Lỗi khi gửi đánh giá:', e)
         toast.error('Lỗi khi kết nối đến máy chủ.')
     } finally {
         loadingSubmit.value = false
@@ -129,7 +181,11 @@ const submitReview = async () => {
 
 const closeModal = () => {
     reviewsData.value.forEach(review => {
-        review.previews.forEach(p => URL.revokeObjectURL(p))
+        review.previews.forEach(p => {
+            if (p.startsWith('blob:')) {
+                URL.revokeObjectURL(p)
+            }
+        })
     })
     reviewsData.value = []
     emit('update:isShow', false)
@@ -141,7 +197,7 @@ const closeModal = () => {
     <div v-if="isShow" class="user-review-overlay" @click.self="closeModal">
         <div class="user-review-card animate__animated animate__fadeInUp">
             <div class="modal-header">
-                <h3 class="modal-title">Đánh giá sản phẩm</h3>
+                <h3 class="modal-title">{{ reviewsData[0]?.review_id ? 'Cập nhật đánh giá' : 'Đánh giá sản phẩm' }}</h3>
                 <button @click="closeModal" class="btn-close"><i class="ph ph-x"></i></button>
             </div>
 
@@ -207,10 +263,10 @@ const closeModal = () => {
             <!-- Footer actions -->
             <div class="modal-footer">
                 <button @click="closeModal" class="btn-action-outline">Hủy bỏ</button>
-                <BaseButton v-if="!loadingSubmit" @click="submitReview" customText="Gửi đánh giá" customClass="btn-action-primary" />
-                <div v-else class="loading-submit">
-                    <BaseLoading size="sm" />
-                </div>
+                <button @click="submitReview" :disabled="loadingSubmit" class="btn-action-primary">
+                    <span v-if="loadingSubmit" class="btn-spinner"></span>
+                    {{ loadingSubmit ? 'Đang gửi...' : (reviewsData[0]?.review_id ? 'Cập nhật' : 'Gửi đánh giá') }}
+                </button>
             </div>
         </div>
     </div>
@@ -498,18 +554,43 @@ const closeModal = () => {
     background: #e2e8f0;
 }
 
-:deep(.btn-action-primary) {
+.btn-action-primary {
     padding: 10px 24px;
     border-radius: 100px;
     font-size: 13px;
     font-weight: 800;
+    background: var(--primary);
+    color: var(--surface);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.loading-submit {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 30px;
+.btn-action-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-action-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 ::-webkit-scrollbar {

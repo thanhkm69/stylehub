@@ -92,14 +92,14 @@ const destroy = (id) => {
                         </div>
                     </td>
                     <td>
-                        <span :class="['badge-status', item.status ? 'badge-active' : 'badge-inactive']">
-                            {{ item.status ? 'Hiển thị' : 'Ẩn' }}
-                        </span>
+                        <span v-if="item.status == 1" class="badge-status badge-active">Hiển thị</span>
+                        <span v-else-if="item.status == 2" class="badge-status badge-pending">Chờ duyệt</span>
+                        <span v-else class="badge-status badge-inactive">Đã ẩn</span>
                     </td>
                     <td>
                         <div class="action-group">
                             <BaseButton @click="showDetail(item)" customText="Chi tiết" customClass="btn-action btn-view" />
-                            <BaseButton @click="toggleStatus(item)" :customText="item.status ? 'Ẩn' : 'Hiện'" :customClass="['btn-action', item.status ? 'btn-deactivate' : 'btn-activate']" />
+                            <BaseButton @click="toggleStatus(item)" :customText="item.status == 1 ? 'Ẩn' : 'Duyệt'" :customClass="['btn-action', item.status == 1 ? 'btn-deactivate' : 'btn-activate']" />
                             <BaseButton @click="destroy(item.id)" customText="Xóa" customClass="btn-action btn-delete" />
                         </div>
                     </td>

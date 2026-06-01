@@ -5,6 +5,8 @@ export const useNotify = () => {
     success: (msg) => toast.success(msg),
     error: (msg) => toast.error(msg),
     warn: (msg) => toast.warning(msg),
+    warning: (msg) => toast.warning(msg),
     info: (msg) => toast.info(msg),
   }
 }
+
