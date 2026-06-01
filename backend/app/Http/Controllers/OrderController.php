@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\OrderDetail;
-use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
-use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class OrderController extends Controller
 {
@@ -24,13 +22,17 @@ class OrderController extends Controller
     {
         $query = Order::query()->with(['user', 'coupon', 'orderDetails.product', 'orderDetails.productVariant']);
 
+        if (! $request->is('api/admin/*')) {
+            $query->where('user_id', $request->user()->id);
+        }
+
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('order_code', 'like', "%{$search}%")
-                  ->orWhere('shipping_name', 'like', "%{$search}%")
-                  ->orWhere('shipping_phone', 'like', "%{$search}%");
+                    ->orWhere('shipping_name', 'like', "%{$search}%")
+                    ->orWhere('shipping_phone', 'like', "%{$search}%");
             });
         }
 
@@ -64,7 +66,7 @@ class OrderController extends Controller
                 'current_page' => $orders->currentPage(),
                 'last_page' => $orders->lastPage(),
                 'total' => $orders->total(),
-            ]
+            ],
         ]);
     }
 
@@ -76,18 +78,18 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             // Generate Order Code: ORD-YYYYMMDD-XXXXX
-            $orderCode = 'ORD-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(3)));
-            
+            $orderCode = 'ORD-'.date('Ymd').'-'.strtoupper(bin2hex(random_bytes(3)));
+
             $subtotalAmount = 0;
             $itemsData = [];
 
             // Calculate subtotal and prepare data
             foreach ($request->items as $item) {
                 $product = Product::findOrFail($item['product_id']);
-                $variant = isset($item['variant_id']) 
-                    ? ProductVariant::with('productVariantValues.attributeValue.attribute')->find($item['variant_id']) 
+                $variant = isset($item['variant_id'])
+                    ? ProductVariant::with('productVariantValues.attributeValue.attribute')->find($item['variant_id'])
                     : null;
-                
+
                 $price = $variant ? $variant->price : $product->price;
                 $lineSubtotal = $price * $item['quantity'];
                 $subtotalAmount += $lineSubtotal;
@@ -126,15 +128,16 @@ class OrderController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Tạo đơn hàng thành công',
-                'data' => new OrderResource($order->load('orderDetails'))
+                'data' => new OrderResource($order->load('orderDetails')),
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Order Store Error: ' . $e->getMessage());
+            Log::error('Order Store Error: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Lỗi khi tạo đơn hàng: ' . $e->getMessage(),
+                'message' => 'Lỗi khi tạo đơn hàng: '.$e->getMessage(),
             ], 500);
         }
     }
@@ -142,12 +145,19 @@ class OrderController extends Controller
     /**
      * Display the specified order.
      */
-    public function show(Order $order): JsonResponse
+    public function show(Request $request, Order $order): JsonResponse
     {
+        if (! $request->is('api/admin/*') && $order->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hành động không được phép.',
+            ], 403);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Lấy chi tiết đơn hàng thành công',
-            'data' => new OrderResource($order->load(['user', 'coupon', 'orderDetails.product', 'orderDetails.productVariant']))
+            'data' => new OrderResource($order->load(['user', 'coupon', 'orderDetails.product', 'orderDetails.productVariant'])),
         ]);
     }
 
@@ -161,10 +171,15 @@ class OrderController extends Controller
         // Handle Status Timestamps
         if (isset($data['status']) && $data['status'] !== $order->status) {
             switch ($data['status']) {
-                case 'confirmed': $data['confirmed_at'] = now(); break;
-                case 'shipping': $data['shipped_at'] = now(); break;
-                case 'delivered': $data['delivered_at'] = now(); $data['payment_status'] = 'paid'; break;
-                case 'cancelled': $data['cancelled_at'] = now(); break;
+                case 'confirmed': $data['confirmed_at'] = now();
+                    break;
+                case 'shipping': $data['shipped_at'] = now();
+                    break;
+                case 'delivered': $data['delivered_at'] = now();
+                    $data['payment_status'] = 'paid';
+                    break;
+                case 'cancelled': $data['cancelled_at'] = now();
+                    break;
             }
         }
 
@@ -173,7 +188,7 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Cập nhật đơn hàng thành công',
-            'data' => new OrderResource($order->fresh(['user', 'orderDetails']))
+            'data' => new OrderResource($order->fresh(['user', 'orderDetails'])),
         ]);
     }
 
@@ -193,28 +208,27 @@ class OrderController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Xóa đơn hàng thành công'
+            'message' => 'Xóa đơn hàng thành công',
         ]);
     }
 
     /**
      * Display order by code.
      */
-    public function showByCode(string $code): JsonResponse
+    public function showByCode(Request $request, string $code): JsonResponse
     {
         $order = Order::where('order_code', $code)
             ->with(['user', 'coupon', 'orderDetails.product', 'orderDetails.productVariant'])
             ->firstOrFail();
 
-        // Security check: only owner or admin
-        if ($order->user_id !== auth()->id() && !auth()->user()->tokenCan('Admin')) {
+        if ($order->user_id !== $request->user()->id) {
             return response()->json(['success' => false, 'message' => 'Hành động không được phép.'], 403);
         }
 
         return response()->json([
             'success' => true,
             'message' => 'Lấy chi tiết đơn hàng thành công',
-            'data' => new OrderResource($order)
+            'data' => new OrderResource($order),
         ]);
     }
 
@@ -225,8 +239,8 @@ class OrderController extends Controller
     {
         // Adjust this based on how your variant values are structured
         // Example: "Color: Red, Size: L"
-        return $variant->productVariantValues->map(function($pvv) {
-            return $pvv->attributeValue->attribute->name . ': ' . $pvv->attributeValue->value;
+        return $variant->productVariantValues->map(function ($pvv) {
+            return $pvv->attributeValue->attribute->name.': '.$pvv->attributeValue->value;
         })->implode(', ');
     }
 }

@@ -83,6 +83,24 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  // ================= REORDER FROM A COMPLETED/CANCELLED ORDER =================
+  const reorder = async (orderId) => {
+    if (!tokenStore.token) return { success: false }
+
+    try {
+      const res = await axios.post(`${API_URL}/orders/${orderId}/reorder`, {}, {
+        headers: { Authorization: `Bearer ${tokenStore.token}` }
+      })
+      if (res.data.success) {
+        items.value = res.data.data.cart_items
+        summary.value = res.data.data.cart_summary
+      }
+      return res.data
+    } catch (error) {
+      return error.response?.data || { success: false, message: 'Có lỗi xảy ra' }
+    }
+  }
+
   // ================= REMOVE ITEM =================
   const destroy = async (cartId) => {
     if (!tokenStore.token) return { success: false }
@@ -135,6 +153,7 @@ export const useCartStore = defineStore('cart', () => {
     summary,
     index,
     store,
+    reorder,
     update,
     destroy,
     clear,

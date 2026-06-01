@@ -120,6 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
   // User Order Routes
   Route::get('orders', [OrderController::class, 'index']);
   Route::get('orders/code/{code}', [OrderController::class, 'showByCode']);
+  Route::post('orders/{order}/reorder', [CartController::class, 'reorder']);
   Route::get('orders/{order}', [OrderController::class, 'show']);
 
   // VNPay Payment Routes
