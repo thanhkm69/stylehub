@@ -2,8 +2,6 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useProductPublicStore } from '@/stores/productPublic'
 import { API_URL_IMAGE } from '@/config/env'
-import ProductCard from '@/components/features/products/ProductCard.vue'
-import BaseLoading from '@/components/base/BaseLoading.vue'
 import HomeCoupons from '@/components/home/HomeCoupons.vue'
 import HomeFlashSale from '@/components/home/HomeFlashSale.vue'
 import HomeCombos from '@/components/home/HomeCombos.vue'
@@ -65,8 +63,33 @@ onUnmounted(() => {
 <template>
   <main>
     <!-- Hero Section -->
-    <section class="hero container">
-      <div class="hero-inner">
+    <section class="hero container" :class="{ group: store.homeData.banners?.length > 1 }">
+      <div v-if="store.homeData.banners?.length" ref="carouselRef" class="banner-carousel">
+        <component
+          :is="banner.link ? 'a' : 'div'"
+          v-for="banner in store.homeData.banners"
+          :key="banner.id"
+          :href="banner.link || undefined"
+          class="hero-inner"
+        >
+          <img
+            :src="`${API_URL_IMAGE}/${banner.image}`"
+            :alt="banner.title || 'Banner StyleHub'"
+            class="hero-image-full"
+          />
+        </component>
+      </div>
+
+      <template v-if="store.homeData.banners?.length > 1">
+        <button type="button" class="carousel-btn prev-btn" aria-label="Banner trước" @click="scrollCarousel('prev')">
+          <i class="ph ph-caret-left"></i>
+        </button>
+        <button type="button" class="carousel-btn next-btn" aria-label="Banner tiếp theo" @click="scrollCarousel('next')">
+          <i class="ph ph-caret-right"></i>
+        </button>
+      </template>
+
+      <div v-else-if="!store.homeData.banners?.length" class="default-hero">
         <div class="hero-content">
           <h1>Định Hình<br>Phong Cách Của Bạn</h1>
           <p>Khám phá bộ sưu tập mùa hè mới nhất với các thiết kế độc quyền, chất liệu cao cấp và form dáng chuẩn mực
@@ -133,6 +156,7 @@ onUnmounted(() => {
 .hero {
   padding: 60px 0;
   animation: fadeInUp 0.8s ease-out forwards;
+  position: relative;
 }
 
 .banner-carousel {
@@ -187,7 +211,8 @@ onUnmounted(() => {
   right: 20px;
 }
 
-.hero-inner {
+.hero-inner,
+.default-hero {
   scroll-snap-align: center;
   flex: 0 0 100%;
   border-radius: var(--radius-lg);
@@ -196,6 +221,10 @@ onUnmounted(() => {
   height: 500px;
   position: relative;
   text-decoration: none;
+}
+
+.default-hero {
+  display: block;
 }
 
 .hero-image-full {
