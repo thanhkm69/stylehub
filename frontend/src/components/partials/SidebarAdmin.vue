@@ -18,6 +18,7 @@ const menuItems = [
     { name: 'Bình luận', path: '/admin/post-comments', icon: 'ph-chat-circle-text' },
     { name: 'Banner', path: '/admin/banners', icon: 'ph-image' },
     { name: 'Đánh giá', path: '/admin/reviews', icon: 'ph-star' },
+    { name: 'Hỗ trợ Chat', path: '/admin/chats', icon: 'ph-chats' },
 
 ];
 

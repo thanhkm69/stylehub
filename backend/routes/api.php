@@ -142,6 +142,10 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('reviews/{review}', [ReviewController::class, 'update']);
   Route::delete('reviews/{review}', [ReviewController::class, 'destroy']);
 
+  // Chat Routes
+  Route::get('chat/my-conversation', [App\Http\Controllers\ChatController::class, 'myConversation']);
+  Route::get('chat/{conversation}/messages', [App\Http\Controllers\ChatController::class, 'getMessages']);
+  Route::post('chat/{conversation}/messages', [App\Http\Controllers\ChatController::class, 'sendMessage']);
   Route::post('blogs/{post:slug}/comments', [PostCommentController::class, 'store']);
   Route::put('post-comments/{postComment}', [PostCommentController::class, 'update']);
   Route::delete('post-comments/{postComment}', [PostCommentController::class, 'destroy']);
@@ -313,6 +317,9 @@ Route::middleware('auth:sanctum')->group(function () {
       Route::get('admin/reviews', 'adminIndex');
       Route::post('admin/reviews/{review}/toggle-status', 'adminToggleStatus');
     });
+
+    // Admin Chat Routes
+    Route::get('admin/chats', [App\Http\Controllers\ChatController::class, 'getConversations']);
 
     Route::controller(PostCommentController::class)->group(function () {
       Route::get('admin/post-comments', 'adminIndex');
