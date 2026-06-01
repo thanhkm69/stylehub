@@ -2,11 +2,17 @@
 import { ref, watch, nextTick, onMounted, computed } from 'vue'
 import { useChatStore } from '@/stores/chat'
 import { useTokenStore } from '@/stores/token'
+import { useCartStore } from '@/stores/cart'
+import { useWishlistStore } from '@/stores/wishlist'
+import { useNotify } from '@/composables/useNotify'
 import axios from 'axios'
-import { API_URL } from '@/config/env'
+import { API_URL, API_URL_IMAGE } from '@/config/env'
 
 const chatStore = useChatStore()
 const tokenStore = useTokenStore()
+const cartStore = useCartStore()
+const wishlistStore = useWishlistStore()
+const toast = useNotify()
 
 const user = computed(() => tokenStore.user?.data)
 
@@ -35,6 +41,36 @@ const selectedAddressId = ref(null)
 const quantity = ref(1)
 const quickOrderNote = ref('')
 const isSubmittingOrder = ref(false)
+const quickOrderMode = ref('order')
+
+const getProductImage = (thumbnail) => {
+  if (!thumbnail) return '/logo.png'
+  if (/^https?:\/\//i.test(thumbnail)) return thumbnail
+  return `${API_URL_IMAGE}/${thumbnail.replace(/^\/+/, '')}`
+}
+
+const handleProductImageError = (event) => {
+  event.target.onerror = null
+  event.target.src = '/logo.png'
+}
+
+const formatPrice = (price) => new Intl.NumberFormat('vi-VN').format(price) + 'đ'
+
+const hasProductCard = (message, productId) => {
+  return message.products?.some(product => product.id === productId)
+}
+
+const selectedQuickOrderVariant = computed(() => {
+  return quickOrderVariants.value.find(variant => variant.id === selectedVariantId.value)
+})
+
+const selectedQuickOrderPricing = computed(() => {
+  return selectedQuickOrderVariant.value || quickOrderProduct.value
+})
+
+const isQuickOrderUnavailable = computed(() => {
+  return quickOrderVariants.value.length > 0 && !selectedQuickOrderVariant.value
+})
 
 const scrollToBottom = async () => {
   await nextTick()
@@ -64,9 +100,10 @@ const parseMessage = (text) => {
   }).filter(part => part.type === 'order' || part.content !== '')
 }
 
-const openQuickOrder = async (productId) => {
+const openQuickOrder = async (productId, mode = 'order') => {
   isQuickOrderOpen.value = true
   quickOrderLoading.value = true
+  quickOrderMode.value = mode
   quickOrderProduct.value = null
   quickOrderVariants.value = []
   quickOrderAddresses.value = []
@@ -87,7 +124,7 @@ const openQuickOrder = async (productId) => {
       
       // Select first variant if exists
       if (data.variants && data.variants.length > 0) {
-        selectedVariantId.value = data.variants[0].id
+        selectedVariantId.value = data.variants.find(variant => variant.stock > 0)?.id ?? null
       }
       
       // Select default or first address if exists
@@ -105,7 +142,48 @@ const openQuickOrder = async (productId) => {
   }
 }
 
+const toggleWishlist = async (productId) => {
+  const res = await wishlistStore.toggle(productId)
+
+  if (!res) return
+  if (res.success) {
+    toast.success(res.status === 'added' ? 'Đã thêm vào yêu thích' : 'Đã xóa khỏi yêu thích')
+  } else {
+    toast.error(res.message || 'Không thể cập nhật danh sách yêu thích')
+  }
+}
+
+const addQuickOrderToCart = async () => {
+  isSubmittingOrder.value = true
+  try {
+    const res = await cartStore.store({
+      product_id: quickOrderProduct.value.id,
+      product_variant_id: selectedVariantId.value,
+      quantity: quantity.value
+    })
+
+    if (res.success) {
+      isQuickOrderOpen.value = false
+      toast.success('Đã thêm vào giỏ hàng')
+    } else {
+      toast.error(res.message || 'Không thể thêm vào giỏ hàng')
+    }
+  } finally {
+    isSubmittingOrder.value = false
+  }
+}
+
 const submitQuickOrder = async () => {
+  if (isQuickOrderUnavailable.value) {
+    toast.error('Sản phẩm hiện đã hết hàng')
+    return
+  }
+
+  if (quickOrderMode.value === 'cart') {
+    await addQuickOrderToCart()
+    return
+  }
+
   if (!selectedAddressId.value) {
     alert('Vui lòng chọn hoặc thêm địa chỉ nhận hàng.')
     return
@@ -186,6 +264,7 @@ const sendAiMessage = async () => {
         id: 'ai-' + Date.now(),
         sender_id: 'ai',
         message: res.data.reply,
+        products: res.data.products || [],
         created_at: new Date().toISOString()
       })
     } else {
@@ -225,6 +304,10 @@ watch(() => chatStore.isOpen, (newVal) => {
   if (newVal) {
     scrollToBottom()
   }
+})
+
+onMounted(() => {
+  wishlistStore.ids()
 })
 </script>
 
@@ -275,13 +358,53 @@ watch(() => chatStore.isOpen, (newVal) => {
               <template v-for="(part, index) in parseMessage(msg.message)" :key="index">
                 <span v-if="part.type === 'text'">{{ part.content }}</span>
                 <button 
-                  v-else-if="part.type === 'order'" 
+                  v-else-if="part.type === 'order' && !hasProductCard(msg, part.productId)" 
                   class="quick-order-btn"
                   @click="openQuickOrder(part.productId)"
                 >
                   <i class="ph ph-lightning"></i> Mua nhanh sản phẩm này
                 </button>
               </template>
+            </div>
+            <div v-if="msg.products?.length" class="chat-product-list">
+              <article v-for="product in msg.products" :key="product.id" class="chat-product-card">
+                <RouterLink
+                  :to="{ name: 'ProductDetail', params: { slug: product.slug } }"
+                  class="chat-product-link"
+                  @click="chatStore.toggleChat"
+                >
+                  <img
+                    :src="getProductImage(product.thumbnail)"
+                    :alt="product.name"
+                    class="chat-product-image"
+                    @error="handleProductImageError"
+                  />
+                  <div class="chat-product-info">
+                    <strong>{{ product.name }}</strong>
+                    <span class="chat-product-price">{{ formatPrice(product.price) }}</span>
+                    <span v-if="product.has_discount" class="chat-product-original-price">
+                      {{ formatPrice(product.original_price) }}
+                    </span>
+                  </div>
+                </RouterLink>
+                <div class="chat-product-actions">
+                  <button
+                    class="chat-product-action-btn wishlist"
+                    :class="{ active: wishlistStore.isWishlisted(product.id) }"
+                    :disabled="wishlistStore.isLoading(product.id)"
+                    @click="toggleWishlist(product.id)"
+                  >
+                    <i :class="wishlistStore.isWishlisted(product.id) ? 'ph-fill ph-heart' : 'ph ph-heart'"></i>
+                    Yêu thích
+                  </button>
+                  <button class="chat-product-action-btn cart" @click="openQuickOrder(product.id, 'cart')">
+                    <i class="ph ph-shopping-cart"></i> Giỏ hàng
+                  </button>
+                </div>
+                <button class="chat-product-order-btn" @click="openQuickOrder(product.id, 'order')">
+                  <i class="ph ph-lightning"></i> Mua nhanh
+                </button>
+              </article>
             </div>
             <div class="msg-time">{{ new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</div>
           </div>
@@ -329,7 +452,7 @@ watch(() => chatStore.isOpen, (newVal) => {
       <!-- Quick Order Overlay Form -->
       <div v-if="isQuickOrderOpen" class="quick-order-overlay">
         <div class="overlay-header">
-          <h5>⚡ Đặt hàng nhanh qua AI</h5>
+          <h5>{{ quickOrderMode === 'cart' ? '🛒 Thêm vào giỏ hàng' : '⚡ Đặt hàng nhanh qua AI' }}</h5>
           <button @click="isQuickOrderOpen = false" class="close-overlay-btn">
             <i class="ph ph-x"></i>
           </button>
@@ -343,10 +466,20 @@ watch(() => chatStore.isOpen, (newVal) => {
         <div v-else class="overlay-content">
           <!-- Product Summary -->
           <div class="product-summary" v-if="quickOrderProduct">
-            <img :src="quickOrderProduct.thumbnail" alt="thumbnail" class="prod-thumb" />
+            <img
+              :src="getProductImage(quickOrderProduct.thumbnail)"
+              :alt="quickOrderProduct.name"
+              class="prod-thumb"
+              @error="handleProductImageError"
+            />
             <div class="prod-info">
               <h6>{{ quickOrderProduct.name }}</h6>
-              <p class="prod-price">{{ new Intl.NumberFormat('vi-VN').format(quickOrderProduct.price) }}đ</p>
+              <p class="prod-price">
+                {{ formatPrice(selectedQuickOrderPricing.price) }}
+                <span v-if="selectedQuickOrderPricing.has_discount" class="prod-original-price">
+                  {{ formatPrice(selectedQuickOrderPricing.original_price) }}
+                </span>
+              </p>
             </div>
           </div>
           
@@ -355,12 +488,12 @@ watch(() => chatStore.isOpen, (newVal) => {
             <label>Phân loại (Kích thước / Màu sắc):</label>
             <select v-model="selectedVariantId" class="form-select">
               <option v-for="v in quickOrderVariants" :key="v.id" :value="v.id" :disabled="v.stock === 0">
-                {{ v.name }} (Còn: {{ v.stock }}) - {{ new Intl.NumberFormat('vi-VN').format(v.price) }}đ
+                {{ v.name }} (Còn: {{ v.stock }}) - {{ formatPrice(v.price) }}{{ v.has_discount ? ` (Giá gốc: ${formatPrice(v.original_price)})` : '' }}
               </option>
             </select>
           </div>
           
-          <div class="form-group">
+          <div v-if="quickOrderMode === 'order'" class="form-group">
             <label>Địa chỉ giao hàng:</label>
             <select v-if="quickOrderAddresses.length > 0" v-model="selectedAddressId" class="form-select">
               <option v-for="addr in quickOrderAddresses" :key="addr.id" :value="addr.id">
@@ -374,10 +507,10 @@ watch(() => chatStore.isOpen, (newVal) => {
           
           <div class="form-group">
             <label>Số lượng:</label>
-            <input type="number" v-model.number="quantity" min="1" class="form-input" />
+            <input type="number" v-model.number="quantity" min="1" :max="selectedQuickOrderVariant?.stock || 99" class="form-input" />
           </div>
 
-          <div class="form-group">
+          <div v-if="quickOrderMode === 'order'" class="form-group">
             <label>Ghi chú:</label>
             <textarea v-model="quickOrderNote" placeholder="Ghi chú thêm cho đơn hàng..." class="form-textarea" rows="2"></textarea>
           </div>
@@ -385,10 +518,10 @@ watch(() => chatStore.isOpen, (newVal) => {
           <button 
             class="submit-order-btn" 
             @click="submitQuickOrder"
-            :disabled="isSubmittingOrder || quickOrderAddresses.length === 0"
+            :disabled="isSubmittingOrder || isQuickOrderUnavailable || (quickOrderMode === 'order' && quickOrderAddresses.length === 0)"
           >
             <span v-if="isSubmittingOrder">Đang xử lý...</span>
-            <span v-else>Xác nhận đặt hàng (COD)</span>
+            <span v-else>{{ quickOrderMode === 'cart' ? 'Thêm vào giỏ hàng' : 'Xác nhận đặt hàng (COD)' }}</span>
           </button>
         </div>
       </div>
@@ -546,6 +679,118 @@ watch(() => chatStore.isOpen, (newVal) => {
   color: var(--text-main);
   border-bottom-left-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.chat-product-list {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chat-product-card {
+  padding: 8px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.chat-product-link {
+  display: flex;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.chat-product-image {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.chat-product-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.chat-product-info strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 13px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.chat-product-price {
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.chat-product-original-price {
+  color: var(--text-muted);
+  font-size: 11px;
+  text-decoration: line-through;
+}
+
+.chat-product-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.chat-product-action-btn {
+  flex: 1;
+  padding: 6px 4px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chat-product-action-btn.wishlist:hover,
+.chat-product-action-btn.wishlist.active {
+  background: #fff1f2;
+  border-color: #fca5a5;
+  color: #ef4444;
+}
+
+.chat-product-action-btn.cart:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #2563eb;
+}
+
+.chat-product-action-btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.chat-product-order-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: #fff1f2;
+  border: 1px solid #ffe4e6;
+  border-radius: var(--radius-sm);
+  color: #f43f5e;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chat-product-order-btn:hover {
+  background: #ffe4e6;
 }
 
 .msg-time {
@@ -736,6 +981,14 @@ watch(() => chatStore.isOpen, (newVal) => {
   font-size: 13px;
   font-weight: 600;
   color: #ef4444;
+}
+
+.prod-original-price {
+  margin-left: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 400;
+  text-decoration: line-through;
 }
 
 .form-group {
