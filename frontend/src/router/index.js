@@ -72,6 +72,11 @@ const router = createRouter({
           component: () => import('@/views/admin/Posts.vue'),
         },
         {
+          path: 'post-comments',
+          name: 'PostComments',
+          component: () => import('@/views/admin/PostComments.vue'),
+        },
+        {
           path: 'banners',
           name: 'Banners',
           component: () => import('@/views/admin/Banners.vue'),

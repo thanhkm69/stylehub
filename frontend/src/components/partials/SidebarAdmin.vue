@@ -15,6 +15,7 @@ const menuItems = [
     { name: 'Liên hệ', path: '/admin/contacts', icon: 'ph-envelope-simple' },
     { name: 'Danh mục', path: '/admin/blog-categories', icon: 'ph-article' },
     { name: 'Bài viết', path: '/admin/posts', icon: 'ph-newspaper' },
+    { name: 'Bình luận', path: '/admin/post-comments', icon: 'ph-chat-circle-text' },
     { name: 'Banner', path: '/admin/banners', icon: 'ph-image' },
     { name: 'Đánh giá', path: '/admin/reviews', icon: 'ph-star' },
     { name: 'Hỗ trợ Chat', path: '/admin/chats', icon: 'ph-chats' },

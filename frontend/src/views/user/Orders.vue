@@ -1,15 +1,22 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { API_URL, API_URL_IMAGE } from '@/config/env'
 import { useTokenStore } from '@/stores/token'
+import { useCartStore } from '@/stores/cart'
+import { useNotify } from '@/composables/useNotify'
 import BaseLoading from '@/components/base/BaseLoading.vue'
 import UserReviewModal from '@/components/features/reviews/UserReviewModal.vue'
 
 const tokenStore = useTokenStore()
+const cartStore = useCartStore()
+const router = useRouter()
+const toast = useNotify()
 const orders = ref([])
 const loading = ref(true)
 const activeFilter = ref('all')
+const reorderingOrderId = ref(null)
 
 // Pagination state
 const pagination = ref({
@@ -99,6 +106,29 @@ const changePage = (page) => {
 const openDetails = (order) => {
     selectedOrder.value = order
     showModal.value = true
+}
+
+const canReorder = (order) => ['delivered', 'cancelled'].includes(order.status)
+
+const reorder = async (order) => {
+    reorderingOrderId.value = order.id
+    const result = await cartStore.reorder(order.id)
+    reorderingOrderId.value = null
+
+    if (!result.success) {
+        toast.error(result.message || 'Không thể mua lại đơn hàng này.')
+        return
+    }
+
+    const adjustedCount = result.data.adjusted_items?.length || 0
+    if (adjustedCount > 0) {
+        toast.warn(`Đã thêm vào giỏ hàng. ${adjustedCount} sản phẩm được điều chỉnh theo tồn kho hiện tại.`)
+    } else {
+        toast.success(result.message)
+    }
+
+    showModal.value = false
+    router.push('/cart')
 }
 
 const isOrderFullyReviewed = (order) => {
@@ -216,6 +246,12 @@ const getProductImage = (item) => {
                         <span class="fw-black text-dark small mb-0">{{ formatPrice(order.total_amount) }}</span>
                     </div>
                     <div class="d-flex gap-2">
+                        <button v-if="canReorder(order)"
+                                :disabled="reorderingOrderId === order.id"
+                                @click="reorder(order)"
+                                class="btn-reorder">
+                            {{ reorderingOrderId === order.id ? 'ĐANG THÊM...' : 'MUA LẠI' }}
+                        </button>
                         <button v-if="order.status === 'delivered'" 
                                 :disabled="isOrderFullyReviewed(order)"
                                 @click="openOrderReviewDirectly(order)" 
@@ -319,10 +355,9 @@ const getProductImage = (item) => {
                                     <div class="d-flex flex-column align-items-end gap-1">
                                         <span class="fw-black text-primary xx-small">{{ formatPrice(item.price) }}</span>
                                         <button v-if="selectedOrder.status === 'delivered'" 
-                                                :disabled="item.is_reviewed" 
                                                 @click="openWriteReview(selectedOrder.id, item)" 
-                                                :class="['btn-write-review mt-1', { 'btn-reviewed': item.is_reviewed }]">
-                                            {{ item.is_reviewed ? 'Đã đánh giá' : 'Viết đánh giá' }}
+                                                :class="[item.is_reviewed ? 'btn-edit-review' : 'btn-write-review', 'mt-1']">
+                                            {{ item.is_reviewed ? 'Sửa đánh giá' : 'Viết đánh giá' }}
                                         </button>
                                     </div>
                                 </div>
@@ -357,6 +392,13 @@ const getProductImage = (item) => {
                         <div class="fw-bold xx-small mb-1">{{ selectedOrder.shipping_name }} | {{ selectedOrder.shipping_phone }}</div>
                         <div class="text-muted xxx-small">{{ selectedOrder.shipping_full_address }}</div>
                     </div>
+
+                    <button v-if="canReorder(selectedOrder)"
+                            :disabled="reorderingOrderId === selectedOrder.id"
+                            @click="reorder(selectedOrder)"
+                            class="btn-reorder w-100 mt-3">
+                        {{ reorderingOrderId === selectedOrder.id ? 'ĐANG THÊM VÀO GIỎ...' : 'MUA LẠI ĐƠN HÀNG' }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -474,12 +516,22 @@ const getProductImage = (item) => {
     border-color: var(--primary);
 }
 
-.btn-write-review.btn-reviewed {
+.btn-edit-review {
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+.btn-edit-review:hover {
     background: #f1f5f9;
-    color: #94a3b8;
-    border-color: #cbd5e1;
-    cursor: not-allowed;
-    pointer-events: none;
+    color: #0f172a;
+    border-color: #94a3b8;
 }
 
 .btn-write-review-footer {
@@ -507,6 +559,27 @@ const getProductImage = (item) => {
     border-color: #cbd5e1;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+.btn-reorder {
+    background: #fff;
+    color: #111827;
+    border: 1px solid #111827;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 999px;
+    transition: all 0.2s;
+}
+
+.btn-reorder:hover:not(:disabled) {
+    background: #111827;
+    color: #fff;
+}
+
+.btn-reorder:disabled {
+    opacity: 0.55;
+    cursor: wait;
 }
 </style>
 

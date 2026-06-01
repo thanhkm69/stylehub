@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateReviewRequest extends FormRequest
@@ -19,7 +20,7 @@ class UpdateReviewRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -30,6 +31,7 @@ class UpdateReviewRequest extends FormRequest
             'comment' => ['nullable', 'string', 'max:1000'],
             'images' => ['nullable', 'array', 'max:5'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'status' => ['sometimes', 'integer', 'in:0,1,2'],
         ];
     }
 
@@ -65,7 +67,7 @@ class UpdateReviewRequest extends FormRequest
         throw new HttpResponseException(response()->json([
             'success' => false,
             'message' => $validator->errors()->first(),
-            'data' => null
+            'data' => null,
         ], 422));
     }
 }

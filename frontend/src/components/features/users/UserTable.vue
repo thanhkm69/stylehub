@@ -89,7 +89,8 @@ const formatDate = (date) => {
                         <div class="action-group">
                             <BaseButton @click="emit('update', item)" customText="Sửa"
                                 customClass="btn-action btn-edit" />
-                            <BaseButton @click="emit('destroy', item.id)" customText="Xóa"
+                            <BaseButton v-if="item.role?.toLowerCase() !== 'admin'"
+                                @click="emit('destroy', item.id)" customText="Xóa"
                                 customClass="btn-action btn-delete" />
                         </div>
                     </td>

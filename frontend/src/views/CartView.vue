@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { API_URL_IMAGE } from '@/config/env'
 import BaseButton from '@/components/base/BaseButton.vue'
@@ -35,17 +35,35 @@ const handleUpdateQuantity = async (item, delta) => {
 }
 
 const handleManualInput = (item, event) => {
+  const originalQty = item.quantity
   let newQty = parseInt(event.target.value)
   const maxStock = item.stock ?? 0
 
   if (isNaN(newQty) || newQty < 1) newQty = 1
+  
   if (newQty > maxStock) {
     toast.error(`Số lượng tồn kho không đủ (Chỉ còn ${maxStock} sản phẩm)`)
-    newQty = maxStock
+    
+    // Force DOM reset to the original quantity
+    setTimeout(() => {
+      event.target.value = originalQty
+    }, 0)
+    
+    isAdjusting.value = true
+    if (adjustTimeout) clearTimeout(adjustTimeout)
+    adjustTimeout = setTimeout(() => {
+      isAdjusting.value = false
+    }, 500)
+    
+    return // Stop here, do not update backend
   }
+  
   if (newQty > 99) newQty = 99
   
-  updateItemQuantity(item, newQty)
+  if (newQty !== originalQty) {
+    event.target.value = newQty
+    updateItemQuantity(item, newQty)
+  }
 }
 
 const updateItemQuantity = async (item, newQty) => {
@@ -88,6 +106,18 @@ const handleClearCart = async () => {
       toast.success('Đã làm trống giỏ hàng')
     }
   }
+}
+
+import { useRouter } from 'vue-router'
+const router = useRouter()
+const isAdjusting = ref(false)
+let adjustTimeout = null
+
+const proceedToCheckout = () => {
+  if (isAdjusting.value) {
+    return // Prevent checkout if we just auto-adjusted quantity
+  }
+  router.push('/checkout')
 }
 </script>
 
@@ -196,7 +226,7 @@ const handleClearCart = async () => {
                   @change="handleManualInput(item, $event)"
                   @keyup.enter="handleManualInput(item, $event)"
                   min="1"
-                  max="99"
+                  :max="item.stock && item.stock < 99 ? item.stock : 99"
                 >
                 <button 
                   @click="handleUpdateQuantity(item, 1)" 
@@ -272,11 +302,9 @@ const handleClearCart = async () => {
 
           <p class="vat-note">(Đã bao gồm thuế VAT nếu có)</p>
 
-          <router-link to="/checkout">
-            <BaseButton variant="primary" size="lg" block class="btn-checkout">
-              Thanh toán
-            </BaseButton>
-          </router-link>
+          <BaseButton variant="primary" size="lg" block class="btn-checkout" @click="proceedToCheckout">
+            Thanh toán
+          </BaseButton>
 
           <div class="payment-methods">
             <p>Chúng tôi chấp nhận:</p>
