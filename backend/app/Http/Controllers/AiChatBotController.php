@@ -157,7 +157,8 @@ class AiChatBotController extends Controller
                 $reply = $result['choices'][0]['message']['content'] ?? 'Xin lỗi, tôi gặp sự cố khi xử lý câu hỏi này.';
                 return response()->json([
                     'success' => true,
-                    'reply' => $reply
+                    'reply' => $reply,
+                    'products' => $this->getReferencedProducts($reply),
                 ]);
             }
 
@@ -176,28 +177,75 @@ class AiChatBotController extends Controller
         }
     }
 
+    private function getReferencedProducts(string $reply): array
+    {
+        preg_match_all('/\[ORDER:(\d+)\]/', $reply, $matches);
+        $productIds = array_values(array_unique(array_map('intval', $matches[1] ?? [])));
+
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $products = Product::query()
+            ->whereIn('id', $productIds)
+            ->where('status', 1)
+            ->get()
+            ->keyBy('id');
+
+        $pricingService = app(\App\Services\FlashSalePricingService::class);
+
+        return collect($productIds)
+            ->map(function ($productId) use ($products, $pricingService) {
+                $product = $products->get($productId);
+
+                if (! $product) {
+                    return null;
+                }
+
+                $pricing = $pricingService->forListing($product);
+
+                return [
+                    'id' => $product->id,
+                    'slug' => $product->slug,
+                    'name' => $product->name,
+                    'thumbnail' => $product->thumbnail,
+                    'price' => $pricing['price'],
+                    'original_price' => $pricing['original_price'],
+                    'has_discount' => $pricing['price'] < $pricing['original_price'],
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
     public function productDetails(Product $product)
     {
         $user = auth()->user();
+        $flashSalePricingService = app(\App\Services\FlashSalePricingService::class);
         
         // Load active variants and their attribute values
         $product->load([
             'activeVariants.productVariantValues.attributeValue.attribute'
         ]);
 
-        $variants = $product->activeVariants->map(function ($variant) {
+        $variants = $product->activeVariants->map(function ($variant) use ($product, $flashSalePricingService) {
             $name = $variant->productVariantValues->map(function ($pvv) {
                 return $pvv->attributeValue->attribute->name . ': ' . $pvv->attributeValue->value;
             })->implode(', ');
+            $pricing = $flashSalePricingService->forSelection($product, $variant);
             
             return [
                 'id' => $variant->id,
                 'sku' => $variant->sku,
                 'stock' => $variant->stock,
-                'price' => $variant->price ?? $variant->product->price,
+                'price' => $pricing['price'],
+                'original_price' => $pricing['original_price'],
+                'has_discount' => $pricing['price'] < $pricing['original_price'],
                 'name' => $name,
             ];
         });
+        $productPricing = $flashSalePricingService->forListing($product);
 
         // Fetch user addresses
         $addresses = Address::where('user_id', $user->id)->get();
@@ -208,7 +256,9 @@ class AiChatBotController extends Controller
                 'product' => [
                     'id' => $product->id,
                     'name' => $product->name,
-                    'price' => $product->price,
+                    'price' => $productPricing['price'],
+                    'original_price' => $productPricing['original_price'],
+                    'has_discount' => $productPricing['price'] < $productPricing['original_price'],
                     'thumbnail' => $product->thumbnail,
                 ],
                 'variants' => $variants,
