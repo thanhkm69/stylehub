@@ -4,6 +4,11 @@ import { createHead } from '@unhead/vue/client'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+import '@phosphor-icons/web/regular'
+import '@phosphor-icons/web/thin'
+import '@phosphor-icons/web/light'
+import '@phosphor-icons/web/bold'
+import '@phosphor-icons/web/fill'
 
 import './assets/main.css'
 
@@ -12,9 +17,11 @@ import router from './router'
 
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import { useTheme } from '@/composables/useTheme'
 
 const app = createApp(App)
 const head = createHead()
+useTheme().initTheme()
 app.use(Toast, {
   timeout: 3000,
   position: 'top-right',

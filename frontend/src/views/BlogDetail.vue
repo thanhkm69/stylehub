@@ -312,8 +312,8 @@ const copyLink = async () => {
 .blog-detail-wrapper {
   background:
     radial-gradient(circle at 88% 9%, rgba(210, 187, 160, 0.2), transparent 28%),
-    #faf9f7;
-  color: #161616;
+    var(--background);
+  color: var(--text-main);
   padding: clamp(1.5rem, 3vw, 2.5rem) 0 5rem;
 }
 
@@ -333,7 +333,7 @@ const copyLink = async () => {
 }
 
 .breadcrumb-link:hover {
-  color: #111 !important;
+  color: var(--text-main) !important;
 }
 
 .article-hero {
@@ -371,7 +371,7 @@ const copyLink = async () => {
 }
 
 .article-title {
-  color: #111;
+  color: var(--text-main);
   font-size: clamp(2.45rem, 4vw, 4rem);
   font-weight: 700;
   letter-spacing: -0.065em;
@@ -381,7 +381,7 @@ const copyLink = async () => {
 }
 
 .article-summary {
-  color: #59544d;
+  color: var(--text-muted);
   font-size: clamp(1.04rem, 1.25vw, 1.16rem);
   line-height: 1.75;
   margin: 0 0 clamp(1.6rem, 3vw, 2.2rem);
@@ -390,7 +390,7 @@ const copyLink = async () => {
 
 .article-meta {
   align-items: center;
-  color: #777;
+  color: var(--text-muted);
   display: flex;
   font-size: 0.9rem;
   gap: 0.9rem;
@@ -447,9 +447,9 @@ const copyLink = async () => {
 
 .reading-aside {
   align-items: center;
-  background: #f2ede6;
+  background: var(--surface);
   border-radius: 18px;
-  color: #686259;
+  color: var(--text-muted);
   display: flex;
   font-size: 0.88rem;
   gap: clamp(1.25rem, 3vw, 2.25rem);
@@ -458,13 +458,13 @@ const copyLink = async () => {
 }
 
 .reading-aside p {
-  border-left: 1px solid #d9cec1;
+  border-left: 1px solid var(--border);
   margin: 0;
   padding-left: clamp(1.25rem, 3vw, 2.25rem);
 }
 
 .reading-aside-label {
-  color: #131313;
+  color: var(--text-main);
   display: block;
   flex: 0 0 auto;
   font-size: 0.73rem;
@@ -474,21 +474,21 @@ const copyLink = async () => {
 }
 
 .article-body {
-  background: #fff;
-  border: 1px solid #eee8e1;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 24px;
   box-shadow: 0 12px 36px rgba(34, 27, 18, 0.045);
   padding: clamp(2rem, 4.5vw, 4rem) clamp(1.4rem, 4vw, 3.75rem);
 }
 
 .article-content {
-  color: #282624;
+  color: var(--text-main);
   font-size: 1.04rem;
   line-height: 1.9;
 }
 
 .article-content :deep(h2) {
-  color: #111;
+  color: var(--text-main);
   font-size: clamp(1.4rem, 2vw, 1.62rem);
   font-weight: 700;
   letter-spacing: -0.025em;
@@ -497,7 +497,7 @@ const copyLink = async () => {
 }
 
 .article-content :deep(h3) {
-  color: #171717;
+  color: var(--text-main);
   font-size: 1.25rem;
   font-weight: 650;
   margin: 2.2rem 0 0.85rem;
@@ -508,14 +508,14 @@ const copyLink = async () => {
 }
 
 .article-content :deep(strong) {
-  color: #111;
+  color: var(--text-main);
   font-weight: 650;
 }
 
 .article-content :deep(ul),
 .article-content :deep(ol) {
-  background: #faf8f5;
-  border-left: 3px solid #161616;
+  background: var(--muted);
+  border-left: 3px solid var(--text-main);
   border-radius: 0 14px 14px 0;
   margin: 1.35rem 0 2rem;
   padding: 1.15rem 1.35rem 1.15rem 2rem;
@@ -534,8 +534,8 @@ const copyLink = async () => {
 
 .article-share {
   align-items: center;
-  background: #fff;
-  border: 1px solid #ede7df;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 18px;
   display: flex;
   justify-content: space-between;
@@ -545,7 +545,7 @@ const copyLink = async () => {
 }
 
 .share-label {
-  color: #2b2825;
+  color: var(--text-main);
   font-size: 0.92rem;
   font-weight: 600;
 }
@@ -604,7 +604,7 @@ const copyLink = async () => {
 }
 
 .related-heading {
-  color: #121212;
+  color: var(--text-main);
   font-size: clamp(1.5rem, 2vw, 1.85rem);
   font-weight: 700;
   letter-spacing: -0.035em;
@@ -612,14 +612,15 @@ const copyLink = async () => {
 }
 
 .related-card {
-  border: 1px solid #ede7df !important;
+  background: var(--surface);
+  border: 1px solid var(--border) !important;
   overflow: hidden;
 }
 
 .related-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important;
-  border-color: #dfd4c8 !important;
+  border-color: var(--text-muted) !important;
 }
 
 .related-img {
@@ -635,7 +636,22 @@ const copyLink = async () => {
 }
 
 .related-card:hover .related-title {
-  color: #73553c !important;
+  color: var(--primary) !important;
+}
+
+.blog-detail-wrapper :deep(.text-dark) {
+  color: var(--text-main) !important;
+}
+
+.blog-detail-wrapper :deep(.text-muted) {
+  color: var(--text-muted) !important;
+}
+
+.blog-detail-wrapper :deep(.card),
+.blog-detail-wrapper :deep(.card-body),
+.blog-detail-wrapper :deep(.bg-white) {
+  background: var(--surface) !important;
+  color: var(--text-main);
 }
 
 .text-truncate-2 {

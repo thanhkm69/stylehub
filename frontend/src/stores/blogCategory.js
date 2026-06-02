@@ -25,7 +25,7 @@ export const useBlogCategoryStore = defineStore('blogCategory', {
                 });
                 this.categories = response.data.data;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error fetching categories';
+        this.error = err.response?.data?.message || 'Không thể tải danh sách danh mục bài viết';
                 toast.error(this.error);
             } finally {
                 this.loading = false;
@@ -43,7 +43,7 @@ export const useBlogCategoryStore = defineStore('blogCategory', {
                 this.category = response.data.data;
                 return response.data.data;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error fetching category';
+        this.error = err.response?.data?.message || 'Không thể tải danh mục bài viết';
                 toast.error(this.error);
             } finally {
                 this.loading = false;
@@ -59,10 +59,10 @@ export const useBlogCategoryStore = defineStore('blogCategory', {
                     }
                 });
                 this.categories.unshift(response.data.data);
-                toast.success('Category created successfully');
+        toast.success('Thêm danh mục bài viết thành công');
                 return true;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error creating category';
+        this.error = err.response?.data?.message || 'Không thể thêm danh mục bài viết';
                 toast.error(this.error);
                 return false;
             } finally {
@@ -82,10 +82,10 @@ export const useBlogCategoryStore = defineStore('blogCategory', {
                 if (index !== -1) {
                     this.categories[index] = response.data.data;
                 }
-                toast.success('Category updated successfully');
+        toast.success('Cập nhật danh mục bài viết thành công');
                 return true;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error updating category';
+        this.error = err.response?.data?.message || 'Không thể cập nhật danh mục bài viết';
                 toast.error(this.error);
                 return false;
             } finally {
@@ -101,10 +101,10 @@ export const useBlogCategoryStore = defineStore('blogCategory', {
                     }
                 });
                 this.categories = this.categories.filter(c => c.id !== id);
-                toast.success('Category deleted successfully');
+        toast.success('Xóa danh mục bài viết thành công');
                 return true;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error deleting category';
+        this.error = err.response?.data?.message || 'Không thể xóa danh mục bài viết';
                 toast.error(this.error);
                 return false;
             }

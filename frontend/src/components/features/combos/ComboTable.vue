@@ -79,7 +79,7 @@ const formatCurrency = (val) =>
                         <div class="action-group">
                             <BaseButton @click="emit('manageItems', item)" customText="Sản phẩm"
                                 customClass="btn-action btn-manage"
-                                style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-light);" />
+                                style="background: #7c3aed; color: #ffffff; border: 1px solid #7c3aed;" />
                             <BaseButton @click="emit('update', item)" customText="Sửa" customClass="btn-action btn-edit" />
                             <BaseButton @click="emit('destroy', item.id)" customText="Xóa" customClass="btn-action btn-delete" />
                         </div>
@@ -136,5 +136,11 @@ const formatCurrency = (val) =>
     font-size: 11px;
     font-weight: 500;
     margin-left: 3px;
+}
+
+:deep(.btn-manage:hover) {
+    background: #6d28d9 !important;
+    border-color: #6d28d9 !important;
+    color: #ffffff !important;
 }
 </style>

@@ -110,7 +110,7 @@ defineProps({
 .progress-line {
     width: 120px;
     height: 2px;
-    background: #f1f5f9;
+    background: var(--border);
     border-radius: 2px;
     overflow: hidden;
 }
@@ -134,10 +134,8 @@ defineProps({
     margin: 0;
 }
 
-/* Dark mode support if needed */
-@media (prefers-color-scheme: dark) {
-    .loading-wrapper.is-fullscreen {
-        background: rgba(15, 23, 42, 0.9);
-    }
+:global(.dark) .loading-wrapper.is-fullscreen {
+    background: rgba(9, 9, 11, 0.92);
 }
+
 </style>

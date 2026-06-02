@@ -217,11 +217,17 @@ onMounted(() => {
   grid-template-columns: 90px 1fr;
   min-height: 120px;
   position: relative;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.05));
+  filter:
+    drop-shadow(1px 0 0 var(--border))
+    drop-shadow(-1px 0 0 var(--border))
+    drop-shadow(0 1px 0 var(--border))
+    drop-shadow(0 -1px 0 var(--border))
+    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
   transition: all 0.3s ease;
   cursor: pointer;
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
-  background: linear-gradient(to right, var(--primary) 90px, var(--surface) 90px);
+  background: linear-gradient(to right, #2563eb 90px, var(--surface) 90px);
   -webkit-mask: 
     radial-gradient(circle at 90px 0, transparent 12px, black 12.5px) top / 100% 55% no-repeat,
     radial-gradient(circle at 90px 100%, transparent 12px, black 12.5px) bottom / 100% 55% no-repeat;
@@ -236,7 +242,7 @@ onMounted(() => {
   left: 90px;
   top: 16px;
   bottom: 16px;
-  border-left: 2px dashed #cbd5e1;
+  border-left: 2px dashed var(--border);
   z-index: 1;
 }
 
@@ -304,9 +310,9 @@ onMounted(() => {
 }
 
 .btn-copy {
-  background: #eff6ff;
-  color: var(--primary);
-  border: 1px dashed #bfdbfe;
+  background: color-mix(in oklch, #3b82f6 18%, var(--surface));
+  color: #60a5fa;
+  border: 1px dashed #3b82f6;
   padding: 4px 8px;
   border-radius: 6px;
   font-family: 'Courier New', monospace;
@@ -321,9 +327,9 @@ onMounted(() => {
 }
 
 .btn-copy:hover {
-  background: var(--primary);
+  background: #2563eb;
   color: white;
-  border-color: var(--primary);
+  border-color: #2563eb;
 }
 
 /* Description */
@@ -344,7 +350,7 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 6px 12px;
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-main);
   margin-top: auto;
 }
 
@@ -356,13 +362,13 @@ onMounted(() => {
   padding: 4px 8px;
   border-radius: 4px;
   font-weight: 500;
-  border: 1px solid #f1f5f9;
+  border: 1px solid var(--border);
   white-space: nowrap;
 }
 
 .ticket-meta i {
   font-size: 14px;
-  color: var(--primary);
+  color: #60a5fa;
 }
 
 .empty-state {

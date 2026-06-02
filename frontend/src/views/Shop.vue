@@ -376,7 +376,7 @@ const visiblePages = () => {
   font-size: 13px;
   font-weight: 600;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-foreground);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;

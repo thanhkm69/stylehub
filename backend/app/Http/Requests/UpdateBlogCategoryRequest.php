@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateBlogCategoryRequest extends FormRequest
 {
@@ -22,9 +23,11 @@ class UpdateBlogCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $blogCategory = $this->route('blogCategory');
+
         return [
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $this->route('blog_category')->id,
+            'slug' => ['required', 'string', 'max:255', Rule::unique('blog_categories', 'slug')->ignore($blogCategory)],
             'description' => 'nullable|string',
         ];
     }

@@ -1,5 +1,5 @@
 <template>
-  <section class="about-section py-6 bg-light" data-aos="fade-up">
+  <section class="about-section py-6" data-aos="fade-up">
     <div class="container">
       <div class="text-center mb-5">
         <span class="eyebrow text-uppercase text-muted">Hình ảnh hoạt động</span>
@@ -65,6 +65,10 @@ const gallery = [
 </script>
 
 <style scoped>
+.about-section {
+  background: var(--surface);
+}
+
 .gallery-card {
   min-height: 260px;
   transition: transform 0.35s ease, box-shadow 0.35s ease;

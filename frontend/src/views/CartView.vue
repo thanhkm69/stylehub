@@ -325,6 +325,7 @@ const proceedToCheckout = () => {
   padding-top: 40px;
   padding-bottom: 80px;
   min-height: 70vh;
+  color: var(--text-main);
 }
 
 .cart-header {
@@ -360,7 +361,7 @@ const proceedToCheckout = () => {
 
 /* ── Items Section ── */
 .cart-items-section {
-  background: white;
+  background: var(--surface);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   overflow: hidden;
@@ -386,13 +387,13 @@ const proceedToCheckout = () => {
 }
 
 .combo-detail-area {
-  background: linear-gradient(135deg, #fff9f6, #fff1ea);
+  background: color-mix(in oklch, #e24326 8%, var(--background));
   border-bottom: 1px solid #f5dacc;
   padding: 22px 24px;
 }
 
 .combo-detail-card {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid #f3ddd4;
   border-radius: 18px;
   margin-bottom: 13px;
@@ -426,7 +427,7 @@ const proceedToCheckout = () => {
 }
 
 .combo-benefit {
-  background: #fff;
+  background: var(--background);
   border: 1px solid #ffd4c5;
   border-radius: 14px;
   flex-shrink: 0;
@@ -456,7 +457,7 @@ const proceedToCheckout = () => {
 
 .combo-product {
   align-items: center;
-  background: #fff;
+  background: var(--background);
   border: 1px solid #f0ddd6;
   border-radius: 14px;
   display: flex;
@@ -518,7 +519,7 @@ const proceedToCheckout = () => {
 }
 
 .cart-item:hover {
-  background: #f8fafc;
+  background: var(--background);
 }
 
 .cart-item:last-child {
@@ -613,7 +614,7 @@ const proceedToCheckout = () => {
   border: 1px solid var(--border);
   border-radius: 8px;
   width: fit-content;
-  background: white;
+  background: var(--background);
   overflow: hidden;
 }
 
@@ -631,7 +632,7 @@ const proceedToCheckout = () => {
 }
 
 .quantity-selector button:hover:not(:disabled) {
-  background: var(--surface);
+  background: var(--muted);
   color: var(--primary);
 }
 
@@ -647,6 +648,7 @@ const proceedToCheckout = () => {
   font-weight: 700;
   font-size: 14px;
   background: transparent;
+  color: var(--text-main);
 }
 
 /* Price/Action columns */
@@ -719,7 +721,7 @@ const proceedToCheckout = () => {
 
 /* ── Summary Section ── */
 .summary-card {
-  background: white;
+  background: var(--surface);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border);
   padding: 32px;

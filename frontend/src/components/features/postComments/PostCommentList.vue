@@ -191,8 +191,8 @@ onMounted(() => {
 <style scoped>
 .moderation-panel {
   align-items: center;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 18px;
   display: flex;
   gap: 30px;
@@ -210,13 +210,13 @@ onMounted(() => {
 }
 
 .moderation-panel h3 {
-  color: #111827;
+  color: var(--text-main);
   font-size: 18px;
   margin: 5px 0 6px;
 }
 
 .moderation-panel p {
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
 }
 

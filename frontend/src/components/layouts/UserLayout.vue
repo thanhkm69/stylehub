@@ -23,12 +23,13 @@ import { RouterView } from 'vue-router';
 
 <style scoped>
 .user-layout-page {
-    background: #f8fafc;
+    background: var(--background);
     min-height: calc(100vh - 80px); /* Adjust based on header height */
 }
 
 .user-content-card {
-    background: #ffffff;
+    background: var(--surface);
+    color: var(--text-main);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     padding: 32px;

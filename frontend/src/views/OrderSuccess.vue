@@ -81,12 +81,12 @@ const getStatusLabel = (status) => {
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <div class="info-card h-100">
-                                    <div class="d-flex align-items-center justify-content-between bg-light rounded-3 p-2 px-3 border border-dashed border-dark-subtle h-100">
+                                    <div class="d-flex flex-column align-items-start justify-content-center bg-light rounded-3 p-2 px-3 border border-dashed border-dark-subtle h-100">
                                         <div class="d-flex flex-column">
                                             <span class="text-muted xx-small uppercase fw-bold">Mã đơn hàng</span>
                                             <span class="fw-black text-primary x-small">{{ order.order_code }}</span>
                                         </div>
-                                        <span class="badge-status">{{ getStatusLabel(order.status) }}</span>
+                                        <span class="badge-status mt-2">{{ getStatusLabel(order.status) }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -182,6 +182,39 @@ const getStatusLabel = (status) => {
 </template>
 
 <style scoped>
+.order-success-page {
+    background: var(--background) !important;
+    color: var(--text-main);
+}
+
+.order-success-page :deep(.card) {
+    background: var(--surface);
+    color: var(--text-main);
+}
+
+.order-success-page :deep(.bg-light) {
+    background: var(--background) !important;
+}
+
+.order-success-page :deep(.text-muted) {
+    color: var(--text-muted) !important;
+}
+
+.order-success-page :deep(.border-bottom),
+.order-success-page :deep(.border-dark-subtle) {
+    border-color: var(--border) !important;
+}
+
+.order-success-page :deep(.btn-outline-dark) {
+    border-color: var(--border);
+    color: var(--text-main);
+}
+
+.order-success-page :deep(.btn-outline-dark:hover) {
+    background: var(--text-main);
+    color: var(--background);
+}
+
 .fw-black { font-weight: 900 !important; }
 .uppercase { text-transform: uppercase; }
 .x-small { font-size: 13px; }
@@ -247,7 +280,7 @@ const getStatusLabel = (status) => {
     height: 100%;
 }
 
-.divider { height: 1px; background: #e2e8f0; }
+.divider { height: 1px; background: var(--border); }
 
 .max-vh-30 { max-height: 30vh; overflow-y: auto; }
 ::-webkit-scrollbar { width: 3px; }

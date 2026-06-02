@@ -9,6 +9,18 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['show', 'update', 'destroy'])
+
+const formatDate = (value) => {
+  if (!value) return ''
+
+  return new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(value))
+}
 </script>
 
 <template>
@@ -49,11 +61,11 @@ const emit = defineEmits(['show', 'update', 'destroy'])
               {{ item.status === 'pending' ? 'Chờ xử lý' : item.status === 'replied' ? 'Đã phản hồi' : 'Đã đóng' }}
             </span>
           </td>
-          <td>{{ item.created_at }}</td>
+          <td class="created-at">{{ formatDate(item.created_at) }}</td>
           <td>
             <div class="action-group">
               <BaseButton @click="emit('show', item)" customText="Xem" customClass="btn-action btn-view" />
-              <BaseButton @click="emit('update', item)" customText="Cập nhật" customClass="btn-action btn-edit" />
+              <BaseButton @click="emit('update', item)" customText="Sửa" customClass="btn-action btn-edit" />
               <BaseButton @click="emit('destroy', item.id)" customText="Xóa" customClass="btn-action btn-delete" />
             </div>
           </td>
@@ -64,6 +76,62 @@ const emit = defineEmits(['show', 'update', 'destroy'])
 </template>
 
 <style scoped>
+.table {
+  table-layout: fixed;
+  min-width: 1180px;
+}
+
+.table th:nth-child(1) {
+  width: 5%;
+}
+
+.table th:nth-child(2) {
+  width: 12%;
+}
+
+.table th:nth-child(3) {
+  width: 24%;
+}
+
+.table th:nth-child(4) {
+  width: 9%;
+}
+
+.table th:nth-child(5) {
+  width: 13%;
+}
+
+.table th:nth-child(6) {
+  width: 15%;
+}
+
+.table th:nth-child(7) {
+  width: 22%;
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
+}
+
+.table td {
+  overflow-wrap: anywhere;
+}
+
+.created-at,
+.badge-status {
+  white-space: nowrap;
+}
+
+.action-group {
+  flex-wrap: nowrap;
+}
+
+:deep(.btn-action) {
+  min-width: 52px;
+  padding: 10px 14px;
+  white-space: nowrap;
+}
+
 .btn-action {
   transition: all 0.2s ease;
   cursor: pointer;

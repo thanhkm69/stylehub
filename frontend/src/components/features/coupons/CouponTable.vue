@@ -118,12 +118,8 @@ const formatDate = (dateString) => {
 
                     <td>
                         <div class="action-group">
-                            <BaseButton @click="emit('update', item)" customClass="btn-action btn-edit" title="Chỉnh sửa">
-                                <i class="ph ph-pencil-simple"></i>
-                            </BaseButton>
-                            <BaseButton @click="emit('destroy', item.id)" customClass="btn-action btn-delete" title="Xóa">
-                                <i class="ph ph-trash"></i>
-                            </BaseButton>
+                            <BaseButton @click="emit('update', item)" customText="Sửa" customClass="btn-action btn-edit" />
+                            <BaseButton @click="emit('destroy', item.id)" customText="Xóa" customClass="btn-action btn-delete" />
                         </div>
                     </td>
                 </tr>
@@ -134,35 +130,39 @@ const formatDate = (dateString) => {
 
 <style scoped>
 .admin-table-wrapper {
-    background: #ffffff;
+    background: var(--surface);
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    border: 1px solid var(--border-color, #e2e8f0);
+    border: 1px solid var(--border);
     overflow: hidden;
 }
 
 .table {
+    --bs-table-bg: var(--surface);
+    --bs-table-color: var(--text-main);
+    --bs-table-hover-bg: var(--muted);
+    --bs-table-hover-color: var(--text-main);
     width: 100%;
     border-collapse: collapse;
 }
 
 .table th {
-    background-color: #f8fafc;
-    color: #475569;
+    background-color: var(--muted);
+    color: var(--text-muted);
     font-weight: 600;
     padding: 16px;
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 0.5px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--border);
     text-align: left;
 }
 
 .table td {
     padding: 16px;
     vertical-align: middle;
-    border-bottom: 1px solid #f1f5f9;
-    color: #334155;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
     font-size: 14px;
 }
 
@@ -171,7 +171,7 @@ const formatDate = (dateString) => {
 }
 
 .table tbody tr:hover {
-    background-color: #f8fafc;
+    background-color: var(--muted);
 }
 
 .table tbody tr:last-child td {
@@ -183,7 +183,7 @@ const formatDate = (dateString) => {
 }
 
 .text-muted {
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .text-success {
@@ -220,19 +220,19 @@ const formatDate = (dateString) => {
     font-family: 'JetBrains Mono', 'Courier New', monospace;
     font-size: 13px;
     font-weight: 700;
-    color: var(--primary, #0f172a);
-    background: #f1f5f9;
+    color: var(--text-main);
+    background: var(--muted);
     padding: 4px 10px;
     border-radius: 6px;
     display: inline-block;
     width: fit-content;
     letter-spacing: 0.5px;
-    border: 1px dashed #cbd5e1;
+    border: 1px dashed var(--border);
 }
 
 .coupon-name {
     font-size: 13px;
-    color: #475569;
+    color: var(--text-muted);
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -280,11 +280,11 @@ const formatDate = (dateString) => {
 
 .discount-condition {
     font-size: 12px;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .discount-condition strong {
-    color: #334155;
+    color: var(--text-main);
     font-weight: 600;
 }
 
@@ -300,7 +300,7 @@ const formatDate = (dateString) => {
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    color: #475569;
+    color: var(--text-muted);
 }
 
 .time-item i {
@@ -357,9 +357,10 @@ const formatDate = (dateString) => {
 }
 
 :deep(.btn-action) {
-    width: 32px;
-    height: 32px;
-    padding: 0;
+    width: auto;
+    min-width: 52px;
+    height: auto;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -368,10 +369,6 @@ const formatDate = (dateString) => {
     cursor: pointer;
     transition: all 0.2s;
     background: transparent;
-}
-
-:deep(.btn-action i) {
-    font-size: 16px;
 }
 
 :deep(.btn-edit) {

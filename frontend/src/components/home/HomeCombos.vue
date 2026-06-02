@@ -140,8 +140,8 @@ const formatDeadline = (value) => {
 }
 
 .combo-card {
-  background: #fff;
-  border: 1px solid #f4ddd6;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 22px;
   box-shadow: 0 13px 35px rgba(108, 36, 18, 0.08);
   overflow: hidden;
@@ -154,7 +154,7 @@ const formatDeadline = (value) => {
 }
 
 .combo-media {
-  background: #fff3ef;
+  background: var(--background);
   height: 210px;
   overflow: hidden;
   position: relative;
@@ -174,7 +174,7 @@ const formatDeadline = (value) => {
 
 .combo-placeholder {
   align-items: center;
-  background: linear-gradient(135deg, #fff2ed, #ffe1d5);
+  background: color-mix(in oklch, #e95032 12%, var(--background));
   color: #e95032;
   display: flex;
   font-size: 54px;
@@ -208,7 +208,7 @@ const formatDeadline = (value) => {
 }
 
 .deadline {
-  color: #8a837e;
+  color: var(--text-muted);
   font-size: 11px;
 }
 
@@ -242,7 +242,7 @@ const formatDeadline = (value) => {
 .combo-item,
 .extra-items {
   align-items: center;
-  border: 1px solid #f2ded7;
+  border: 1px solid var(--border);
   border-radius: 12px;
   display: flex;
   height: 53px;
@@ -275,7 +275,7 @@ const formatDeadline = (value) => {
 }
 
 .extra-items {
-  background: #fff5f1;
+  background: color-mix(in oklch, #e95032 10%, var(--background));
   color: #e95032;
   font-size: 13px;
   font-weight: 750;

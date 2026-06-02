@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import SidebarAdmin from '@/components/partials/SidebarAdmin.vue';
 import { RouterView } from 'vue-router';
+import ThemeToggle from '@/components/ui/ThemeToggle.vue';
 
 const isSidebarOpen = ref(false);
 
@@ -24,6 +25,7 @@ const toggleSidebar = () => {
                 </div>
                 <div class="topbar-right">
                     <div class="topbar-actions hide-on-mobile">
+                        <ThemeToggle />
                         <button class="icon-btn">
                             <i class="ph-bold ph-bell"></i>
                             <span class="badge"></span>
@@ -52,7 +54,7 @@ const toggleSidebar = () => {
 .admin-layout {
     display: flex;
     min-height: 100vh;
-    background: #f8fafc;
+    background: var(--background);
 }
 
 .sidebar-overlay {
@@ -75,7 +77,7 @@ const toggleSidebar = () => {
 
 .admin-topbar {
     height: 80px;
-    background: rgba(255, 255, 255, 0.8);
+    background: color-mix(in oklch, var(--surface) 85%, transparent);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
     padding: 0 32px;
@@ -109,7 +111,7 @@ const toggleSidebar = () => {
 }
 
 .menu-toggle:hover {
-    background: #f1f5f9;
+    background: var(--muted);
 }
 
 .page-title {
@@ -142,14 +144,14 @@ const toggleSidebar = () => {
     align-items: center;
     justify-content: center;
     font-size: 20px;
-    color: #64748b;
+    color: var(--text-muted);
     cursor: pointer;
     position: relative;
     transition: var(--transition);
 }
 
 .icon-btn:hover {
-    background: #f1f5f9;
+    background: var(--muted);
     color: var(--text-main);
 }
 
@@ -160,7 +162,7 @@ const toggleSidebar = () => {
     width: 8px;
     height: 8px;
     background: #ef4444;
-    border: 2px solid #fff;
+    border: 2px solid var(--surface);
     border-radius: 50%;
 }
 

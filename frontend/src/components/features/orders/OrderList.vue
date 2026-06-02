@@ -204,6 +204,10 @@ onMounted(() => {
     backdrop-filter: blur(4px);
 }
 
+:global(.dark) .detail-loading-overlay {
+    background: rgba(9, 9, 11, 0.9);
+}
+
 .order-list-container :deep(.toolbar-right) {
     gap: 8px;
 }

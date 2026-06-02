@@ -178,6 +178,33 @@ const updateUrl = () => {
   transition: all 0.3s ease;
 }
 
+.blog-page-wrapper {
+  background: var(--background) !important;
+  color: var(--text-main);
+}
+
+.blog-page-wrapper :deep(.text-dark) {
+  color: var(--text-main) !important;
+}
+
+.blog-page-wrapper :deep(.text-muted) {
+  color: var(--text-muted) !important;
+}
+
+.blog-page-wrapper :deep(.card),
+.blog-page-wrapper :deep(.card-body) {
+  background: var(--surface);
+  color: var(--text-main);
+}
+
+.blog-page-wrapper :deep(.bg-light) {
+  background: var(--muted) !important;
+}
+
+.blog-page-wrapper :deep(.bg-white) {
+  background: var(--surface) !important;
+}
+
 .blog-card {
   border: 1px solid transparent !important;
 }
@@ -236,13 +263,14 @@ const updateUrl = () => {
 }
 
 .custom-filter-btn.btn-outline-secondary {
-  border-color: #dee2e6;
-  color: #6c757d;
+  background: var(--surface) !important;
+  border-color: var(--border);
+  color: var(--text-muted);
 }
 
 .custom-filter-btn.btn-outline-secondary:hover {
-  background-color: #f8f9fa !important;
-  color: #495057;
+  background-color: var(--muted) !important;
+  color: var(--text-main);
 }
 
 .pagination-btn {
@@ -254,7 +282,17 @@ const updateUrl = () => {
 }
 
 .page-item.disabled .pagination-btn {
-  background-color: #f8f9fa !important;
-  color: #adb5bd !important;
+  background-color: var(--muted) !important;
+  color: var(--text-muted) !important;
+}
+
+.pagination-btn {
+  background: var(--surface);
+  color: var(--text-main) !important;
+}
+
+.page-link.bg-primary {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
 }
 </style>

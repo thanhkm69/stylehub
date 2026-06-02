@@ -1,4 +1,5 @@
 <script setup>
+import BaseButton from '@/components/base/BaseButton.vue'
 import BaseLoading from '@/components/base/BaseLoading.vue'
 
 const props = defineProps({
@@ -118,14 +119,10 @@ const getPaymentStatusClass = (status) => {
                         <small>{{ item.created_at }}</small>
                     </td>
                     <td class="text-end">
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline-primary" @click="emit('update', item)" title="Cập nhật trạng thái">
-                                <i class="ph ph-note-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" :disabled="item.status !== 'cancelled'" 
-                                @click="emit('destroy', item.id)" title="Xóa đơn hàng">
-                                <i class="ph ph-trash"></i>
-                            </button>
+                        <div class="action-group justify-content-end">
+                            <BaseButton @click="emit('update', item)" customText="Sửa" customClass="btn-action btn-edit" />
+                            <BaseButton @click="emit('destroy', item.id)" customText="Xóa"
+                                customClass="btn-action btn-delete" />
                         </div>
                     </td>
                 </tr>
@@ -135,8 +132,16 @@ const getPaymentStatusClass = (status) => {
 </template>
 
 <style scoped>
+.custom-table {
+    --bs-table-bg: var(--surface);
+    --bs-table-color: var(--text-main);
+    --bs-table-hover-bg: var(--muted);
+    --bs-table-hover-color: var(--text-main);
+    margin-bottom: 0;
+}
+
 .custom-table thead th {
-    background: #f8fafc;
+    background: var(--muted);
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -156,5 +161,38 @@ const getPaymentStatusClass = (status) => {
     padding: 4px 10px;
     font-size: 11px;
     font-weight: 600;
+}
+
+.action-group {
+    display: flex;
+    gap: 8px;
+}
+
+:deep(.btn-action) {
+    min-width: 52px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+:deep(.btn-edit) {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+:deep(.btn-edit:hover) {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+:deep(.btn-delete) {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
+:deep(.btn-delete:hover) {
+    background: #fee2e2;
+    color: #dc2626;
 }
 </style>

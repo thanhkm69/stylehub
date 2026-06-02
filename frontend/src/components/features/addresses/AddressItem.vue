@@ -75,7 +75,8 @@ const handleDelete = async () => {
 
 <style scoped>
 .address-item {
-    background: white;
+    background: var(--surface);
+    color: var(--text-main);
     transition: all 0.2s ease;
 }
 .address-item:hover {

@@ -1,12 +1,15 @@
 <script setup>
 import { computed, onMounted } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useTokenStore } from '@/stores/token';
 import { useProfileStore } from '@/stores/profile';
+import { useNotify } from '@/composables/useNotify';
 
 const route = useRoute();
+const router = useRouter();
 const tokenStore = useTokenStore();
 const profileStore = useProfileStore();
+const toast = useNotify();
 
 const user = computed(() => tokenStore.user?.data);
 const displayName = computed(() => profileStore.profile?.full_name || user.value?.name || 'Người dùng');
@@ -23,6 +26,18 @@ const userMenu = [
 const isActive = (path) => {
     if (path === '/user') return route.path === '/user';
     return route.path.startsWith(path);
+};
+
+const logout = async () => {
+    const result = await tokenStore.logout();
+    profileStore.clear();
+    router.replace('/');
+
+    if (result.success === true) {
+        toast.success(result.message);
+    } else {
+        toast.error(result?.message || 'Lỗi khi đăng xuất');
+    }
 };
 
 onMounted(() => {
@@ -56,10 +71,10 @@ onMounted(() => {
                     </li>
                     <li class="nav-divider"></li>
                     <li>
-                        <a href="#" class="user-nav-link logout-btn">
+                        <button type="button" class="user-nav-link logout-btn" @click="logout">
                             <i class="ph-bold ph-sign-out"></i>
                             <span>Đăng xuất</span>
-                        </a>
+                        </button>
                     </li>
                 </ul>
             </nav>
@@ -73,7 +88,7 @@ onMounted(() => {
 }
 
 .user-card {
-    background: #ffffff;
+    background: var(--surface);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
     overflow: hidden;
@@ -82,7 +97,7 @@ onMounted(() => {
 
 .user-card-header {
     padding: 32px 24px;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: var(--background);
     border-bottom: 1px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -94,7 +109,7 @@ onMounted(() => {
 .user-avatar-lg {
     width: 80px;
     height: 80px;
-    background: #ffffff;
+    background: var(--surface);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -102,7 +117,7 @@ onMounted(() => {
     font-size: 40px;
     color: var(--primary);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border: 4px solid #ffffff;
+    border: 4px solid var(--surface);
 }
 
 .user-name {
@@ -137,7 +152,7 @@ onMounted(() => {
     gap: 12px;
     padding: 12px 16px;
     text-decoration: none;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 14px;
     font-weight: 500;
     border-radius: var(--radius-md);
@@ -156,7 +171,7 @@ onMounted(() => {
 }
 
 .user-nav-link:hover {
-    background: #f8fafc;
+    background: var(--background);
     color: var(--text-main);
 }
 
@@ -166,7 +181,7 @@ onMounted(() => {
 }
 
 .user-nav-link.active {
-    background: #eff6ff;
+    background: color-mix(in oklch, #3b82f6 14%, var(--surface));
     color: var(--primary);
 }
 
@@ -184,5 +199,11 @@ onMounted(() => {
 .logout-btn:hover {
     background: #fef2f2;
     color: #ef4444;
+}
+
+.logout-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
 }
 </style>

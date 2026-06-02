@@ -78,7 +78,7 @@ const isActive = (path) => {
 .sidebar-admin {
     width: 280px;
     height: 100vh;
-    background: #ffffff;
+    background: var(--surface);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -155,7 +155,7 @@ const isActive = (path) => {
     gap: 12px;
     padding: 12px 16px;
     text-decoration: none;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 15px;
     font-weight: 500;
     border-radius: var(--radius-md);
@@ -167,13 +167,13 @@ const isActive = (path) => {
 }
 
 .nav-link:hover {
-    background: #f8fafc;
+    background: var(--muted);
     color: var(--text-main);
 }
 
 .nav-link.active {
-    background: #eff6ff;
-    color: var(--primary);
+    background: var(--accent);
+    color: var(--accent-foreground);
 }
 
 .logout-link:hover {
@@ -191,7 +191,7 @@ const isActive = (path) => {
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
+    background: var(--border);
     border-radius: 10px;
 }
 

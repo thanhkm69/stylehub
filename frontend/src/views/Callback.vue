@@ -78,19 +78,19 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8fafc;
+    background: var(--background);
     padding: 24px;
 }
 
 .callback-card {
-    background: #ffffff;
+    background: var(--surface);
     width: 100%;
     max-width: 480px;
     padding: 60px 40px;
     border-radius: 32px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
     text-align: center;
-    border: 1px solid #f1f5f9;
+    border: 1px solid var(--border);
 }
 
 .state-content {
@@ -191,7 +191,7 @@ onMounted(async () => {
     margin-top: 12px;
     padding: 12px 24px;
     background: var(--text-main);
-    color: white;
+    color: var(--background);
     border: none;
     border-radius: 12px;
     font-weight: 600;

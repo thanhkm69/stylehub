@@ -66,6 +66,8 @@ export const useChatStore = defineStore('chat', {
     },
 
     listenToConversation(conversationId) {
+      if (!echo) return
+
       echo.private(`chat.${conversationId}`)
         .listen('MessageSent', (e) => {
           const messageExists = this.messages.some(m => m.id === e.id)
