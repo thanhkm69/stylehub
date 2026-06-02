@@ -16,6 +16,8 @@ class Message extends Model
 
     protected $casts = [
         'is_read' => 'boolean',
+        'sender_id' => 'integer',
+        'conversation_id' => 'integer',
     ];
 
     public function conversation(): BelongsTo

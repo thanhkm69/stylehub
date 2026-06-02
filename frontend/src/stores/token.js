@@ -55,7 +55,7 @@ export const useTokenStore = defineStore('token', () => {
     }
   }
 
-  watch(token, async () => await getUser())
+  watch(token, async () => await getUser(), { immediate: true })
 
   return {
     token,

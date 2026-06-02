@@ -3,6 +3,7 @@ import Pusher from 'pusher-js'
 import axios from 'axios'
 
 window.Pusher = Pusher
+window.axios = axios
 
 const echo = new Echo({
     broadcaster: 'reverb',
