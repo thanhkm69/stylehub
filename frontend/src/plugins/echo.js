@@ -2,9 +2,11 @@ import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
 import axios from 'axios'
 
+const reverbEnabled = import.meta.env.VITE_REVERB_ENABLED === 'true'
+
 window.Pusher = Pusher
 
-const echo = new Echo({
+const echo = reverbEnabled ? new Echo({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
     wsHost: import.meta.env.VITE_REVERB_HOST,
@@ -32,6 +34,6 @@ const echo = new Echo({
             }
         };
     },
-})
+}) : null
 
 export default echo

@@ -188,7 +188,7 @@ const handleHide = async () => {
 }
 
 .info-card {
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 16px;
@@ -241,7 +241,7 @@ const handleHide = async () => {
     display: flex;
     align-items: center;
     gap: 16px;
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 12px;
@@ -253,7 +253,7 @@ const handleHide = async () => {
     border-radius: 8px;
     border: 1px solid var(--border);
     overflow: hidden;
-    background: #fff;
+    background: var(--background);
     flex-shrink: 0;
 }
 
@@ -292,7 +292,7 @@ const handleHide = async () => {
 }
 
 .rating-comment-section {
-    background: #f8fafc;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 16px;
@@ -353,7 +353,7 @@ const handleHide = async () => {
     font-size: 14px;
     color: var(--text-main);
     line-height: 1.6;
-    background: #ffffff;
+    background: var(--background);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 12px;

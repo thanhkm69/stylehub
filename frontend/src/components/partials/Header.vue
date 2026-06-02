@@ -2,14 +2,16 @@
 import BaseButton from '@/components/base/BaseButton.vue';
 import BaseSpinner from '@/components/base/BaseSpinner.vue';
 import { computed, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { useTokenStore } from '@/stores/token';
 import { useWishlistStore } from '@/stores/wishlist';
 import { useCartStore } from '@/stores/cart';
 import { useNotify } from '@/composables/useNotify';
 import { useProfileStore } from '@/stores/profile';
+import ThemeToggle from '@/components/ui/ThemeToggle.vue';
 
 const tokenStore = useTokenStore()
+const router = useRouter()
 const wishlistStore = useWishlistStore()
 const cartStore = useCartStore()
 const profileStore = useProfileStore()
@@ -26,6 +28,8 @@ const loading = ref(false)
 const logout = async () => {
     loading.value = true
     const result = await tokenStore.logout()
+    profileStore.clear()
+    router.replace('/')
     if (result.success === true) {
         toast.success(result.message)
         localStorage.removeItem('token')
@@ -79,6 +83,7 @@ onMounted(async () => {
             <!-- Actions & Auth -->
             <div class="nav-actions">
                 <div class="action-icons">
+                    <ThemeToggle />
                     <i class="ph ph-magnifying-glass" title="Tìm kiếm"></i>
                     <router-link to="/cart" class="cart-icon-wrapper">
                         <i class="ph ph-shopping-cart" title="Giỏ hàng"></i>
@@ -213,7 +218,7 @@ onMounted(async () => {
     position: sticky;
     top: 0;
     z-index: 1000;
-    background: rgba(255, 255, 255, 0.85);
+    background: color-mix(in oklch, var(--surface) 85%, transparent);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
     padding: 14px 0;
@@ -330,7 +335,7 @@ onMounted(async () => {
 
 .auth-btn {
     background: var(--text-main);
-    color: white;
+    color: var(--background);
     padding: 10px 20px;
     border-radius: 12px;
     font-weight: 600;
@@ -340,6 +345,7 @@ onMounted(async () => {
 
 .auth-btn:hover {
     background: var(--primary);
+    color: var(--primary-foreground);
     transform: translateY(-2px);
     box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.2);
 }
@@ -362,12 +368,12 @@ onMounted(async () => {
     padding: 6px 12px;
     border-radius: 12px;
     transition: var(--transition);
-    background: #f8fafc;
+    background: var(--background);
     border: 1px solid var(--border);
 }
 
 .user-info-trigger:hover {
-    background: #f1f5f9;
+    background: var(--muted);
 }
 
 .avatar-circle {
@@ -407,7 +413,7 @@ onMounted(async () => {
     top: 100%;
     right: 0;
     width: 240px;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
@@ -465,7 +471,7 @@ onMounted(async () => {
 
 .dropdown-divider {
     height: 1px;
-    background: #f1f5f9;
+    background: var(--border);
     margin: 8px 0;
 }
 
@@ -481,7 +487,7 @@ onMounted(async () => {
     gap: 12px;
     padding: 10px 12px;
     border-radius: 10px;
-    color: #475569;
+    color: var(--text-muted);
     font-size: 14px;
     font-weight: 600;
     transition: var(--transition);
@@ -497,7 +503,7 @@ onMounted(async () => {
 }
 
 .dropdown-item:hover {
-    background: #f8fafc;
+    background: var(--muted);
     color: var(--primary);
 }
 
@@ -515,7 +521,7 @@ onMounted(async () => {
     display: none;
     width: 40px;
     height: 40px;
-    background: #f8fafc;
+    background: var(--background);
     border: 1px solid var(--border);
     border-radius: 10px;
     align-items: center;
@@ -527,7 +533,7 @@ onMounted(async () => {
 }
 
 .mobile-menu-btn:hover {
-    background: #f1f5f9;
+    background: var(--muted);
     color: var(--primary);
 }
 
@@ -546,7 +552,7 @@ onMounted(async () => {
     width: 85%;
     max-width: 320px;
     height: 100vh;
-    background: #ffffff;
+    background: var(--surface);
     z-index: 10001;
     display: flex;
     flex-direction: column;
@@ -558,7 +564,7 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border);
 }
 
 .mobile-brand {
@@ -573,14 +579,14 @@ onMounted(async () => {
 .close-btn {
     width: 36px;
     height: 36px;
-    background: #f1f5f9;
+    background: var(--muted);
     border: none;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
-    color: #64748b;
+    color: var(--text-muted);
 }
 
 .mobile-nav-list {
@@ -596,7 +602,7 @@ onMounted(async () => {
     gap: 16px;
     padding: 12px 16px;
     border-radius: 12px;
-    color: #475569;
+    color: var(--text-muted);
     font-size: 16px;
     font-weight: 600;
     transition: var(--transition);
@@ -624,7 +630,7 @@ onMounted(async () => {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: #f8fafc;
+    background: var(--background);
 }
 
 .mobile-btn {
@@ -643,13 +649,13 @@ onMounted(async () => {
 
 .mobile-btn.register {
     background: var(--primary);
-    color: white;
+    color: var(--primary-foreground);
 }
 
 .mobile-menu-footer {
     padding: 24px;
     text-align: center;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--border);
 }
 
 .social-links {

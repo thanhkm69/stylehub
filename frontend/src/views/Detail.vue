@@ -1050,7 +1050,7 @@ watch(() => route.params.slug, (newSlug) => {
 }
 
 .review-item {
-  background: #f8fafc;
+  background: var(--surface);
   padding: 16px 20px;
   border-radius: 12px;
   border: 1px solid transparent;
@@ -1058,7 +1058,7 @@ watch(() => route.params.slug, (newSlug) => {
 }
 
 .review-item:hover {
-  background: white;
+  background: var(--muted);
   border-color: var(--border);
   box-shadow: var(--shadow-md);
   transform: translateY(-4px);
@@ -1128,7 +1128,7 @@ watch(() => route.params.slug, (newSlug) => {
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid var(--border);
-  background: #f8fafc;
+  background: var(--muted);
 }
 
 .review-img-wrapper img {

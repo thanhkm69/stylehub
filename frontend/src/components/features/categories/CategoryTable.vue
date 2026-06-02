@@ -115,7 +115,7 @@ const categorizedData = computed(() => {
 
 <style scoped>
 .row-child {
-    background-color: #fafafa;
+    background-color: var(--muted);
 }
 
 .parent-stt {
@@ -134,7 +134,7 @@ const categorizedData = computed(() => {
     border-radius: 10px;
     border: 1px solid var(--border);
     overflow: hidden;
-    background: #f8fafc;
+    background: var(--muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -164,8 +164,8 @@ const categorizedData = computed(() => {
     top: -12px;
     width: 16px;
     height: 24px;
-    border-left: 2px solid #e2e8f0;
-    border-bottom: 2px solid #e2e8f0;
+    border-left: 2px solid var(--border);
+    border-bottom: 2px solid var(--border);
     border-bottom-left-radius: 8px;
 }
 
@@ -193,16 +193,17 @@ const categorizedData = computed(() => {
 .display-order {
     display: inline-flex;
     padding: 2px 8px;
-    background: #f1f5f9;
+    background: var(--muted);
     border-radius: 6px;
     font-weight: 600;
     font-size: 13px;
-    color: #475569;
+    color: var(--text-main);
 }
 
 .text-center { text-align: center; }
 
 :deep(.btn-action) {
-    padding: 6px 12px;
+    min-width: 52px;
+    padding: 10px 14px;
 }
 </style>

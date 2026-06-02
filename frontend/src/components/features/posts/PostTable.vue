@@ -41,7 +41,7 @@ const emit = defineEmits(["update", "destroy", "show"])
                 </td>
                 <td>
                     <div class="fw-medium text-dark max-w-xs truncate">{{ item.title }}</div>
-                    <div class="text-muted text-xs mt-1">{{ item.slug }}</div>
+                    <div class="text-muted text-xs mt-1 post-slug">{{ item.slug }}</div>
                 </td>
                 <td>
                     <span class="category-badge">{{ item.blog_category?.name }}</span>
@@ -57,12 +57,8 @@ const emit = defineEmits(["update", "destroy", "show"])
                 </td>
                 <td>
                     <div class="action-buttons justify-content-end">
-                        <BaseButton @click="emit('update', item)" customClass="btn-icon btn-light" customTitle="Sửa">
-                            <i class="ph-bold ph-pencil-simple text-primary"></i>
-                        </BaseButton>
-                        <BaseButton @click="emit('destroy', item.id)" customClass="btn-icon btn-light" customTitle="Xóa">
-                            <i class="ph-bold ph-trash text-danger"></i>
-                        </BaseButton>
+                        <BaseButton @click="emit('update', item)" customText="Sửa" customClass="btn-action btn-edit" />
+                        <BaseButton @click="emit('destroy', item.id)" customText="Xóa" customClass="btn-action btn-delete" />
                     </div>
                 </td>
             </tr>
@@ -83,24 +79,28 @@ const emit = defineEmits(["update", "destroy", "show"])
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    background: var(--surface);
+    color: var(--text-main);
 }
 
 .admin-table th {
-    background: #f8fafc;
-    color: #64748b;
+    background: var(--muted);
+    color: var(--text-muted);
     font-weight: 600;
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     padding: 16px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--border);
     white-space: nowrap;
 }
 
 .admin-table td {
     padding: 16px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border);
     vertical-align: middle;
+    background: var(--surface);
+    color: var(--text-main);
 }
 
 .loading-cell {
@@ -113,7 +113,19 @@ const emit = defineEmits(["update", "destroy", "show"])
 }
 
 .admin-table tbody tr:hover {
-    background: #f8fafc;
+    background: var(--muted);
+}
+
+.admin-table tbody tr:hover td {
+    background: var(--muted);
+}
+
+.admin-table .text-dark {
+    color: var(--text-main) !important;
+}
+
+.admin-table .text-muted {
+    color: var(--text-muted) !important;
 }
 
 .product-img-wrapper {
@@ -121,8 +133,8 @@ const emit = defineEmits(["update", "destroy", "show"])
     height: 45px;
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
-    background: #ffffff;
+    border: 1px solid var(--border);
+    background: var(--surface);
 }
 
 .product-img-wrapper img {
@@ -137,7 +149,7 @@ const emit = defineEmits(["update", "destroy", "show"])
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f1f5f9;
+    background: var(--muted);
     color: #94a3b8;
 }
 
@@ -179,37 +191,6 @@ const emit = defineEmits(["update", "destroy", "show"])
     gap: 8px;
 }
 
-.btn-icon {
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 10px;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    transition: all 0.2s;
-}
-
-.btn-icon i {
-    font-size: 18px;
-}
-
-.btn-icon:hover {
-    background: #f1f5f9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.btn-icon:hover .text-primary {
-    color: var(--primary) !important;
-}
-
-.btn-icon:hover .text-danger {
-    color: #ef4444 !important;
-}
-
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -229,6 +210,13 @@ const emit = defineEmits(["update", "destroy", "show"])
 }
 
 .max-w-xs {
-    max-width: 20rem;
+    max-width: 16rem;
+}
+
+.post-slug {
+    max-width: 16rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>

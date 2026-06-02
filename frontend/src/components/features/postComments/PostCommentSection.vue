@@ -262,7 +262,7 @@ watch(
 
 .comment-heading {
   align-items: end;
-  border-bottom: 1px solid #ece4db;
+  border-bottom: 1px solid var(--border);
   display: flex;
   gap: 2rem;
   justify-content: space-between;
@@ -281,7 +281,7 @@ watch(
 }
 
 .comment-heading h2 {
-  color: #141312;
+  color: var(--text-main);
   font-size: clamp(1.55rem, 2.4vw, 2rem);
   font-weight: 700;
   letter-spacing: -0.045em;
@@ -289,12 +289,12 @@ watch(
 }
 
 .comment-heading h2 span {
-  color: #80776d;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .comment-heading p {
-  color: #6e675e;
+  color: var(--text-muted);
   margin: 0;
   max-width: 420px;
   text-align: right;
@@ -302,8 +302,8 @@ watch(
 
 .comment-form,
 .login-prompt {
-  background: #fff;
-  border: 1px solid #ebe3d9;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 20px;
   margin-bottom: 1.6rem;
   padding: clamp(1.1rem, 3vw, 1.45rem);
@@ -311,9 +311,10 @@ watch(
 
 .comment-form textarea,
 .comment-main textarea {
-  border: 1px solid #e4dbd1;
+  background: var(--background);
+  border: 1px solid var(--border);
   border-radius: 13px;
-  color: #282522;
+  color: var(--text-main);
   font: inherit;
   line-height: 1.65;
   outline: none;
@@ -330,7 +331,7 @@ watch(
 
 .comment-form-footer {
   align-items: center;
-  color: #91887f;
+  color: var(--text-muted);
   display: flex;
   font-size: 0.86rem;
   justify-content: space-between;
@@ -359,7 +360,7 @@ watch(
 }
 
 .login-prompt p {
-  color: #605b55;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -369,8 +370,8 @@ watch(
 }
 
 .comment-item {
-  background: #fff;
-  border: 1px solid #eee7df;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 18px;
   display: flex;
   gap: 1rem;
@@ -402,12 +403,12 @@ watch(
 }
 
 .comment-main time {
-  color: #91887e;
+  color: var(--text-muted);
   font-size: 0.86rem;
 }
 
 .comment-main p {
-  color: #443f39;
+  color: var(--text-main);
   line-height: 1.72;
   margin: 0;
   white-space: pre-wrap;
@@ -424,25 +425,25 @@ watch(
 .comment-edit-actions button {
   background: transparent;
   border: 0;
-  color: #756859;
+  color: var(--text-muted);
   font-size: 0.88rem;
   font-weight: 600;
   padding: 0;
 }
 
 .comment-edit-actions .save-btn {
-  color: #111;
+  color: var(--text-main);
 }
 
 .reply-form {
-  background: #faf7f3;
+  background: var(--muted);
   border-radius: 14px;
   margin-top: 1rem;
   padding: 0.85rem;
 }
 
 .reply-list {
-  border-left: 2px solid #eee5dc;
+  border-left: 2px solid var(--border);
   display: grid;
   gap: 0.85rem;
   margin-top: 1rem;
@@ -460,10 +461,10 @@ watch(
 }
 
 .comment-empty {
-  background: #fff;
-  border: 1px dashed #ddd1c5;
+  background: var(--surface);
+  border: 1px dashed var(--border);
   border-radius: 18px;
-  color: #756e66;
+  color: var(--text-muted);
   padding: 2.2rem 1rem;
   text-align: center;
 }
@@ -477,8 +478,9 @@ watch(
 }
 
 .comment-pagination button {
-  background: #fff;
-  border: 1px solid #e7ded5;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-main);
   border-radius: 999px;
   padding: 0.55rem 1rem;
 }

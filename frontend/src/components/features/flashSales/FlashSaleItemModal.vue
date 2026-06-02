@@ -537,9 +537,9 @@ const formatCurrency = (val) =>
 }
 
 .action-group-compact :deep(.btn-action) {
-    min-width: 44px;
-    padding: 6px 9px;
-    font-size: 12px;
+    min-width: 52px;
+    padding: 10px 14px;
+    font-size: 14px;
     line-height: 1.2;
 }
 
@@ -559,7 +559,7 @@ const formatCurrency = (val) =>
 
 /* Price preview panel */
 .price-preview {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: color-mix(in oklch, var(--surface) 78%, var(--background));
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 16px;
@@ -600,9 +600,9 @@ const formatCurrency = (val) =>
 
 .price-saved {
     font-size: 12px;
-    color: #16a34a;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
+    color: #22c55e;
+    background: color-mix(in oklch, #16a34a 14%, var(--surface));
+    border: 1px solid color-mix(in oklch, #22c55e 55%, var(--border));
     border-radius: 8px;
     padding: 6px 10px;
     text-align: center;

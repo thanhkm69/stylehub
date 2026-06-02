@@ -250,8 +250,9 @@ const destroy = (id) => {
 }
 
 :deep(.btn-action) {
-    padding: 6px 12px;
-    font-size: 13px;
+    min-width: 52px;
+    padding: 10px 14px;
+    font-size: 14px;
     font-weight: 600;
     border-radius: 8px;
 }
@@ -288,7 +289,6 @@ const destroy = (id) => {
 :deep(.btn-delete) {
     background: #fef2f2;
     color: #dc2626;
-    border: 1px solid #fecaca;
 }
 
 :deep(.btn-delete:hover) {

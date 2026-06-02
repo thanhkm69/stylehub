@@ -32,7 +32,7 @@ export const usePostStore = defineStore('post', {
                 this.pagination.total = response.data.meta?.total ?? this.posts.length;
                 this.pagination.last_page = response.data.meta?.last_page ?? 1;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error fetching posts';
+        this.error = err.response?.data?.message || 'Không thể tải danh sách bài viết';
                 toast.error(this.error);
             } finally {
                 this.loading = false;
@@ -50,7 +50,7 @@ export const usePostStore = defineStore('post', {
                 this.post = response.data.data;
                 return response.data.data;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error fetching post';
+        this.error = err.response?.data?.message || 'Không thể tải bài viết';
                 toast.error(this.error);
             } finally {
                 this.loading = false;
@@ -67,10 +67,10 @@ export const usePostStore = defineStore('post', {
                     }
                 });
                 this.posts.unshift(response.data.data);
-                toast.success('Post created successfully');
+        toast.success('Thêm bài viết thành công');
                 return true;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error creating post';
+        this.error = err.response?.data?.message || 'Không thể thêm bài viết';
                 toast.error(this.error);
                 return false;
             } finally {
@@ -91,10 +91,10 @@ export const usePostStore = defineStore('post', {
                 if (index !== -1) {
                     this.posts[index] = response.data.data;
                 }
-                toast.success('Post updated successfully');
+        toast.success('Cập nhật bài viết thành công');
                 return true;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error updating post';
+        this.error = err.response?.data?.message || 'Không thể cập nhật bài viết';
                 toast.error(this.error);
                 return false;
             } finally {
@@ -110,10 +110,10 @@ export const usePostStore = defineStore('post', {
                     }
                 });
                 this.posts = this.posts.filter(p => p.id !== id);
-                toast.success('Post deleted successfully');
+        toast.success('Xóa bài viết thành công');
                 return true;
             } catch (err) {
-                this.error = err.response?.data?.message || 'Error deleting post';
+        this.error = err.response?.data?.message || 'Không thể xóa bài viết';
                 toast.error(this.error);
                 return false;
             }

@@ -111,7 +111,8 @@ const changePage = (page) => {
 }
 
 .modal-card {
-    background: white;
+    background: var(--surface);
+    color: var(--text-main);
     width: 100%;
     max-width: 700px;
     border-radius: 20px;
@@ -120,6 +121,6 @@ const changePage = (page) => {
 }
 
 .empty-address {
-    border: 2px dashed #dee2e6;
+    border: 2px dashed var(--border);
 }
 </style>

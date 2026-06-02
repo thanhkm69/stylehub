@@ -213,7 +213,7 @@ onMounted(loadProfile)
 }
 
 .content-header {
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--border);
     padding-bottom: 24px;
 }
 
@@ -263,8 +263,8 @@ onMounted(loadProfile)
 }
 
 .password-card {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 20px;
     padding: 28px;
 }
@@ -281,7 +281,7 @@ onMounted(loadProfile)
 
 .password-card-desc {
     margin: 0;
-    color: #64748b;
+    color: var(--text-muted);
     font-size: 14px;
 }
 

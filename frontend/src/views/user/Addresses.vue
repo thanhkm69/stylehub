@@ -18,6 +18,21 @@ import AddressList from '@/components/features/addresses/AddressList.vue';
 <style scoped>
 .user-addresses-page {
     animation: fadeIn 0.5s ease;
+    color: var(--text-main);
+}
+
+.user-addresses-page :deep(.card) {
+    background: var(--surface);
+    color: var(--text-main);
+}
+
+.user-addresses-page :deep(.text-muted),
+.user-addresses-page :deep(.text-secondary) {
+    color: var(--text-muted) !important;
+}
+
+.user-addresses-page :deep(.bg-light) {
+    background: var(--background) !important;
 }
 
 @keyframes fadeIn {

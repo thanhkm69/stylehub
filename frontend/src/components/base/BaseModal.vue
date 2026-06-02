@@ -66,7 +66,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleEsc));
 }
 
 .modal-container {
-    background: #ffffff;
+    background: var(--surface);
     width: 100%;
     position: relative;
     border-radius: 24px;
@@ -74,7 +74,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleEsc));
     display: flex;
     flex-direction: column;
     max-height: calc(100vh - 48px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
 }
 
 .btn-close-modal {
@@ -84,9 +84,9 @@ onUnmounted(() => window.removeEventListener('keydown', handleEsc));
     width: 32px;
     height: 32px;
     border-radius: 10px;
-    background: #f1f5f9;
+    background: var(--muted);
     border: none;
-    color: #64748b;
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -96,7 +96,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleEsc));
 }
 
 .btn-close-modal:hover {
-    background: #e2e8f0;
+    background: var(--accent);
     color: #ef4444;
     transform: rotate(90deg);
 }
@@ -125,7 +125,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleEsc));
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
+    background: var(--border);
     border-radius: 10px;
 }
 

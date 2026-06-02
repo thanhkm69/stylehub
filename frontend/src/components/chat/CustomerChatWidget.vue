@@ -542,7 +542,7 @@ onMounted(() => {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: var(--text-main);
+  background: #111827;
   color: white;
   border: none;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -564,7 +564,8 @@ onMounted(() => {
   right: 0;
   width: 350px;
   height: 500px;
-  background: white;
+  background: var(--surface);
+  color: var(--text-main);
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   display: flex;
@@ -574,7 +575,7 @@ onMounted(() => {
 
 .chat-header {
   padding: 16px;
-  background: var(--text-main);
+  background: #111827;
   color: white;
   display: flex;
   justify-content: space-between;
@@ -669,13 +670,13 @@ onMounted(() => {
 }
 
 .message.sent .msg-content {
-  background: var(--text-main);
+  background: #111827;
   color: white;
   border-bottom-right-radius: 4px;
 }
 
 .message.received .msg-content {
-  background: white;
+  background: var(--background);
   color: var(--text-main);
   border-bottom-left-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -691,7 +692,7 @@ onMounted(() => {
 
 .chat-product-card {
   padding: 8px;
-  background: white;
+  background: var(--background);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
@@ -749,7 +750,7 @@ onMounted(() => {
 .chat-product-action-btn {
   flex: 1;
   padding: 6px 4px;
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text-muted);
@@ -844,7 +845,7 @@ onMounted(() => {
 
 .chat-input-area {
   padding: 16px;
-  background: white;
+  background: var(--surface);
   border-top: 1px solid var(--border);
   display: flex;
   gap: 12px;
@@ -857,10 +858,12 @@ onMounted(() => {
   padding: 8px 16px;
   outline: none;
   font-size: 14px;
+  background: var(--background);
+  color: var(--text-main);
 }
 
 .chat-input-area button {
-  background: var(--text-main);
+  background: #111827;
   color: white;
   border: none;
   width: 40px;
@@ -884,7 +887,8 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: white;
+  background: var(--surface);
+  color: var(--text-main);
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -902,7 +906,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f8fafc;
+  background: var(--background);
 }
 
 .overlay-header h5 {
@@ -957,7 +961,7 @@ onMounted(() => {
   display: flex;
   gap: 12px;
   padding: 10px;
-  background: #f8fafc;
+  background: var(--background);
   border-radius: var(--radius-md);
   align-items: center;
 }
@@ -1010,7 +1014,8 @@ onMounted(() => {
   padding: 8px 12px;
   font-size: 13px;
   outline: none;
-  background: white;
+  background: var(--background);
+  color: var(--text-main);
 }
 
 .form-select:focus, .form-input:focus, .form-textarea:focus {
@@ -1030,7 +1035,7 @@ onMounted(() => {
 .submit-order-btn {
   margin-top: auto;
   width: 100%;
-  background: var(--text-main);
+  background: #111827;
   color: white;
   border: none;
   padding: 12px;

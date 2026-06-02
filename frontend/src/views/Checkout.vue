@@ -377,9 +377,10 @@ const getProductImage = (item) => {
 
 <style scoped>
 .breadcrumb-nav { font-size: 13px; font-weight: 500; }
-.breadcrumb-item a { color: #64748b; text-decoration: none; transition: color 0.2s; }
-.breadcrumb-item a:hover { color: #000; }
-.breadcrumb-item.active { color: #000; font-weight: 800; }
+.checkout-page { background: var(--background) !important; color: var(--text-main); }
+.breadcrumb-item a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+.breadcrumb-item a:hover { color: var(--text-main); }
+.breadcrumb-item.active { color: var(--text-main); font-weight: 800; }
 .breadcrumb-item + .breadcrumb-item::before { 
     content: "/"; 
     padding: 0 10px; 
@@ -387,15 +388,15 @@ const getProductImage = (item) => {
 }
 
 .checkout-card {
-    background: #ffffff;
+    background: var(--surface);
     border-radius: 20px;
     padding: 25px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-    border: 1px solid rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
 }
 
 .summary-card {
-    background: #ffffff;
+    background: var(--surface);
     border-radius: 30px;
     padding: 30px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.08);
@@ -405,35 +406,36 @@ const getProductImage = (item) => {
     font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
-    color: #64748b;
+    color: var(--text-muted);
     margin-bottom: 6px;
     display: block;
     letter-spacing: 0.5px;
 }
 
 .input-premium {
-    background: #f8fafc;
-    border: 2px solid #f1f5f9;
+    background: var(--background);
+    border: 2px solid var(--border);
     border-radius: 14px;
     padding: 10px 15px;
     font-size: 14px;
     transition: all 0.3s ease;
+    color: var(--text-main);
 }
 
 .input-premium:focus {
-    border-color: #000;
-    background: #fff;
+    border-color: var(--text-main);
+    background: var(--background);
     outline: none;
     box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
 }
 
-.divider { height: 1px; background: #f1f5f9; }
+.divider { height: 1px; background: var(--border); }
 
 .selected-address-box {
-    border: 3px solid #000;
+    border: 3px solid var(--text-main);
     border-radius: 18px;
     padding: 15px;
-    background: #fff;
+    background: var(--background);
     position: relative;
     box-shadow: 0 10px 20px rgba(0,0,0,0.05);
 }
@@ -448,13 +450,13 @@ const getProductImage = (item) => {
     text-transform: uppercase;
 }
 
-.phone-text { font-weight: 700; color: #000; }
-.address-text { color: #64748b; line-height: 1.5; }
+.phone-text { font-weight: 700; color: var(--text-main); }
+.address-text { color: var(--text-muted); line-height: 1.5; }
 
 .btn-change {
     background: none;
     border: none;
-    color: #000;
+    color: var(--text-main);
     font-size: 13px;
     font-weight: 800;
     display: flex; align-items: center; gap: 5px; padding: 0;
@@ -462,14 +464,14 @@ const getProductImage = (item) => {
 
 .payment-card {
     display: flex; align-items: center; padding: 15px;
-    border: 2px solid #f1f5f9; border-radius: 14px; margin-bottom: 10px;
+    border: 2px solid var(--border); border-radius: 14px; margin-bottom: 10px;
     cursor: pointer; transition: all 0.3s ease;
 }
 
-.payment-card.active { border-color: #000; background: #fff; }
+.payment-card.active { border-color: var(--text-main); background: var(--background); }
 
 .payment-icon {
-    width: 36px; height: 36px; background: #f1f5f9; border-radius: 10px;
+    width: 36px; height: 36px; background: var(--muted); border-radius: 10px;
     display: flex; align-items: center; justify-content: center; font-size: 16px;
 }
 
@@ -482,7 +484,7 @@ const getProductImage = (item) => {
 
 .item-img-box {
     width: 65px; height: 65px; border-radius: 12px;
-    overflow: hidden; background: #f8fafc;
+    overflow: hidden; background: var(--background);
 }
 
 .item-img-box img { width: 100%; height: 100%; object-fit: cover; }
@@ -501,7 +503,7 @@ const getProductImage = (item) => {
     align-items: center; 
     justify-content: center; 
     border-radius: 50%;
-    border: 2px solid #fff; /* Thêm viền trắng để nổi bật */
+    border: 2px solid var(--surface);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     z-index: 2;
 }
@@ -510,7 +512,7 @@ const getProductImage = (item) => {
 .original-price { color: #94a3b8; font-size: 12px; font-weight: 600; text-decoration: line-through; }
 .flash-sale-label { color: #dc2626; font-size: 11px; font-weight: 800; margin-top: 2px; text-transform: uppercase; }
 .applied-combo {
-    background: linear-gradient(120deg, #fff4ef, #ffe7dc);
+    background: color-mix(in oklch, #e24326 8%, var(--background));
     border: 1px solid #ffd0bf;
     border-radius: 12px;
     color: #892715;
@@ -551,14 +553,14 @@ const getProductImage = (item) => {
     display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px);
 }
 
-.modal-card { background: #fff; width: 90%; max-width: 450px; border-radius: 30px; padding: 25px; }
+.modal-card { background: var(--surface); color: var(--text-main); width: 90%; max-width: 450px; border-radius: 30px; padding: 25px; }
 
 .address-item-option {
-    padding: 12px; border: 2px solid #f1f5f9; border-radius: 15px; margin-bottom: 8px;
+    padding: 12px; border: 2px solid var(--border); border-radius: 15px; margin-bottom: 8px;
     cursor: pointer; position: relative;
 }
 
-.address-item-option.active { border-color: #000; border-width: 2px; }
+.address-item-option.active { border-color: var(--text-main); border-width: 2px; }
 
 .fw-black { font-weight: 900 !important; }
 .uppercase { text-transform: uppercase; }
@@ -571,4 +573,12 @@ const getProductImage = (item) => {
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
 .btn-close-custom { background: none; border: none; font-size: 20px; }
+
+.checkout-page :deep(.text-dark) {
+    color: var(--text-main) !important;
+}
+
+.checkout-page :deep(.text-muted) {
+    color: var(--text-muted) !important;
+}
 </style>

@@ -9,6 +9,8 @@ export const swalConfirmDelete = (title, text) =>
     cancelButtonText: 'Hủy',
     showCancelButton: true,
     showCloseButton: true,
+    background: document.documentElement.classList.contains('dark') ? '#262626' : '#ffffff',
+    color: document.documentElement.classList.contains('dark') ? '#fafafa' : '#111827',
   })
 
 export const swalCallback = () =>
@@ -18,4 +20,6 @@ export const swalCallback = () =>
     icon: 'info',
     timer: 2000,
     showConfirmButton: false,
+    background: document.documentElement.classList.contains('dark') ? '#262626' : '#ffffff',
+    color: document.documentElement.classList.contains('dark') ? '#fafafa' : '#111827',
   })

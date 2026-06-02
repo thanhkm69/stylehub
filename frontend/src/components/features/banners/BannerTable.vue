@@ -112,7 +112,8 @@ const emit = defineEmits(['update', 'destroy'])
 .text-center { text-align: center; }
 
 :deep(.btn-action) {
-    padding: 6px 12px;
+    min-width: 52px;
+    padding: 10px 14px;
 }
 </style>
 

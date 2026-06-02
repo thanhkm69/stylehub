@@ -90,7 +90,32 @@ const formatDate = (value) => new Date(value).toLocaleDateString('vi-VN')
 
 <style scoped>
 .admin-table-wrapper {
+  background: var(--surface);
   width: 100%;
+}
+
+.table {
+  --bs-table-bg: var(--surface);
+  --bs-table-color: var(--text-main);
+  --bs-table-hover-bg: var(--muted);
+  --bs-table-hover-color: var(--text-main);
+}
+
+.table th {
+  background: var(--muted);
+  color: var(--text-main);
+}
+
+.table td,
+.user-name,
+.post-link,
+.content-cell {
+  color: var(--text-main);
+}
+
+.table .text-muted,
+.loading-cell {
+  color: var(--text-muted) !important;
 }
 
 .loading-cell {
@@ -117,7 +142,6 @@ const formatDate = (value) => new Date(value).toLocaleDateString('vi-VN')
 }
 
 .post-link {
-  color: var(--text-main);
   display: -webkit-box;
   font-weight: 600;
   max-width: 210px;
@@ -128,7 +152,6 @@ const formatDate = (value) => new Date(value).toLocaleDateString('vi-VN')
 }
 
 .content-cell {
-  color: var(--text-main);
   display: -webkit-box;
   line-height: 1.5;
   margin: 5px 0 0;

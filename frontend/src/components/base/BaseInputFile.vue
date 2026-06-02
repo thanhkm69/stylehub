@@ -73,8 +73,8 @@ const handleFileChange = (event) => {
     display: block;
     width: 100%;
     cursor: pointer;
-    background: #f8fafc;
-    border: 2px dashed #e2e8f0;
+    background: var(--muted);
+    border: 2px dashed var(--border);
     border-radius: var(--radius-lg);
     padding: 12px;
     transition: all 0.2s ease;
@@ -83,7 +83,7 @@ const handleFileChange = (event) => {
 
 .custom-file-upload:hover {
     border-color: var(--primary);
-    background: #f1f5f9;
+    background: var(--accent);
 }
 
 .custom-file-upload.has-error {
@@ -100,7 +100,7 @@ const handleFileChange = (event) => {
 .icon-box {
     width: 44px;
     height: 44px;
-    background: #ffffff;
+    background: var(--surface);
     border-radius: 10px;
     display: flex;
     align-items: center;
@@ -137,7 +137,7 @@ const handleFileChange = (event) => {
 
 .browse-btn {
     padding: 8px 16px;
-    background: #ffffff;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 13px;

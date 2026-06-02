@@ -55,8 +55,8 @@ const value = defineModel();
 <style scoped>
 .auth-input:disabled,
 .auth-input[readonly] {
-    background-color: #f8fafc;
-    color: #64748b;
+    background-color: var(--muted);
+    color: var(--text-muted);
     cursor: not-allowed;
     opacity: 1;
 }

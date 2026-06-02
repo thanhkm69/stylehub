@@ -8,7 +8,7 @@
 
       <div class="row g-4">
         <div class="col-md-6 col-xl-3" v-for="item in promises" :key="item.title">
-          <div class="promise-card p-4 rounded-4 h-100 shadow-sm border border-light bg-white">
+          <div class="promise-card p-4 rounded-4 h-100 shadow-sm border">
             <span class="promise-icon d-inline-flex align-items-center justify-content-center mb-3 rounded-circle text-white fs-4" :class="item.colorClass">
               <i :class="item.icon"></i>
             </span>
@@ -51,7 +51,13 @@ const promises = [
 </script>
 
 <style scoped>
+.about-section {
+  background: var(--background);
+}
+
 .promise-card {
+  background: var(--surface);
+  border-color: var(--border) !important;
   min-height: 220px;
   transition: transform 0.35s ease, box-shadow 0.35s ease;
 }

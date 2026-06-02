@@ -77,6 +77,10 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
+  const clear = () => {
+    profile.value = null
+  }
+
   return {
     profile,
     profiles,
@@ -88,5 +92,6 @@ export const useProfileStore = defineStore('profile', () => {
     show,
     update,
     destroy,
+    clear,
   }
 })

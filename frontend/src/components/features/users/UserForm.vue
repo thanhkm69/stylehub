@@ -151,19 +151,19 @@ const loadingSubmit = defineModel("loadingSubmit")
     gap: 16px;
     padding-top: 24px;
     margin-top: 8px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--border);
 }
 
 .btn-cancel {
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--muted);
+    color: var(--text-muted);
     font-weight: 600;
     padding: 10px 24px;
     border-radius: 12px;
 }
 
 .btn-cancel:hover {
-    background: #e2e8f0;
+    background: var(--accent);
 }
 
 .loading-submit {

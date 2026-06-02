@@ -177,6 +177,16 @@ const submit = async () => {
     padding: 10px 15px;
     border-radius: 8px;
     border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--text-main);
+}
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+.form-select:disabled,
+.form-control:disabled {
+    background: var(--muted);
+    color: var(--text-muted);
 }
 .form-control:focus, .form-select:focus {
     border-color: var(--primary);

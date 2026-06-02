@@ -141,7 +141,7 @@ watch(
 
 .secondary-column {
     padding-left: 32px;
-    border-left: 1px solid #f1f5f9;
+    border-left: 1px solid var(--border);
 }
 
 .form-section {
@@ -176,7 +176,7 @@ watch(
     overflow: hidden;
     border: 2px dashed var(--border);
     position: relative;
-    background: #f8fafc;
+    background: var(--muted);
 }
 
 .image-preview-large img {
@@ -190,7 +190,7 @@ watch(
     height: 180px;
     border-radius: 16px;
     border: 2px dashed var(--border);
-    background: #f8fafc;
+    background: var(--muted);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -233,19 +233,19 @@ watch(
     gap: 16px;
     padding-top: 24px;
     margin-top: 8px;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--border);
 }
 
 .btn-cancel {
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--muted);
+    color: var(--text-muted);
     font-weight: 600;
     padding: 10px 24px;
     border-radius: 12px;
 }
 
 .btn-cancel:hover {
-    background: #e2e8f0;
+    background: var(--accent);
 }
 
 .loading-submit {
@@ -264,7 +264,7 @@ watch(
     .secondary-column {
         padding-left: 0;
         border-left: none;
-        border-top: 1px solid #f1f5f9;
+        border-top: 1px solid var(--border);
         padding-top: 24px;
     }
 }
@@ -274,15 +274,51 @@ watch(
 }
 
 :deep(.ql-container) {
+    background: var(--surface);
+    border-color: var(--border);
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+    color: var(--text-main);
     font-family: inherit;
     font-size: 15px;
 }
 
 :deep(.ql-toolbar) {
+    border-color: var(--border);
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-    background-color: #f8fafc;
+    background-color: var(--muted);
+}
+
+:deep(.ql-editor.ql-blank::before) {
+    color: var(--text-muted);
+}
+
+:deep(.ql-snow .ql-stroke) {
+    stroke: var(--text-muted);
+}
+
+:deep(.ql-snow .ql-fill),
+:deep(.ql-snow .ql-stroke.ql-fill) {
+    fill: var(--text-muted);
+}
+
+:deep(.ql-snow .ql-picker) {
+    color: var(--text-muted);
+}
+
+:deep(.ql-snow .ql-picker-options) {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+:deep(.ql-snow button:hover .ql-stroke),
+:deep(.ql-snow button.ql-active .ql-stroke) {
+    stroke: var(--text-main);
+}
+
+:deep(.ql-snow button:hover .ql-fill),
+:deep(.ql-snow button.ql-active .ql-fill) {
+    fill: var(--text-main);
 }
 </style>

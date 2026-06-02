@@ -1,5 +1,5 @@
 <template>
-  <section class="about-section bg-white" data-aos="fade-up">
+  <section class="about-section" data-aos="fade-up">
     <div class="container py-6">
       <div class="section-header mb-5">
         <div>
@@ -15,7 +15,7 @@
         </div>
 
         <div class="col-lg-7">
-          <div class="timeline-card p-4 rounded-4 border border-2 border-light shadow-sm bg-light">
+          <div class="timeline-card p-4 rounded-4 border border-2 shadow-sm">
             <div class="timeline-item d-flex align-items-start gap-4 mb-4">
               <div class="marker"></div>
               <div>
@@ -52,6 +52,7 @@
 <style scoped>
 .about-section {
   position: relative;
+  background: var(--background);
 }
 
 .eyebrow {
@@ -60,7 +61,8 @@
 }
 
 .timeline-card {
-  background: #f8f9fb;
+  background: var(--surface);
+  border-color: var(--border) !important;
 }
 
 .marker {
