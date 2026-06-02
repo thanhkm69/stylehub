@@ -34,6 +34,9 @@ use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\PostCommentController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Broadcast;
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 Route::post('verify', [AuthController::class, 'sendVerifyEmailOtp']);
 Route::post('contacts', [ContactController::class, 'store']);
@@ -323,6 +326,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin Chat Routes
     Route::get('admin/chats', [App\Http\Controllers\ChatController::class, 'getConversations']);
+    Route::get('admin/chats/unread-count', [App\Http\Controllers\ChatController::class, 'unreadCount']);
 
     Route::controller(PostCommentController::class)->group(function () {
       Route::get('admin/post-comments', 'adminIndex');

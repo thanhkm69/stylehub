@@ -10,12 +10,22 @@ const messagesContainer = ref(null)
 
 onMounted(async () => {
   await chatStore.fetchAdminConversations()
+  // Auto-select conversation if navigated from notification
+  if (chatStore.activeAdminConversationId) {
+    chatStore.setActiveAdminConversation(chatStore.activeAdminConversationId)
+  }
 })
 
 const user = computed(() => tokenStore.user?.data)
 
 const activeConversation = computed(() => {
-  return chatStore.adminConversations.find(c => c.id === chatStore.activeAdminConversationId)
+  return chatStore.adminConversations.find(c => Number(c.id) === Number(chatStore.activeAdminConversationId))
+})
+
+const sortedConversations = computed(() => {
+  return [...chatStore.adminConversations].sort((a, b) => {
+    return new Date(b.last_message_at) - new Date(a.last_message_at)
+  })
 })
 
 const selectConversation = (id) => {
@@ -32,6 +42,16 @@ const scrollToBottom = async () => {
 watch(() => chatStore.messages, () => {
   scrollToBottom()
 }, { deep: true })
+
+watch(() => chatStore.activeAdminConversationId, (newId) => {
+  if (newId) {
+    // Only call if we aren't already listening to this channel to avoid redundant loads
+    const currentChannel = `chat.${newId}`
+    if (chatStore._currentListeningChannel !== currentChannel) {
+      chatStore.setActiveAdminConversation(newId)
+    }
+  }
+})
 
 const sendMessage = async () => {
   if (!messageInput.value.trim() || !chatStore.activeAdminConversationId) return
@@ -64,23 +84,29 @@ const sendMessage = async () => {
         </div>
         <div class="conversation-list">
           <div 
-            v-for="conv in chatStore.adminConversations" 
+            v-for="conv in sortedConversations" 
             :key="conv.id"
-            :class="['conversation-item', { active: chatStore.activeAdminConversationId === conv.id }]"
+            :class="['conversation-item', { active: Number(chatStore.activeAdminConversationId) === Number(conv.id), unread: conv.unread_count > 0 }]"
             @click="selectConversation(conv.id)"
           >
-            <div class="avatar">
-              {{ conv.user?.name?.charAt(0).toUpperCase() || 'K' }}
+            <div class="avatar-wrapper">
+              <div class="avatar">
+                {{ conv.user?.name?.charAt(0).toUpperCase() || 'K' }}
+              </div>
+              <span v-if="conv.unread_count > 0" class="online-dot"></span>
             </div>
             <div class="conv-info">
-              <h4>{{ conv.user?.name || 'Khách hàng' }}</h4>
-              <p v-if="conv.messages && conv.messages.length > 0" class="last-message">
+              <h4 :class="{ 'fw-bold': conv.unread_count > 0 }">{{ conv.user?.name || 'Khách hàng' }}</h4>
+              <p v-if="conv.messages && conv.messages.length > 0" class="last-message" :class="{ 'unread-text': conv.unread_count > 0 }">
                 {{ conv.messages[0].message }}
               </p>
               <p v-else class="last-message">Đã bắt đầu hội thoại</p>
             </div>
-            <div class="time">
-              {{ new Date(conv.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+            <div class="conv-right">
+              <div class="time" :class="{ 'unread-time': conv.unread_count > 0 }">
+                {{ new Date(conv.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+              </div>
+              <span v-if="conv.unread_count > 0" class="unread-badge">{{ conv.unread_count > 9 ? '9+' : conv.unread_count }}</span>
             </div>
           </div>
           <div v-if="chatStore.adminConversations.length === 0" class="empty-list">
@@ -217,6 +243,19 @@ const sendMessage = async () => {
   border-left: 4px solid var(--primary);
 }
 
+.conversation-item.unread {
+  background: #f0f4ff;
+}
+
+.conversation-item.unread:hover {
+  background: #e8edfc;
+}
+
+.avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .avatar {
   width: 40px;
   height: 40px;
@@ -231,6 +270,17 @@ const sendMessage = async () => {
   flex-shrink: 0;
 }
 
+.online-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #22c55e;
+  border: 2.5px solid var(--surface);
+  border-radius: 50%;
+}
+
 .conv-info {
   flex: 1;
   overflow: hidden;
@@ -239,7 +289,13 @@ const sendMessage = async () => {
 .conv-info h4 {
   margin: 0 0 4px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--text-main);
+  transition: font-weight 0.15s;
+}
+
+.conv-info h4.fw-bold {
+  font-weight: 800;
   color: var(--text-main);
 }
 
@@ -252,9 +308,42 @@ const sendMessage = async () => {
   text-overflow: ellipsis;
 }
 
+.last-message.unread-text {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.conv-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .time {
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.time.unread-time {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.unread-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: var(--primary);
+  color: white;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .empty-list {
